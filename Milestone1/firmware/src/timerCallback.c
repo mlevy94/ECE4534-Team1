@@ -50,7 +50,8 @@ void vTimerCallback( TimerHandle_t pxTimer )
     {
         /* Read from the queue. */
         char receivedChar;
-        if(xQueueReceiveFromISR( timerQ, &receivedChar, 0))
+        //Returns true if rec char. false if no char
+        if(xQueueReceiveFromISR( timerQ, &receivedChar, 0)) 
         {
             /* Write to the I/O using the debug. */
             addToAppQFromISR(&receivedChar);
