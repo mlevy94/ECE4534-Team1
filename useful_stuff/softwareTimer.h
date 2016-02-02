@@ -22,8 +22,8 @@ extern "C" {
 #endif
 
     void initializeTimer();
-    void addToTimerFromQ(char* val);
-    BaseType_t addToTImerQISR(char* val);
+    void addToTimerQ(char* val);
+    BaseType_t addToTimerQFromISR(char* val);
 
 #ifdef	__cplusplus
 }
