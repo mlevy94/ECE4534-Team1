@@ -24,3 +24,6 @@ disassembly/
 # pyenv
 .idea
 __pycache__
+
+#other stuff
+*.zip
