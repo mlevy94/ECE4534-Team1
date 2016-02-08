@@ -1,25 +1,7 @@
-*.d
-*.pre
-*.p1
-*.lst
-*.sym
+*.o.d
 *.obj
 *.o
-*.sdb
 *.obj.dmp
-*/html/
-*/nbproject/private/
-*/nbproject/Package-*.bash
-*/build/
-*/nbbuild/
-*/dist/
-*/nbdist/
-*/nbactions.xml
-*/nb-configuration.xml
-*/funclist
-*/nbproject/Makefile*
-*/disassembly/
-*.map
 
 # pyenv
 */.idea
@@ -27,3 +9,4 @@
 
 #other stuff
 *.zip
+*.img
