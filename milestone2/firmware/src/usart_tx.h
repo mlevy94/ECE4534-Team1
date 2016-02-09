@@ -58,6 +58,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
+#include <queue.h>
+#include "comm.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -109,11 +111,10 @@ typedef enum
 
 typedef struct
 {
-    /* The application's current state */
-    USART_TX_STATES state;
-
     /* TODO: Define any additional data used by the application. */
 
+    QueueHandle_t usart_txQ;
+    char in_msg[MAX_MSG_SIZE];
 
 } USART_TX_DATA;
 
