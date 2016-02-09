@@ -117,6 +117,9 @@ typedef struct
     APP_STATES state;
 
     /* TODO: Define any additional data used by the application. */
+    
+    QueueHandle_t msgInQ;
+    QueueHandle_t msgOutQ;
 
 
 } APP_DATA;

@@ -124,6 +124,14 @@ void sendString(const char *string)
     }
 }
 
+void addToMsgQ(char* val){
+    xQueueSend(appData.msgInQ, val, portMAX_DELAY);
+}
+BaseType_t addToTimerQFromISR(char* val){
+
+}
+
+
 // void sendCharacter(const char character)
 // {
 //     /* Check if buffer is empty for a new transmission */

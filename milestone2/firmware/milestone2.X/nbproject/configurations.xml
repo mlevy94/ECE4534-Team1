@@ -32,6 +32,7 @@
         <itemPath>../src/usart_rx.h</itemPath>
         <itemPath>../src/adc.h</itemPath>
         <itemPath>../src/comm.h</itemPath>
+        <itemPath>../src/app_public.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="system" projectFiles="true">
@@ -177,6 +178,7 @@
     <Elem>../src</Elem>
     <Elem>../src/system_config/default</Elem>
     <Elem>../../../../../../../microchip/harmony/v1_06_02</Elem>
+    <Elem>../..</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
