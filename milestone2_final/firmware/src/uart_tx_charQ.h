@@ -16,7 +16,7 @@ extern "C" {
     void addToTXCharQ(char* val); // blocking
     BaseType_t addToTXCharQFromISR(char* val); // non-blocking
     void getFromTXCharQ(char* val);
-    void getFromTXCharQFromISR(char* val);
+    BaseType_t getFromTXCharQFromISR(char* val);
 
 
 #ifdef	__cplusplus
