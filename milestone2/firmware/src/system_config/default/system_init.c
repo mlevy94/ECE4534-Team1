@@ -49,6 +49,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
+#include "uart_tx_charQ.h"
 
 
 // ****************************************************************************
@@ -192,6 +193,7 @@ void SYS_Initialize ( void* data )
 
     /* Initialize the Application */
     APP_Initialize();
+    initializeTXCharQ();
     USART_TX_Initialize();
     USART_RX_Initialize();
     ADC_Initialize();

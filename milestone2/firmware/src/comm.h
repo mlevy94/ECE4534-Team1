@@ -45,6 +45,8 @@ extern "C" {
     /* ************************************************************************** */
 
 #define MAX_MSG_SIZE 64
+#define OUT_BUF_SIZE 16
+#define IN_BUF_SIZE 16
     
     /*  A brief description of a section can be given directly below the section
         banner.

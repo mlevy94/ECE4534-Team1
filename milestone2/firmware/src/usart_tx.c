@@ -113,12 +113,14 @@ USART_TX_DATA usart_txData;
 
 void USART_TX_Initialize ( void )
 {
-    /* Place the App state machine in its initial state. */
-    usart_txData.state = USART_TX_STATE_INIT;
+
     
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
+    
+    usart_txData.usart_txQ = xQueueCreate(OUT_BUF_SIZE, MAX_MSG_SIZE);
+    
 }
 
 
@@ -132,24 +134,27 @@ void USART_TX_Initialize ( void )
 
 void USART_TX_Tasks ( void )
 {
-    /* Check the application's current state. */
-    switch ( usart_txData.state )
-    {
-        /* Application's initial state. */
-        case USART_TX_STATE_INIT:
-        {
-            break;
-        }
-
-        /* TODO: implement your application state machine.*/
-
-        /* The default state should never be executed. */
-        default:
-        {
-            /* TODO: Handle error in application's state machine. */
-            break;
+  
+    char out_msg[MAX_MSG_SIZE];
+    
+    char inChar;
+    int i = 0;
+    while(1){
+        
+        // Check outQ for message
+        if(xQueueReceive(usart_txData.usart_txQ, &out_msg, portMAX_DELAY)) {
+               
+            // Header stuff goes here ( encapsulation if necessary )
+            
+            for (i = 0; out_msg[i] != '\0'; i++) {
+                
+                // send to outbuff
+                
+            }
+            // add null term
         }
     }
+    
 }
  
 

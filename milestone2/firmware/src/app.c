@@ -127,7 +127,7 @@ void sendString(const char *string)
 void addToMsgQ(char* val){
     xQueueSend(appData.msgInQ, val, portMAX_DELAY);
 }
-BaseType_t addToTimerQFromISR(char* val){
+BaseType_t addToMsgQFromISR(char* val){
 
 }
 

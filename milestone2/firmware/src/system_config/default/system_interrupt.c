@@ -64,6 +64,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <sys/attribs.h>
 #include "app.h"
 #include "system_definitions.h"
+#include "uart_tx_charQ.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -85,6 +86,7 @@ void IntHandlerDrvUsartInstance0(void)
     /* TODO: Add code to process interrupt here */
     
     // grab char and send to rx buffer
+    
     
     
 
