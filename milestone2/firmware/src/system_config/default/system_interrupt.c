@@ -77,19 +77,21 @@ void IntHandlerDrvAdc(void)
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
 }
 
+void rxIntteruptHandler() {
+    
+}
+
+void txIntteruptHandler() {
+    
+}
 
 
 
 void IntHandlerDrvUsartInstance0(void)
 {
-
-    /* TODO: Add code to process interrupt here */
-    
-    // grab char and send to rx buffer
     
     
     
-
     /* Clear pending interrupt */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE);
