@@ -90,7 +90,7 @@ void rxIntteruptHandler() {
         
     }
     
-    addToUsartRxQFromISR(mydata);
+    addToUsartRxQFromISR(&mydata);
     
 }
 

@@ -20,13 +20,13 @@ void addToTXCharQ(char* val) {
 }
 
 BaseType_t addToTXCharQFromISR(char* val) {
-    xQueueSendFromISR( txCharQ, val, 0);
+    return xQueueSendFromISR( txCharQ, val, 0);
 }
 
 void getFromTXCharQ(char* val) {
     xQueueReceive( txCharQ, val, 0);
 }
 
-void getFromTXCharQFromISR(char* val) {
-    xQueueReceiveFromISR( txCharQ, val, 0);
+BaseType_t getFromTXCharQFromISR(char* val) {
+    return xQueueReceiveFromISR( txCharQ, val, 0);
 }
