@@ -2,6 +2,8 @@
 *.obj
 *.o
 *.obj.dmp
+*/dist/*
+
 
 # pyenv
 */.idea

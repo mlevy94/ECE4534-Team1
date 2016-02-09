@@ -54,6 +54,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "adc_app.h"
+#include "app_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -135,9 +136,10 @@ void ADC_APP_Initialize ( void )
 void ADC_APP_Tasks ( void )
 {
     while (1) {
-        uint16_t ADCValue;
+        char ADCValue;
         ADCValue = read_distance();
         setDebugVal(ADCValue);
+        addToOutMsgQ(&ADCValue);
     }
 }
  
