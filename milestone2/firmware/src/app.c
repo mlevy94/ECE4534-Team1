@@ -107,6 +107,9 @@ void initUART(void)
     //USART_ID_1 is for UART port 0 (J14)
     PLIB_USART_Enable(USART_ID_1);
     
+    appData.msgInQ = xQueueCreate(16, MAX_MSG_SIZE);
+    appData.msgOutQ = xQueueCreate(16, MAX_MSG_SIZE);
+    
     //PLIB_USART_InitializeOperation(USART_ID_1, USART_RECEIVE_FIFO_HALF_FULL,
                     //USART_TRANSMIT_FIFO_NOT_FULL  , USART_ENABLE_TX_RX_USED);
 }
@@ -124,13 +127,19 @@ void sendString(const char *string)
     }
 }
 
-void addToMsgQ(char* val){
+void addToInMsgQ(char* val){
     xQueueSend(appData.msgInQ, val, portMAX_DELAY);
 }
-BaseType_t addToMsgQFromISR(char* val){
-
+BaseType_t addToInMsgQFromISR(char* val){
+    xQueueSendFromISR(appData.msgInQ, val, 0);
 }
 
+void addToOutMsgQ(char* val){
+    xQueueSend(appData.msgOutQ, val, portMAX_DELAY);
+}
+BaseType_t addToOutMsgQFromISR(char* val){
+    xQueueSendFromISR(appData.msgOutQ, val, 0);
+}
 
 // void sendCharacter(const char character)
 // {

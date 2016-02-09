@@ -137,7 +137,7 @@ void USART_TX_Tasks ( void )
   
     char out_msg[MAX_MSG_SIZE];
     
-    char inChar;
+    char outChar;
     int i = 0;
     while(1){
         
@@ -147,14 +147,19 @@ void USART_TX_Tasks ( void )
             // Header stuff goes here ( encapsulation if necessary )
             
             for (i = 0; out_msg[i] != '\0'; i++) {
-                
-                // send to outbuff
-                
+
+                void addToTXCharQ(&out_msg[i]);
             }
-            // add null term
+            
+            outChar = '\0';
+            void addToTXCharQ(&outChar);
         }
     }
     
+}
+
+void addToOutQfromApp(char* val){
+    xQueueSend(usart_txData.usart_txQ, val, portMAX_DELAY);
 }
  
 
