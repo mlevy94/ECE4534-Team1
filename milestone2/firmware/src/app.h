@@ -122,6 +122,7 @@ typedef struct
     
     QueueHandle_t msgInQ;
     QueueHandle_t msgOutQ;
+    char curVal;
 
 
 } APP_DATA;
