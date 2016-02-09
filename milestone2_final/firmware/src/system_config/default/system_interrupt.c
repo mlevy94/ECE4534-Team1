@@ -98,11 +98,12 @@ void txIntteruptHandler() {
     
     char data;
     
-    getFromTXCharQ(&data);
+    if (getFromTXCharQFromISR(&data)) {
     
-    if(!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)){
+        if(!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)){
 
-    PLIB_USART_TransmitterByteSend(USART_ID_1, data);
+        PLIB_USART_TransmitterByteSend(USART_ID_1, data);
+        }
     }
     
 }
