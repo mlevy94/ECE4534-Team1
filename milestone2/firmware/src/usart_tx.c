@@ -5,7 +5,7 @@
     Microchip Technology Inc.
   
   File Name:
-    app.c
+    usart_tx.c
 
   Summary:
     This file contains the source code for the MPLAB Harmony application.
@@ -53,7 +53,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include "app.h"
+#include "usart_tx.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -76,10 +76,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-APP_DATA appData;
-
-// Global string for testing
-const char *testing = "Team 1";
+USART_TX_DATA usart_txData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -96,43 +93,9 @@ const char *testing = "Team 1";
 // *****************************************************************************
 // *****************************************************************************
 
-
 /* TODO:  Add any necessary local functions.
 */
 
-// Initializes the UART Module
-void initUART(void)
-{
-    /* Enable the UART module*/
-    //USART_ID_1 is for UART port 0 (J14)
-    PLIB_USART_Enable(USART_ID_1);
-    
-    //PLIB_USART_InitializeOperation(USART_ID_1, USART_RECEIVE_FIFO_HALF_FULL,
-                    //USART_TRANSMIT_FIFO_NOT_FULL  , USART_ENABLE_TX_RX_USED);
-}
-
-void sendString(const char *string)
-{
-    /* Write a character at a time, only if transmitter is empty */
-    while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-    {
-        /* Send character */
-        PLIB_USART_TransmitterByteSend(USART_ID_1, *string);
-
-        /* Increment to address of next character */
-        string++;
-    }
-}
-
-// void sendCharacter(const char character)
-// {
-//     /* Check if buffer is empty for a new transmission */
-//     if(PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-//     {
-//         /* Send character */
-//         PLIB_USART_TransmitterByteSend(USART_ID_1, character);
-//     }
-// }
 
 // *****************************************************************************
 // *****************************************************************************
@@ -142,17 +105,17 @@ void sendString(const char *string)
 
 /*******************************************************************************
   Function:
-    void APP_Initialize ( void )
+    void USART_TX_Initialize ( void )
 
   Remarks:
-    See prototype in app.h.
+    See prototype in usart_tx.h.
  */
 
-void APP_Initialize ( void )
+void USART_TX_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
-    appData.state = APP_STATE_INIT;
-    initUART();
+    usart_txData.state = USART_TX_STATE_INIT;
+    
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
@@ -161,35 +124,32 @@ void APP_Initialize ( void )
 
 /******************************************************************************
   Function:
-    void APP_Tasks ( void )
+    void USART_TX_Tasks ( void )
 
   Remarks:
-    See prototype in app.h.
+    See prototype in usart_tx.h.
  */
 
-void APP_Tasks ( void )
+void USART_TX_Tasks ( void )
 {
-    /*
-    // Check the application's current state.
-    switch ( appData.state )
+    /* Check the application's current state. */
+    switch ( usart_txData.state )
     {
-        // Application's initial state.
-        case APP_STATE_INIT:
+        /* Application's initial state. */
+        case USART_TX_STATE_INIT:
         {
             break;
         }
 
-        // TODO: implement your application state machine.
+        /* TODO: implement your application state machine.*/
 
-        // The default state should never be executed.
+        /* The default state should never be executed. */
         default:
         {
-            // TODO: Handle error in application's state machine.
+            /* TODO: Handle error in application's state machine. */
             break;
         }
     }
-    */
-    sendString(testing);
 }
  
 

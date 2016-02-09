@@ -192,6 +192,9 @@ void SYS_Initialize ( void* data )
 
     /* Initialize the Application */
     APP_Initialize();
+    USART_TX_Initialize();
+    USART_RX_Initialize();
+    ADC_Initialize();
 }
 
 

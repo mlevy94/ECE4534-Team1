@@ -5,7 +5,7 @@
     Microchip Technology Inc.
   
   File Name:
-    app.c
+    usart_rx.c
 
   Summary:
     This file contains the source code for the MPLAB Harmony application.
@@ -53,7 +53,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include "app.h"
+#include "usart_rx.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -76,10 +76,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-APP_DATA appData;
-
-// Global string for testing
-const char *testing = "Team 1";
+USART_RX_DATA usart_rxData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -87,7 +84,7 @@ const char *testing = "Team 1";
 // *****************************************************************************
 // *****************************************************************************
 
-/* TODO:  Add any necessary callback funtions.
+/* TODO:  Add any necessary callback functions.
 */
 
 // *****************************************************************************
@@ -96,43 +93,9 @@ const char *testing = "Team 1";
 // *****************************************************************************
 // *****************************************************************************
 
-
 /* TODO:  Add any necessary local functions.
 */
 
-// Initializes the UART Module
-void initUART(void)
-{
-    /* Enable the UART module*/
-    //USART_ID_1 is for UART port 0 (J14)
-    PLIB_USART_Enable(USART_ID_1);
-    
-    //PLIB_USART_InitializeOperation(USART_ID_1, USART_RECEIVE_FIFO_HALF_FULL,
-                    //USART_TRANSMIT_FIFO_NOT_FULL  , USART_ENABLE_TX_RX_USED);
-}
-
-void sendString(const char *string)
-{
-    /* Write a character at a time, only if transmitter is empty */
-    while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-    {
-        /* Send character */
-        PLIB_USART_TransmitterByteSend(USART_ID_1, *string);
-
-        /* Increment to address of next character */
-        string++;
-    }
-}
-
-// void sendCharacter(const char character)
-// {
-//     /* Check if buffer is empty for a new transmission */
-//     if(PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-//     {
-//         /* Send character */
-//         PLIB_USART_TransmitterByteSend(USART_ID_1, character);
-//     }
-// }
 
 // *****************************************************************************
 // *****************************************************************************
@@ -142,54 +105,51 @@ void sendString(const char *string)
 
 /*******************************************************************************
   Function:
-    void APP_Initialize ( void )
+    void USART_RX_Initialize ( void )
 
   Remarks:
-    See prototype in app.h.
+    See prototype in usart_rx.h.
  */
 
-void APP_Initialize ( void )
+void USART_RX_Initialize ( void )
 {
-    /* Place the App state machine in its initial state. */
-    appData.state = APP_STATE_INIT;
-    initUART();
+    
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
+    
+    usart_rxData.usart_rxQ = xQueueCreate(32, 8);
+    
 }
 
 
 /******************************************************************************
   Function:
-    void APP_Tasks ( void )
+    void USART_RX_Tasks ( void )
 
   Remarks:
-    See prototype in app.h.
+    See prototype in usart_rx.h.
  */
 
-void APP_Tasks ( void )
+void USART_RX_Tasks ( void )
 {
-    /*
-    // Check the application's current state.
-    switch ( appData.state )
-    {
-        // Application's initial state.
-        case APP_STATE_INIT:
-        {
-            break;
+    char inChar;
+    int i = 0;
+    while(1){
+        // clear message to 0
+        for (i = 0; i < MAX_MSG_SIZE; i++) {
+        usart_rxData.in_msg[i] = 0;
         }
-
-        // TODO: implement your application state machine.
-
-        // The default state should never be executed.
-        default:
-        {
-            // TODO: Handle error in application's state machine.
-            break;
+        // get entire message
+        for (i = 0; usart_rxData.in_msg[i] != '\0'; i++) {
+            // wait for characters
+            while(!xQueueReceive(usart_rxData.usart_rxQ, &inChar, portMAX_DELAY));
+            usart_rxData.in_msg[i] = inChar;
         }
+        //addToAppRXQ(usart_rxData.in_msg);
     }
-    */
-    sendString(testing);
+    
+    
 }
  
 

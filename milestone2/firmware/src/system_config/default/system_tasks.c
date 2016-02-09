@@ -55,6 +55,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_config.h"
 #include "system_definitions.h"
 #include "app.h"
+#include "usart_tx.h"
+#include "usart_rx.h"
+#include "adc.h"
 
 
 // *****************************************************************************
@@ -65,6 +68,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
  
 static void _SYS_Tasks ( void );
 static void _APP_Tasks(void);
+static void _USART_TX_Tasks(void);
+static void _USART_RX_Tasks(void);
+static void _ADC_Tasks(void);
 
 
 // *****************************************************************************
@@ -91,7 +97,22 @@ void SYS_Tasks ( void )
     /* Create OS Thread for APP Tasks. */
     xTaskCreate((TaskFunction_t) _APP_Tasks,
                 "APP Tasks",
-                1024, NULL, 1, NULL);
+                4096, NULL, 1, NULL);
+
+    /* Create OS Thread for USART_TX Tasks. */
+    xTaskCreate((TaskFunction_t) _USART_TX_Tasks,
+                "USART_TX Tasks",
+                4096, NULL, 1, NULL);
+
+    /* Create OS Thread for USART_RX Tasks. */
+    xTaskCreate((TaskFunction_t) _USART_RX_Tasks,
+                "USART_RX Tasks",
+                4096, NULL, 1, NULL);
+
+    /* Create OS Thread for ADC Tasks. */
+    xTaskCreate((TaskFunction_t) _ADC_Tasks,
+                "ADC Tasks",
+                4096, NULL, 2, NULL);
 
     /**************
      * Start RTOS * 
@@ -137,6 +158,57 @@ static void _APP_Tasks(void)
     while(1)
     {
         APP_Tasks();
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+    void _USART_TX_Tasks ( void )
+
+  Summary:
+    Maintains state machine of USART_TX.
+*/
+
+static void _USART_TX_Tasks(void)
+{
+    while(1)
+    {
+        USART_TX_Tasks();
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+    void _USART_RX_Tasks ( void )
+
+  Summary:
+    Maintains state machine of USART_RX.
+*/
+
+static void _USART_RX_Tasks(void)
+{
+    while(1)
+    {
+        USART_RX_Tasks();
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+    void _ADC_Tasks ( void )
+
+  Summary:
+    Maintains state machine of ADC.
+*/
+
+static void _ADC_Tasks(void)
+{
+    while(1)
+    {
+        ADC_Tasks();
     }
 }
 
