@@ -79,9 +79,30 @@ void IntHandlerDrvAdc(void)
 
 void rxIntteruptHandler() {
     
+    char mydata;
+    
+    while
+    
+    if(PLIB_USART_ReceiverDataIsAvailable(USART_ID_1)){
+
+        mydata = PLIB_USART_ReceiverByteReceive(USART_ID_1);
+        
+    }
+    
+    addToUsartRxQFromISR(mydata);
+    
 }
 
 void txIntteruptHandler() {
+    
+    char data;
+    
+    getFromTXCharQ(&data);
+    
+    if(!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)){
+
+    PLIB_USART_TransmitterByteSend(USART_ID_1, data);
+    }
     
 }
 
@@ -90,6 +111,17 @@ void txIntteruptHandler() {
 void IntHandlerDrvUsartInstance0(void)
 {
     
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_RECEIVE)){
+        rxIntteruptHandler();
+    }
+    
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT)){
+        txIntteruptHandler();
+    }
+    
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_ERROR){
+        //not sure what we are doing yet
+    }
     
     
     /* Clear pending interrupt */
