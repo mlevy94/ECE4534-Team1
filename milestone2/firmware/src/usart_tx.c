@@ -148,11 +148,11 @@ void USART_TX_Tasks ( void )
             
             for (i = 0; out_msg[i] != '\0'; i++) {
 
-                void addToTXCharQ(&out_msg[i]);
+                addToTXCharQ(&out_msg[i]);
             }
             
             outChar = '\0';
-            void addToTXCharQ(&outChar);
+            addToTXCharQ(&outChar);
         }
     }
     

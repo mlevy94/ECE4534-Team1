@@ -81,15 +81,13 @@ void rxIntteruptHandler() {
     
     char mydata;
     
-    while
-    
     if(PLIB_USART_ReceiverDataIsAvailable(USART_ID_1)){
 
         mydata = PLIB_USART_ReceiverByteReceive(USART_ID_1);
         
     }
     
-    addToUsartRxQFromISR(mydata);
+    addToUsartRxQFromISR(&mydata);
     
 }
 
@@ -119,7 +117,7 @@ void IntHandlerDrvUsartInstance0(void)
         txIntteruptHandler();
     }
     
-    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_ERROR){
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_ERROR)){
         //not sure what we are doing yet
     }
     
