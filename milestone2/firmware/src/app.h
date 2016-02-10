@@ -58,12 +58,15 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
-
-// Includes for UART libraries
-#include "peripheral/usart/plib_usart.h"
-#include "peripheral/devcon/plib_devcon.h"
-
+#include "debug.h"
+#include "sensor.h"
+#include "app_public.h"
+#include "peripheral/adc/plib_adc.h"
 #include <queue.h>
+
+//// Includes for UART libraries
+//#include "peripheral/usart/plib_usart.h"
+//#include "peripheral/devcon/plib_devcon.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -116,13 +119,10 @@ typedef enum
 typedef struct
 {
     /* The application's current state */
-    APP_STATES state;
+    //APP_STATES state;
 
     /* TODO: Define any additional data used by the application. */
-    
-    QueueHandle_t msgInQ;
-    QueueHandle_t msgOutQ;
-
+    QueueHandle_t msgToAdcQ;
 
 } APP_DATA;
 
