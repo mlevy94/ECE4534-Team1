@@ -144,6 +144,7 @@ void addToInMsgQ(char* val){
 }
 BaseType_t addToInMsgQFromISR(char* val){
     return xQueueSendFromISR(appData.msgInQ, val, 0);
+}
  
 
 /*******************************************************************************
