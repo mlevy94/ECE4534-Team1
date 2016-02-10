@@ -139,20 +139,23 @@ void USART_TX_Tasks ( void )
         if(xQueueReceive(usart_txData.usart_txQ, &out_msg, portMAX_DELAY)) {
                
             // Header stuff goes here ( encapsulation if necessary )
-            
             for (i = 0; out_msg[i] != '\0'; i++) {
 
                 addToTXCharQ(&out_msg[i]);
             }
-            
+            // tail stuff goes here
             outChar = '\0';
             addToTXCharQ(&outChar);
         }
     }
 }
 
-void addToOutQfromApp(char* val){
+void addToOutQ(char* val){
     xQueueSend(usart_txData.usart_txQ, val, portMAX_DELAY);
+}
+
+BaseType_t addToOutQFromISR(char* val) {
+    return xQueueSendFromISR(usart_txData.usart_txQ, val, portMAX_DELAY);
 }
  
 

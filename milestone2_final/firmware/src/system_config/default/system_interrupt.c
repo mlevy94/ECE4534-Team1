@@ -62,49 +62,89 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include <xc.h>
 #include <sys/attribs.h>
-#include "app.h"
-#include "usart_tx.h"
-#include "usart_rx.h"
-#include "adc_app.h"
 #include "system_definitions.h"
-#include "uart_tx_charQ.h"
+
+#include "txbuffer_public.h"
+#include "app_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
+
+// ADC
 void IntHandlerDrvAdc(void)
 {
     /* Clear ADC Interrupt Flag */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
 }
 
-void rxIntteruptHandler() {
-    
-    char mydata;
-    
-    if(PLIB_USART_ReceiverDataIsAvailable(USART_ID_1)){
+// UART
 
-        mydata = PLIB_USART_ReceiverByteReceive(USART_ID_1);
-        
-    }
-    
-    addToUsartRxQFromISR(&mydata);
-    
+QueueHandle_t txbufferQ;
+void initializeBufferQ() {
+    txbufferQ = xQueueCreate(16, MAX_MSG_SIZE);
 }
+
+BaseType_t putInBufferQ(char* msg) {
+    return xQueueSend(txbufferQ, msg, portMAX_DELAY);
+}
+    
+BaseType_t putInBufferQFromISR(char* msg) {
+    return xQueueSendFromISR(txbufferQ, msg, 0);
+}
+
+char* txBuffer[MAX_MSG_SIZE] = { '\0' };
+int txBufferIdx = 0;
+char* rxBuffer[MAX_MSG_SIZE] = { '\0' };
+int rxBufferIdx = 0;
 
 void txIntteruptHandler() {
     
-    char data;
-    
-    if (getFromTXCharQFromISR(&data)) {
-    
-        if(!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)){
-
-        PLIB_USART_TransmitterByteSend(USART_ID_1, data);
+    while (!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)){
+        // get new message
+        if (txBuffer[txBufferIdx == '\0']) {
+            // check for message in Q
+            if (!xQueueReceiveFromISR(txbufferQ, txBuffer, 0)) {
+                // no message in Q
+                break;
+            }
+            // message found. reset index to 0
+            else {
+                txBufferIdx = 0;
+            }
         }
+        // send character
+        PLIB_USART_TransmitterByteSend(USART_ID_1, txBuffer[txBufferIdx]);
+        txBufferIdx++;
     }
+    
+}
+
+void rxIntteruptHandler() {
+    // while there are characters to read
+    while(PLIB_USART_ReceiverDataIsAvailable(USART_ID_1)){
+        // read a character
+        rxBuffer[rxBufferIdx] = PLIB_USART_ReceiverByteReceive(USART_ID_1);
+        // if its the end of the message
+        if (rxBuffer[rxBufferIdx] == '\0') {
+            // copy message to a temp val
+            char tempBuffer[rxBufferIdx + 1];
+            int i;
+            for (i = 0; rxBuffer[rxBufferIdx]; i++) {
+                tempBuffer[i] = rxBuffer[i];
+            }
+            // add message to Q
+            addToInMsgQFromISR(tempBuffer);
+            rxBufferIdx = 0;
+        }
+        else {
+            rxBufferIdx++;
+        }
+        
+    }
+    
     
 }
 

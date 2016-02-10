@@ -114,7 +114,6 @@ APP_DATA appData;
 void APP_Initialize ( void )
 {
     appData.msgInQ = xQueueCreate(16, MAX_MSG_SIZE);
-    appData.msgOutQ = xQueueCreate(16, MAX_MSG_SIZE);
     
 }
 
@@ -129,8 +128,14 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
+    char inMsg[MAX_MSG_SIZE];
+    int i = 0;
     while(1) {
-        
+        if (xQueueReceive(appData.msgInQ, &inMsg, portMAX_DELAY)) {
+            for(i = 0; inMsg[i] != '\0'; i++) {
+                setDebugVal(inMsg[i]);
+            }
+        }
     }
 }
 
@@ -138,15 +143,7 @@ void addToInMsgQ(char* val){
     xQueueSend(appData.msgInQ, val, portMAX_DELAY);
 }
 BaseType_t addToInMsgQFromISR(char* val){
-    xQueueSendFromISR(appData.msgInQ, val, 0);
-}
-
-void addToOutMsgQ(char* val){
-    xQueueSend(appData.msgOutQ, val, portMAX_DELAY);
-}
-BaseType_t addToOutMsgQFromISR(char* val){
-    xQueueSendFromISR(appData.msgOutQ, val, 0);
-}
+    return xQueueSendFromISR(appData.msgInQ, val, 0);
  
 
 /*******************************************************************************

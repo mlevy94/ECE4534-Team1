@@ -13,14 +13,7 @@ extern "C" {
 #endif
 
     void addToInMsgQ(char* val);
-    BaseType_t addToInMsgFromISR(char* val);
-    
-    void addToOutMsgQ(char* val);
-    BaseType_t addToOutMsgQFromISR(char* val);
-    
-    void addToOutQfromApp(char* val);
-    
-    BaseType_t addToUsartRxQFromISR(char* val);
+    BaseType_t addToInMsgQFromISR(char* val);
     
 #ifdef	__cplusplus
 }

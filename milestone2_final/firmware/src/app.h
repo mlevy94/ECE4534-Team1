@@ -60,6 +60,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_definitions.h"
 
 #include <queue.h>
+#include "debug.h"
 
 // Includes for UART libraries
 #include "peripheral/usart/plib_usart.h"
@@ -109,9 +110,6 @@ extern "C" {
 typedef struct
 {
     QueueHandle_t msgInQ;
-    QueueHandle_t msgOutQ;
-
-
 } APP_DATA;
 
 

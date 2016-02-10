@@ -22,7 +22,10 @@ class OutboundWorker:
     while 1:
       msg = self.queue.get()
       for client in self.clientList:
+        try:
           client.send(msg)
           print("Send {}: {}".format(client.address, msg))
-
+        except:
+          self.clientList.remove(client)
+          print("Client Disconnected: {}".format(client.address))
 

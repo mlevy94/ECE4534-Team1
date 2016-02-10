@@ -2,7 +2,10 @@
 *.obj
 *.o
 *.obj.dmp
-*/dist/*
+Makefile*
+Package*
+debug
+production
 
 
 # pyenv

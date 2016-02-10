@@ -135,11 +135,10 @@ void ADC_APP_Initialize ( void )
 
 void ADC_APP_Tasks ( void )
 {
+    char ADCValue;
     while (1) {
-        char ADCValue;
         ADCValue = read_distance();
         setDebugVal(ADCValue);
-        addToOutMsgQ(&ADCValue);
     }
 }
  
