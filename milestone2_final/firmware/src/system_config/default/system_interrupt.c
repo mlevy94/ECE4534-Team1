@@ -83,15 +83,15 @@ void IntHandlerDrvAdc(void)
 // UART
 
 QueueHandle_t txbufferQ;
-void initializeBufferQ() {
+void initializeTXBufferQ() {
     txbufferQ = xQueueCreate(16, MAX_MSG_SIZE);
 }
 
-BaseType_t putInBufferQ(char* msg) {
+BaseType_t putInTXBufferQ(char* msg) {
     return xQueueSend(txbufferQ, msg, portMAX_DELAY);
 }
     
-BaseType_t putInBufferQFromISR(char* msg) {
+BaseType_t putInTXBufferQFromISR(char* msg) {
     return xQueueSendFromISR(txbufferQ, msg, 0);
 }
 
@@ -100,12 +100,17 @@ int txBufferIdx = 0;
 char* rxBuffer[MAX_MSG_SIZE] = { '\0' };
 int rxBufferIdx = 0;
 
-void txIntteruptHandler() {
+void txInterruptHandler() {
+    
+#ifdef DEBUG_ON
+    setDebugVal('C');
+#endif
+   
     
     while (!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)){
-        // get new message
-        if (txBuffer[txBufferIdx == '\0']) {
-            // check for message in Q
+        // get new char from txBuffer
+        if (txBuffer[txBufferIdx] == '\0') {
+            // grab new message from bufferQ
             if (!xQueueReceiveFromISR(txbufferQ, txBuffer, 0)) {
                 // no message in Q
                 break;
@@ -120,9 +125,18 @@ void txIntteruptHandler() {
         txBufferIdx++;
     }
     
+#ifdef DEBUG_ON
+    setDebugVal('D');
+#endif
+    
 }
 
-void rxIntteruptHandler() {
+void rxInterruptHandler() {
+    
+ #ifdef DEBUG_ON
+    setDebugVal('E');
+#endif
+    
     // while there are characters to read
     while(PLIB_USART_ReceiverDataIsAvailable(USART_ID_1)){
         // read a character
@@ -145,20 +159,25 @@ void rxIntteruptHandler() {
         
     }
     
+#ifdef DEBUG_ON
+    setDebugVal('F');
+#endif
     
 }
 
 
-
 void IntHandlerDrvUsartInstance0(void)
 {
-
-    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_RECEIVE)){
-        rxIntteruptHandler();
-    }
+#ifdef DEBUG_ON
+    setDebugVal('A');
+#endif
     
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT)){
-        txIntteruptHandler();
+        txInterruptHandler();
+    }
+
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_RECEIVE)){
+        rxInterruptHandler();
     }
     
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_ERROR)){
@@ -169,6 +188,10 @@ void IntHandlerDrvUsartInstance0(void)
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE);
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_ERROR);
+    
+#ifdef DEBUG_ON
+    setDebugVal('B');
+#endif
 
 }
  

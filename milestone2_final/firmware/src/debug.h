@@ -8,6 +8,8 @@
 #include "system_config.h"
 #include "system_definitions.h"
 
+#define DEBUG_ON
+
 #ifdef __cplusplus  // Provide C++ Compatibility
 
 extern "C" {
@@ -20,6 +22,21 @@ inline void debugFailOn0(char value);
 inline void debugFailOnNot0(char value);
 void debugFailOnVal(char value, char expected);
 void debugFailOnNotVal(char value, char expected);
+
+
+#define USART0_IH_TX_START      0x01;
+#define USART0_IH_TX_END        0x02;
+#define USART0_IH_RX_START      0x03;
+#define USART0_IH_RX_END        0x04;
+#define USART0_IH_MASTER_START  0x05;
+#define USART0_IH_MASTER_END    0x06;
+#define USART1_IH_TX_START      0x07;
+#define USART1_IH_TX_END        0x08;
+#define USART1_IH_RX_START      0x09;
+#define USART1_IH_RX_END        0x0A;
+#define USART1_IH_MASTER_START  0x0B;
+#define USART1_IH_MASTER_END    0x0C;
+
 
 
 #ifdef __cplusplus
