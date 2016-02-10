@@ -123,6 +123,7 @@ typedef struct
 
     /* TODO: Define any additional data used by the application. */
     QueueHandle_t msgToAdcQ;
+    int AdcData;
 
 } APP_DATA;
 

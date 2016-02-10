@@ -76,10 +76,14 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-APP_DATA appData;
+APP_DATA appData =
+{
+    //TODO - Initialize appData structure.
+
+};
 
 // Global string for testing
-const char *testing = "Team 1 \0";
+//const char *testing = "Team 1 \0";
 
 // *****************************************************************************
 // *****************************************************************************
@@ -101,24 +105,24 @@ const char *testing = "Team 1 \0";
 
 
 // Initializes the UART Module
-void initUART(void)
-{
+//void initUART(void)
+//{
     /* Enable the UART module*/
     //USART_ID_1 is for UART port 0 (J14)
-    PLIB_USART_Enable(USART_ID_1);
-}
+  //  PLIB_USART_Enable(USART_ID_1);
+//}
 
-void sendString(const char *string)
-{
-    int index;
-    while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-    {
+//void sendString(const char *string)
+//{
+   // int index;
+    //while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
+    //{
         /* Write a character at a time, only if transmitter is empty */
-        for (index = 0; string[index] != '\0'; index++) {
-            PLIB_USART_TransmitterByteSend(USART_ID_1, string[index]);
-        }
-        PLIB_USART_TransmitterByteSend(USART_ID_1, '\0');
-    }
+      //  for (index = 0; string[index] != '\0'; index++) {
+        //    PLIB_USART_TransmitterByteSend(USART_ID_1, string[index]);
+       // }
+        //PLIB_USART_TransmitterByteSend(USART_ID_1, '\0');
+   // }
     /*
     while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
     {
@@ -134,17 +138,17 @@ void sendString(const char *string)
         index ++;
     }
     */
-}
+//}
 
-void sendCharacter(const char character)
-{
+//void sendCharacter(const char character)
+//{
     /* Check if buffer is empty for a new transmission */
-    if(PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-    {
+  //  if(PLIB_USART_TransmitterIsEmpty(USART_ID_1))
+    //{
         /* Send character */
-        PLIB_USART_TransmitterByteSend(USART_ID_1, character);
-    }
-}
+      //  PLIB_USART_TransmitterByteSend(USART_ID_1, character);
+   // }
+//}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -163,8 +167,9 @@ void sendCharacter(const char character)
 void APP_Initialize ( void )
 {
     appData.msgToAdcQ = xQueueCreate(16, 8);
-    DRV_ADC_Open();
-    DRV_ADC_Start();
+    //DRV_ADC_Initialize();
+    //DRV_ADC_Open();
+    //DRV_ADC_Start();
     /* Place the App state machine in its initial state. */
     //appData.state = APP_STATE_INIT;
     //initUART();
@@ -188,7 +193,9 @@ void APP_Tasks ( void )
     //bool here;
     //here = DRV_ADC_SamplesAvailable();
     //setDebugBool(here);
+    DRV_ADC_Open();
     while(1){
+       // DRV_ADC_Open();
         //setDebugVal('W');
         if(xQueueReceive(appData.msgToAdcQ, &curVal, portMAX_DELAY)){
             //setDebugBool(pdFALSE);
@@ -198,11 +205,11 @@ void APP_Tasks ( void )
     }
 }
  
-BaseType_t adcFromISR(uint8_t *adcVal){
+BaseType_t adcFromISR(char *adcVal){
     //setDebugVal(xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0));
+    setDebugBool(xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0));
     return xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
     //xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
-    //setDebugBool(pdFALSE);
     //return xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
     //function from isr. store in ADC_CUR;
 }
