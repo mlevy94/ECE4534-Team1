@@ -79,7 +79,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 APP_DATA appData;
 
 // Global string for testing
-const char *testing = "Team 1";
+const char *testing = "Team 1 \0";
 
 // *****************************************************************************
 // *****************************************************************************
@@ -96,9 +96,9 @@ const char *testing = "Team 1";
 // *****************************************************************************
 // *****************************************************************************
 
-
 /* TODO:  Add any necessary local functions.
 */
+
 
 // Initializes the UART Module
 void initUART(void)
@@ -106,50 +106,45 @@ void initUART(void)
     /* Enable the UART module*/
     //USART_ID_1 is for UART port 0 (J14)
     PLIB_USART_Enable(USART_ID_1);
-    
-    appData.msgInQ = xQueueCreate(16, MAX_MSG_SIZE);
-    appData.msgOutQ = xQueueCreate(16, MAX_MSG_SIZE);
-    
-    //PLIB_USART_InitializeOperation(USART_ID_1, USART_RECEIVE_FIFO_HALF_FULL,
-                    //USART_TRANSMIT_FIFO_NOT_FULL  , USART_ENABLE_TX_RX_USED);
 }
 
 void sendString(const char *string)
 {
-    /* Write a character at a time, only if transmitter is empty */
+    int index;
     while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
     {
-        /* Send character */
-        PLIB_USART_TransmitterByteSend(USART_ID_1, *string);
+        /* Write a character at a time, only if transmitter is empty */
+        for (index = 0; string[index] != '\0'; index++) {
+            PLIB_USART_TransmitterByteSend(USART_ID_1, string[index]);
+        }
+        PLIB_USART_TransmitterByteSend(USART_ID_1, '\0');
+    }
+    /*
+    while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
+    {
+        if (*(string + index) == '\0')
+        {
+            
+        }
+        else
+        {
+            // Send character
+            PLIB_USART_TransmitterByteSend(USART_ID_1, *(string + index));
+        }
+        index ++;
+    }
+    */
+}
 
-        /* Increment to address of next character */
-        string++;
+void sendCharacter(const char character)
+{
+    /* Check if buffer is empty for a new transmission */
+    if(PLIB_USART_TransmitterIsEmpty(USART_ID_1))
+    {
+        /* Send character */
+        PLIB_USART_TransmitterByteSend(USART_ID_1, character);
     }
 }
-
-void addToInMsgQ(char* val){
-    xQueueSend(appData.msgInQ, val, portMAX_DELAY);
-}
-BaseType_t addToInMsgQFromISR(char* val){
-    xQueueSendFromISR(appData.msgInQ, val, 0);
-}
-
-void addToOutMsgQ(char* val){
-    xQueueSend(appData.msgOutQ, val, portMAX_DELAY);
-}
-BaseType_t addToOutMsgQFromISR(char* val){
-    xQueueSendFromISR(appData.msgOutQ, val, 0);
-}
-
-// void sendCharacter(const char character)
-// {
-//     /* Check if buffer is empty for a new transmission */
-//     if(PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-//     {
-//         /* Send character */
-//         PLIB_USART_TransmitterByteSend(USART_ID_1, character);
-//     }
-// }
 
 // *****************************************************************************
 // *****************************************************************************
@@ -167,9 +162,12 @@ BaseType_t addToOutMsgQFromISR(char* val){
 
 void APP_Initialize ( void )
 {
+    appData.msgToAdcQ = xQueueCreate(16, 8);
+    DRV_ADC_Open();
+    DRV_ADC_Start();
     /* Place the App state machine in its initial state. */
-    appData.state = APP_STATE_INIT;
-    initUART();
+    //appData.state = APP_STATE_INIT;
+    //initUART();
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
@@ -186,29 +184,28 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
-    /*
-    // Check the application's current state.
-    switch ( appData.state )
-    {
-        // Application's initial state.
-        case APP_STATE_INIT:
-        {
-            break;
-        }
-
-        // TODO: implement your application state machine.
-
-        // The default state should never be executed.
-        default:
-        {
-            // TODO: Handle error in application's state machine.
-            break;
-        }
+    char curVal;
+    //bool here;
+    //here = DRV_ADC_SamplesAvailable();
+    //setDebugBool(here);
+    while(1){
+        //setDebugVal('W');
+        if(xQueueReceive(appData.msgToAdcQ, &curVal, portMAX_DELAY)){
+            //setDebugBool(pdFALSE);
+            setDebugVal(curVal);
+        } 
+        //setDebugBool(pdFALSE);
     }
-    */
-    sendString(testing);
 }
  
+BaseType_t adcFromISR(uint8_t *adcVal){
+    //setDebugVal(xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0));
+    return xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
+    //xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
+    //setDebugBool(pdFALSE);
+    //return xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
+    //function from isr. store in ADC_CUR;
+}
 
 /*******************************************************************************
  End of File

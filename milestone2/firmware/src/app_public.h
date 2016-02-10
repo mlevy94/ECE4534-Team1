@@ -7,20 +7,15 @@
 
 #ifndef APP_PUBLIC_H
 #define	APP_PUBLIC_H
+#define MAX_MSG_SIZE 64
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-    void addToInMsgQ(char* val);
-    BaseType_t addToInMsgFromISR(char* val);
-    
-    void addToOutMsgQ(char* val);
-    BaseType_t addToOutMsgQFromISR(char* val);
-    
-    void addToOutQfromApp(char* val);
-    
-    BaseType_t addToUsartRxQFromISR(char* val);
+    //void addToInMsgQ(char* val);
+    //BaseType_t addToInMsgFromISR(char* val);
+    BaseType_t adcFromISR(uint8_t *adcVal);
     
 #ifdef	__cplusplus
 }

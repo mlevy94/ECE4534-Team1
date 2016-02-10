@@ -129,11 +129,11 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
+  char curVal;
     while(1) {
         
         if(xQueueReceive(appData.msgOutQ, &curVal, portMAX_DELAY)){
             
-            addToTXCharQFromISR(char* curVal);
             
         }
         
