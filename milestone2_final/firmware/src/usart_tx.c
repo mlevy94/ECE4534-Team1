@@ -54,7 +54,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "usart_tx.h"
-#include "uart_tx_charQ.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -116,6 +115,8 @@ void USART_TX_Initialize ( void )
 {
     usart_txData.usart_txQ = xQueueCreate(OUT_BUF_SIZE, MAX_MSG_SIZE);
     
+    initMessageCounter();
+    
 }
 
 
@@ -140,12 +141,13 @@ void USART_TX_Tasks ( void )
                
             // Header stuff goes here ( encapsulation if necessary )
             for (i = 0; out_msg[i] != '\0'; i++) {
-
-                addToTXCharQ(&out_msg[i]);
+                   
+                
             }
             // tail stuff goes here
             outChar = '\0';
-            addToTXCharQ(&outChar);
+            
+         
         }
     }
 }
@@ -156,6 +158,39 @@ void addToOutQ(char* val){
 
 BaseType_t addToOutQFromISR(char* val) {
     return xQueueSendFromISR(usart_txData.usart_txQ, val, portMAX_DELAY);
+}
+
+TEAM1_MSG buildMessage(char source, char message_number, char type,
+        char payloadSize, char payload){
+    
+    TEAM1_MSG msg;
+    
+    msg.MSG_SRC = source;
+    msg.MSG_NUM = message_number;
+    msg.MSG_TYPE = type;
+    msg.PAYLOAD_SIZE = payloadSize;
+    msg.PAYLOAD = payload;
+    
+    msg.CHKSUM = (int)source +  (int)message_number + (int)type +
+            (int)payloadSize + (int)payload;
+    
+    msg.ACK_FIELD = 0x06;
+
+    return msg;
+    
+}
+
+void initMessageCounter(){
+    
+    usart_txData.message_counter.FOLLOW_PO_COUNT = 0;
+    usart_txData.message_counter.INITIALIZE_COUNT = 0;
+    usart_txData.message_counter.LEAD_PO_COUNT = 0;
+    usart_txData.message_counter.MOTOR_FB_COUNT = 0;
+    usart_txData.message_counter.OBS_INFO_COUNT = 0;
+    usart_txData.message_counter.ROVER_CMD_COUNT = 0;
+    usart_txData.message_counter.RTSTART_COUNT = 0;
+    usart_txData.message_counter.TOKEN_FOUND_COUNT = 0;
+
 }
  
 

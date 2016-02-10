@@ -90,6 +90,7 @@ typedef struct
 {
     QueueHandle_t usart_txQ;
     char in_msg[MAX_MSG_SIZE];
+    MSG_COUNTER message_counter;
     
 } USART_TX_DATA;
 
@@ -175,8 +176,13 @@ void USART_TX_Initialize ( void );
 
 void USART_TX_Tasks( void );
 
+void initMessageCounter();
+
+
 
 #endif /* _USART_TX_H */
+
+
 
 //DOM-IGNORE-BEGIN
 #ifdef __cplusplus
