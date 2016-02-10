@@ -49,9 +49,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
-
-// Commenting out, assuming absolete - Kyle
-//#include "uart_tx_charQ.h"
+#include "txbuffer_public.h"
 
 
 // ****************************************************************************
@@ -195,10 +193,7 @@ void SYS_Initialize ( void* data )
 
     /* Initialize the Application */
     APP_Initialize();
-    
-    // Removing, assumed obsolete
-    // initializeTXCharQ();
-    
+    initializeTXBufferQ();
     USART_TX_Initialize();
     USART_RX_Initialize();
     ADC_APP_Initialize();

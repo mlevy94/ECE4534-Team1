@@ -83,15 +83,15 @@ void IntHandlerDrvAdc(void)
 // UART
 
 QueueHandle_t txbufferQ;
-void initializeBufferQ() {
+void initializeTXBufferQ() {
     txbufferQ = xQueueCreate(16, MAX_MSG_SIZE);
 }
 
-BaseType_t putInBufferQ(char* msg) {
+BaseType_t putInTXBufferQ(char* msg) {
     return xQueueSend(txbufferQ, msg, portMAX_DELAY);
 }
     
-BaseType_t putInBufferQFromISR(char* msg) {
+BaseType_t putInTXBufferQFromISR(char* msg) {
     return xQueueSendFromISR(txbufferQ, msg, 0);
 }
 
@@ -168,17 +168,16 @@ void rxInterruptHandler() {
 
 void IntHandlerDrvUsartInstance0(void)
 {
-    
 #ifdef DEBUG_ON
     setDebugVal('A');
 #endif
-
-    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_RECEIVE)){
-        rxInterruptHandler();
-    }
     
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT)){
         txInterruptHandler();
+    }
+
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_RECEIVE)){
+        rxInterruptHandler();
     }
     
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_ERROR)){
