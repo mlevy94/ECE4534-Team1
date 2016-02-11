@@ -62,6 +62,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <queue.h>
 #include "comm.h"
 
+#define TX_PRIORITY_Q_SIZE 16
+
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -89,8 +91,9 @@ extern "C" {
 typedef struct
 {
     QueueHandle_t usart_txQ;
+    QueueHandle_t usart_prioirtyTxQ;
     char in_msg[MAX_MSG_SIZE];
-    MSG_COUNTER message_counter;
+    char message_counter;
     
 } USART_TX_DATA;
 
@@ -176,7 +179,8 @@ void USART_TX_Initialize ( void );
 
 void USART_TX_Tasks( void );
 
-void initMessageCounter();
+void buildMessageCharArray(char * outChar, char source, char message_counter, char type,
+        char payloadSize, char * payload);
 
 
 

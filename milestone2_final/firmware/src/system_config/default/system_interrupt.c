@@ -95,9 +95,9 @@ BaseType_t putInTXBufferQFromISR(char* msg) {
     return xQueueSendFromISR(txbufferQ, msg, 0);
 }
 
-char* txBuffer[MAX_MSG_SIZE] = { '\0' };
+char txBuffer[MAX_MSG_SIZE] = { '\0' };
 int txBufferIdx = 0;
-char* rxBuffer[MAX_MSG_SIZE] = { '\0' };
+char rxBuffer[MAX_MSG_SIZE] = { '\0' };
 int rxBufferIdx = 0;
 
 void txInterruptHandler() {
@@ -106,6 +106,7 @@ void txInterruptHandler() {
     setDebugVal('C');
 #endif
    
+    
     
     while (!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)){
         // get new char from txBuffer

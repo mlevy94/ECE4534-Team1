@@ -54,6 +54,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "usart_tx.h"
+#include "usart_tx_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -115,7 +116,9 @@ void USART_TX_Initialize ( void )
 {
     usart_txData.usart_txQ = xQueueCreate(OUT_BUF_SIZE, MAX_MSG_SIZE);
     
-    initMessageCounter();
+    usart_txData.usart_prioirtyTxQ = xQueueCreate(TX_PRIORITY_Q_SIZE, MAX_MSG_SIZE);
+    
+    usart_txData.message_counter = 0;
     
 }
 
@@ -130,67 +133,102 @@ void USART_TX_Initialize ( void )
 
 void USART_TX_Tasks ( void )
 {
-    char out_msg[MAX_MSG_SIZE];
-    
+    INTERNAL_MSG internal_msg;
+    char outCharArray[MAX_MSG_SIZE];
     char outChar;
     int i = 0;
-    while(1){
+    while(1) {
         
+        // Check PRIORITY queue 
         // Check outQ for message
-        if(xQueueReceive(usart_txData.usart_txQ, &out_msg, portMAX_DELAY)) {
+        //if(xQueueReceive(usart_txData.usart_prioirtyTxQ, &out_msg, portMAX_DELAY)) {
+            
+           
                
             // Header stuff goes here ( encapsulation if necessary )
-            for (i = 0; out_msg[i] != '\0'; i++) {
+            //for (i = 0; out_msg[i] != '\0'; i++) {
+                   
+                // Send to Front of Interrupt's buffQ
+                
+            // }
+            // tail stuff goes here
+            //outChar = '\0';
+            
+       //}
+        
+        // Check outQ for message
+        if(xQueueReceive(usart_txData.usart_txQ, &internal_msg, portMAX_DELAY)) {
+            
+            // char source, char message_counter, char type, char payloadSize, char payload
+            buildMessageCharArray( outCharArray, MY_ROLE, usart_txData.message_counter, internal_msg.INTERNAL_TYPE, PAYLOAD_4BYTE, internal_msg.INTERNAL_MESSAGE );
+            
+            
+            
+            
+            
+            for (i = 0; outCharArray[i] != '\0'; i++) {
+                
+                // Send to Interrupt's buffQ
                    
                 
             }
             // tail stuff goes here
             outChar = '\0';
             
-         
         }
     }
 }
 
+
 void addToOutQ(char* val){
     xQueueSend(usart_txData.usart_txQ, val, portMAX_DELAY);
+}
+
+void addToPrioirtyTxQ(char* val){
+    
+    xQueueSend(usart_txData.usart_prioirtyTxQ, val, portMAX_DELAY);
+    
+}
+
+BaseType_t addToPrioirtyTxQFromISR(char* val){
+    
+    xQueueSend(usart_txData.usart_prioirtyTxQ, val, portMAX_DELAY);
+    
 }
 
 BaseType_t addToOutQFromISR(char* val) {
     return xQueueSendFromISR(usart_txData.usart_txQ, val, portMAX_DELAY);
 }
 
-TEAM1_MSG buildMessage(char source, char message_number, char type,
-        char payloadSize, char payload){
+void buildMessageCharArray(char * outCharArray, char source, char msg_counter, char type, char payloadSize, char * payload){
     
-    TEAM1_MSG msg;
+    TEAM1_MSG out_msg;
     
-    msg.MSG_SRC = source;
-    msg.MSG_NUM = message_number;
-    msg.MSG_TYPE = type;
-    msg.PAYLOAD_SIZE = payloadSize;
-    msg.PAYLOAD = payload;
+    out_msg.MSG_START = 0x01;
+    out_msg.MSG_SRC = source;
+    out_msg.MSG_NUM = msg_counter;
+    out_msg.MSG_TYPE = type;
+    out_msg.PAYLOAD_SIZE = payloadSize;
+    out_msg.PAYLOAD = (unsigned)payload;
     
-    msg.CHKSUM = (int)source +  (int)message_number + (int)type +
-            (int)payloadSize + (int)payload;
+    out_msg.CHKSUM = (int)source + (int)msg_counter + (int)type + (int)payloadSize +
+            ( (int)payload & 0xFF) +
+            ( (int)payload >> 8 & 0xFF) +
+            ( (int)payload >> 16 & 0xFF) +
+            ( (int)payload >> 24 & 0xFF);
     
-    msg.ACK_FIELD = 0x06;
-
-    return msg;
+    out_msg.ACK_FIELD = 0x06;
     
-}
-
-void initMessageCounter(){
+    msg_counter = (int)msg_counter + 1;
     
-    usart_txData.message_counter.FOLLOW_PO_COUNT = 0;
-    usart_txData.message_counter.INITIALIZE_COUNT = 0;
-    usart_txData.message_counter.LEAD_PO_COUNT = 0;
-    usart_txData.message_counter.MOTOR_FB_COUNT = 0;
-    usart_txData.message_counter.OBS_INFO_COUNT = 0;
-    usart_txData.message_counter.ROVER_CMD_COUNT = 0;
-    usart_txData.message_counter.RTSTART_COUNT = 0;
-    usart_txData.message_counter.TOKEN_FOUND_COUNT = 0;
-
+    outCharArray[0] = out_msg.MSG_START;
+    outCharArray[1] = out_msg.MSG_SRC;
+    outCharArray[2] = out_msg.MSG_NUM;
+    outCharArray[3] = out_msg.PAYLOAD_SIZE;
+    outCharArray[4] = out_msg.PAYLOAD;
+    outCharArray[5] = out_msg.CHKSUM;
+    outCharArray[6] = out_msg.ACK_FIELD;
+    
 }
  
 
