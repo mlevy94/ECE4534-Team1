@@ -123,7 +123,7 @@ BaseType_t adcFromISR(int *adcVal){
 
 void APP_Initialize ( void )
 {
-    appData.msgToAdcQ = xQueueCreate(16, 8);
+    appData.msgToAdcQ = xQueueCreate(16, 10);
     /* Place the App state machine in its initial state. */
 
     /* TODO: Initialize your application's state machine and other

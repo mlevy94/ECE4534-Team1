@@ -74,16 +74,20 @@ void IntHandlerDrvAdc(void)
 {
     /* Clear ADC Interrupt Flag */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
-    int i;
+    PLIB_ADC_SampleAutoStartEnable(ADC_ID_1);
+    setDebugBool(pdTRUE);
+    //int i;
     int adcVal;
-    for(i=0;i<16;i++){
-        adcVal = adcVal + PLIB_ADC_ResultGetByIndex(ADC_ID_1, i);// * temp;
-    }
-    adcVal = adcVal / ADC_16SAMPLES_PER_INTERRUPT;
+    //for(i=0;i<16;i++){
+        //adcVal = adcVal + PLIB_ADC_ResultGetByIndex(ADC_ID_1, i);// * temp;
+    //}
+    //adcVal = adcVal / ADC_16SAMPLES_PER_INTERRUPT;
+    adcVal = PLIB_ADC_ResultGetByIndex(ADC_ID_1, 0);
     //adcVal = adcVal / 2;
-    adcFromISR(10);
-    //PLIB_ADC_SampleAutoStartEnable(ADC_ID_1);
+    adcFromISR(&adcVal);
+    setDebugBool(pdFALSE);
 }
+
 
 
 
