@@ -12,9 +12,7 @@
 extern "C" {
 #endif
 
-    //void addToInMsgQ(char* val);
-    //BaseType_t addToInMsgFromISR(char* val);
-    BaseType_t adcFromISR(char *adcVal);
+    BaseType_t adcFromISR(int *adcVal);
     
 #ifdef	__cplusplus
 }

@@ -119,11 +119,10 @@ typedef enum
 typedef struct
 {
     /* The application's current state */
-    //APP_STATES state;
-
+    
     /* TODO: Define any additional data used by the application. */
     QueueHandle_t msgToAdcQ;
-    int AdcData;
+    char* AdcData;
 
 } APP_DATA;
 

@@ -15,6 +15,13 @@ void setDebugVal(char value) {
     
 }
 
+void TenBitsetDebugVal(int value){
+    SYS_PORTS_Clear(PORTS_ID_0, PORT_CHANNEL_E, 0x00FF);
+    SYS_PORTS_Clear(PORTS_ID_0, PORT_CHANNEL_D, 0x00FF);
+    SYS_PORTS_Set(PORTS_ID_0, PORT_CHANNEL_E, (value & 0xFF), 0x00FF); // checks bits 7-0
+    SYS_PORTS_Set(PORTS_ID_0, PORT_CHANNEL_D, (value & 0x300), 0x00FF); // checks bits 9 & 8
+}
+
 inline void debugFailOn0(char value) {
     debugFailOnVal(value, 0);
 }

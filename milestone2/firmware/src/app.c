@@ -94,6 +94,10 @@ APP_DATA appData =
 /* TODO:  Add any necessary callback funtions.
 */
 
+BaseType_t adcFromISR(int *adcVal){
+    return xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
+}
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Local Functions
@@ -102,53 +106,6 @@ APP_DATA appData =
 
 /* TODO:  Add any necessary local functions.
 */
-
-
-// Initializes the UART Module
-//void initUART(void)
-//{
-    /* Enable the UART module*/
-    //USART_ID_1 is for UART port 0 (J14)
-  //  PLIB_USART_Enable(USART_ID_1);
-//}
-
-//void sendString(const char *string)
-//{
-   // int index;
-    //while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-    //{
-        /* Write a character at a time, only if transmitter is empty */
-      //  for (index = 0; string[index] != '\0'; index++) {
-        //    PLIB_USART_TransmitterByteSend(USART_ID_1, string[index]);
-       // }
-        //PLIB_USART_TransmitterByteSend(USART_ID_1, '\0');
-   // }
-    /*
-    while (PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-    {
-        if (*(string + index) == '\0')
-        {
-            
-        }
-        else
-        {
-            // Send character
-            PLIB_USART_TransmitterByteSend(USART_ID_1, *(string + index));
-        }
-        index ++;
-    }
-    */
-//}
-
-//void sendCharacter(const char character)
-//{
-    /* Check if buffer is empty for a new transmission */
-  //  if(PLIB_USART_TransmitterIsEmpty(USART_ID_1))
-    //{
-        /* Send character */
-      //  PLIB_USART_TransmitterByteSend(USART_ID_1, character);
-   // }
-//}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -167,12 +124,8 @@ APP_DATA appData =
 void APP_Initialize ( void )
 {
     appData.msgToAdcQ = xQueueCreate(16, 8);
-    //DRV_ADC_Initialize();
-    //DRV_ADC_Open();
-    //DRV_ADC_Start();
     /* Place the App state machine in its initial state. */
-    //appData.state = APP_STATE_INIT;
-    //initUART();
+
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
@@ -189,30 +142,15 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
-    char curVal;
-    //bool here;
-    //here = DRV_ADC_SamplesAvailable();
-    //setDebugBool(here);
+    int curVal;
     DRV_ADC_Open();
     while(1){
-       // DRV_ADC_Open();
-        //setDebugVal('W');
         if(xQueueReceive(appData.msgToAdcQ, &curVal, portMAX_DELAY)){
-            //setDebugBool(pdFALSE);
-            setDebugVal(curVal);
+            TenBitsetDebugVal(curVal);
         } 
-        //setDebugBool(pdFALSE);
     }
 }
- 
-BaseType_t adcFromISR(char *adcVal){
-    //setDebugVal(xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0));
-    setDebugBool(xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0));
-    return xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
-    //xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
-    //return xQueueSendFromISR(appData.msgToAdcQ, adcVal, 0);
-    //function from isr. store in ADC_CUR;
-}
+
 
 /*******************************************************************************
  End of File
