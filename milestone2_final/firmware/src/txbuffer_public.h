@@ -13,8 +13,10 @@ extern "C" {
 #endif
 
     void initializeTXBufferQ();
-    BaseType_t putInTXBufferQ(char* msg);
+    BaseType_t putInTXBufferQ(char * msg);
+    BaseType_t priorityPutInTXBufferQ(char * msg);
     BaseType_t putInTXBufferQFromISR(char* msg);
+    BaseType_t priorityPutInTXBufferQFromISR(char* msg);
 
 
 #ifdef	__cplusplus

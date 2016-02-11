@@ -16,6 +16,8 @@ extern "C" {
 void addToOutQ(char* val);
 BaseType_t addToOutQFromISR(char* val);
 
+void addToPrioirtyTxQ(char* val);
+BaseType_t addToPrioirtyTxQFromISR(char* val);
 
 #ifdef	__cplusplus
 }
