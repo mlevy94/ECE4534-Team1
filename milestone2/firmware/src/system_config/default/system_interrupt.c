@@ -64,7 +64,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <sys/attribs.h>
 #include "app.h"
 #include "system_definitions.h"
-#include "uart_tx_charQ.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -75,57 +74,24 @@ void IntHandlerDrvAdc(void)
 {
     /* Clear ADC Interrupt Flag */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
-}
-
-void rxIntteruptHandler() {
-    
-    char mydata;
-    
-    if(PLIB_USART_ReceiverDataIsAvailable(USART_ID_1)){
-
-        mydata = PLIB_USART_ReceiverByteReceive(USART_ID_1);
-        
+    int i;
+    int adcVal;
+    for(i=0;i<16;i++){
+        adcVal = adcVal + PLIB_ADC_ResultGetByIndex(ADC_ID_1, i);// * temp;
     }
-    
-    addToUsartRxQFromISR(&mydata);
-    
-}
-
-void txIntteruptHandler() {
-    
-    char data;
-    
-    getFromTXCharQ(&data);
-    
-    if(!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)){
-
-    PLIB_USART_TransmitterByteSend(USART_ID_1, data);
-    }
-    
+    adcVal = adcVal / ADC_16SAMPLES_PER_INTERRUPT;
+    //adcVal = adcVal / 2;
+    adcFromISR(10);
+    //PLIB_ADC_SampleAutoStartEnable(ADC_ID_1);
 }
 
 
 
 void IntHandlerDrvUsartInstance0(void)
 {
-    
-    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_RECEIVE)){
-        rxIntteruptHandler();
-    }
-    
-    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT)){
-        txIntteruptHandler();
-    }
-    
-    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_ERROR)){
-        //not sure what we are doing yet
-    }
-    
-    
-    /* Clear pending interrupt */
-    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
-    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE);
-    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_ERROR);
+    DRV_USART_TasksTransmit(sysObj.drvUsart0);
+    DRV_USART_TasksReceive(sysObj.drvUsart0);
+    DRV_USART_TasksError(sysObj.drvUsart0);
 
 }
  
