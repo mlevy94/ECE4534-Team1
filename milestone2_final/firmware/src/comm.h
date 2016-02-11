@@ -29,7 +29,7 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 // Message and buffer sizes
 ///////////////////////////////////////////////////////////////////////////////
-#define MAX_MSG_SIZE 120
+#define MAX_MSG_SIZE 128
 #define OUT_BUF_SIZE 16
 #define IN_BUF_SIZE 16
 #define INTERNAL_MSG_SIZE 32
@@ -47,7 +47,7 @@ typedef struct{
     MSG_FIELD MSG_TYPE:8;
     MSG_FIELD PAYLOAD_SIZE:8;
     MSG_FIELD PAYLOAD:32;
-    MSG_FIELD CHKSUM:8;
+    MSG_FIELD CHKSUM:16;
     MSG_FIELD ACK_FIELD:8;
     
 } TEAM1_MSG;

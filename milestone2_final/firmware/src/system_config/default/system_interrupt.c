@@ -88,11 +88,23 @@ void initializeTXBufferQ() {
 }
 
 BaseType_t putInTXBufferQ(char* msg) {
+    // Turn TX Interrupt on
+    PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
     return xQueueSend(txbufferQ, msg, portMAX_DELAY);
+}
+
+BaseType_t priorityPutInTXBufferQ(char* msg) {
+    // Turn TX INterrupt on
+    PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
+    return xQueueSendToFront(txbufferQ, msg, portMAX_DELAY);
 }
     
 BaseType_t putInTXBufferQFromISR(char* msg) {
     return xQueueSendFromISR(txbufferQ, msg, 0);
+}
+
+BaseType_t priorityPutInTXBufferQFromISR(char* msg) {
+    return xQueueSendToFrontFromISR(txbufferQ, msg, 0);
 }
 
 char txBuffer[MAX_MSG_SIZE] = { '\0' };
@@ -114,6 +126,8 @@ void txInterruptHandler() {
             // grab new message from bufferQ
             if (!xQueueReceiveFromISR(txbufferQ, txBuffer, 0)) {
                 // no message in Q
+                // Turn TX interrupt off
+                PLIB_INT_SourceDisable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
                 break;
             }
             // message found. reset index to 0

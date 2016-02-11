@@ -160,20 +160,10 @@ void USART_TX_Tasks ( void )
         if(xQueueReceive(usart_txData.usart_txQ, &internal_msg, portMAX_DELAY)) {
             
             // char source, char message_counter, char type, char payloadSize, char payload
-            buildMessageCharArray( outCharArray, MY_ROLE, usart_txData.message_counter, internal_msg.INTERNAL_TYPE, PAYLOAD_4BYTE, internal_msg.INTERNAL_MESSAGE );
+            buildMessageCharArray( outCharArray, MY_ROLE, usart_txData.message_counter, internal_msg.INTERNAL_TYPE, PAYLOAD_4BYTE, internal_msg.INTERNAL_MESSAGE );      
             
+            putInTXBufferQ(outCharArray);
             
-            
-            
-            
-            for (i = 0; outCharArray[i] != '\0'; i++) {
-                
-                // Send to Interrupt's buffQ
-                   
-                
-            }
-            // tail stuff goes here
-            outChar = '\0';
             
         }
     }
@@ -231,7 +221,6 @@ void buildMessageCharArray(char * outCharArray, char source, char msg_counter, c
     
 }
  
-
 /*******************************************************************************
  End of File
  */
