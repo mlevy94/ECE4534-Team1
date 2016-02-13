@@ -24,18 +24,22 @@ void debugFailOnVal(char value, char expected);
 void debugFailOnNotVal(char value, char expected);
 
 
-#define USART0_IH_TX_START      0x01;
-#define USART0_IH_TX_END        0x02;
-#define USART0_IH_RX_START      0x03;
-#define USART0_IH_RX_END        0x04;
-#define USART0_IH_MASTER_START  0x05;
-#define USART0_IH_MASTER_END    0x06;
-#define USART1_IH_TX_START      0x07;
-#define USART1_IH_TX_END        0x08;
-#define USART1_IH_RX_START      0x09;
-#define USART1_IH_RX_END        0x0A;
-#define USART1_IH_MASTER_START  0x0B;
-#define USART1_IH_MASTER_END    0x0C;
+#define USART0_IH_TX_START      0x01
+#define USART0_IH_TX_END        0x02
+#define USART0_IH_RX_START      0x03
+#define USART0_IH_RX_END        0x04
+#define USART0_IH_MASTER_START  0x05
+#define USART0_IH_MASTER_END    0x06
+#define USART1_IH_TX_START      0x07
+#define USART1_IH_TX_END        0x08
+#define USART1_IH_RX_START      0x09
+#define USART1_IH_RX_END        0x0A
+#define USART1_IH_MASTER_START  0x0B
+#define USART1_IH_MASTER_END    0x0C
+#define ENTER_APP_INIT          0x0D
+#define EXIT_APP_INIT           0x0E
+#define ENTER_APP_TASKS         0x0F
+#define EXIT_APP_TASKS          0x10
 
 
 

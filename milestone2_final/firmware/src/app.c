@@ -113,7 +113,14 @@ APP_DATA appData;
 
 void APP_Initialize ( void )
 {
+#ifdef DEBUG_ON
+    setDebugVal(ENTER_APP_INIT);
+#endif
     appData.msgInQ = xQueueCreate(16, MAX_MSG_SIZE);
+    
+#ifdef DEBUG_ON
+    setDebugVal(EXIT_APP_INIT);
+#endif
     
 }
 
@@ -128,6 +135,11 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
+    
+#ifdef DEBUG_ON
+    setDebugVal(ENTER_APP_TASKS);
+#endif
+    
     char inMsg[MAX_MSG_SIZE];
     int i = 0;
     while(1) {
@@ -137,6 +149,10 @@ void APP_Tasks ( void )
             }
         }
     }
+    
+#ifdef DEBUG_ON
+    setDebugVal(EXIT_APP_TASKS);
+#endif
 }
 
 void addToInMsgQ(char* val){
@@ -145,6 +161,8 @@ void addToInMsgQ(char* val){
 BaseType_t addToInMsgQFromISR(char* val){
     return xQueueSendFromISR(appData.msgInQ, val, 0);
 }
+
+
  
 
 /*******************************************************************************

@@ -115,7 +115,7 @@ int rxBufferIdx = 0;
 void txInterruptHandler() {
     
 #ifdef DEBUG_ON
-    setDebugVal('C');
+    setDebugVal(USART0_IH_TX_START);
 #endif
    
     
@@ -141,15 +141,17 @@ void txInterruptHandler() {
     }
     
 #ifdef DEBUG_ON
-    setDebugVal('D');
+    setDebugVal(USART0_IH_TX_END );
 #endif
     
 }
 
+
+
 void rxInterruptHandler() {
     
  #ifdef DEBUG_ON
-    setDebugVal('E');
+    setDebugVal(USART0_IH_RX_START);
 #endif
     
     // while there are characters to read
@@ -159,11 +161,12 @@ void rxInterruptHandler() {
         // if its the end of the message
         if (rxBuffer[rxBufferIdx] == '\0') {
             // copy message to a temp val
-            char tempBuffer[rxBufferIdx + 1];
+            char tempBuffer[MAX_MSG_SIZE];
             int i;
-            for (i = 0; rxBuffer[rxBufferIdx]; i++) {
+            for (i = 0; i < MAX_MSG_SIZE ; i++) {
                 tempBuffer[i] = rxBuffer[i];
             }
+            
             // add message to Q
             addToInMsgQFromISR(tempBuffer);
             rxBufferIdx = 0;
@@ -175,7 +178,7 @@ void rxInterruptHandler() {
     }
     
 #ifdef DEBUG_ON
-    setDebugVal('F');
+    setDebugVal(USART0_IH_RX_END);
 #endif
     
 }
@@ -184,7 +187,7 @@ void rxInterruptHandler() {
 void IntHandlerDrvUsartInstance0(void)
 {
 #ifdef DEBUG_ON
-    setDebugVal('A');
+    setDebugVal(USART0_IH_MASTER_START);
 #endif
     
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT)){
@@ -205,7 +208,7 @@ void IntHandlerDrvUsartInstance0(void)
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_ERROR);
     
 #ifdef DEBUG_ON
-    setDebugVal('B');
+    setDebugVal(USART0_IH_MASTER_END);
 #endif
 
 }
