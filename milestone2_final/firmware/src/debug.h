@@ -18,6 +18,8 @@ extern "C" {
 
 void setDebugBool(bool val); // Output to pin 29 on ChipKit Max32
 void setDebugVal(char value); // Output to pins 30-37 on ChipKit Max32
+// Output to pins 38-39 on ChipKit Max32 and the same pins as setDebugVal
+void TenBitsetDebugVal(int value); 
 inline void debugFailOn0(char value);
 inline void debugFailOnNot0(char value);
 void debugFailOnVal(char value, char expected);

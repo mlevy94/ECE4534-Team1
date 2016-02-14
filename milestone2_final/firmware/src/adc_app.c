@@ -19,7 +19,7 @@
     the modules in the system or make any assumptions about when those functions
     are called.  That is the responsibility of the configuration-specific system
     files.
- *******************************************************************************/
+*******************************************************************************/
 
 // DOM-IGNORE-BEGIN
 /*******************************************************************************
@@ -43,7 +43,7 @@ INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR
 CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
 SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
- *******************************************************************************/
+*******************************************************************************/
 // DOM-IGNORE-END
 
 
@@ -85,25 +85,18 @@ ADC_APP_DATA adc_appData;
 // *****************************************************************************
 // *****************************************************************************
 
-/* TODO:  Add any necessary callback funtions.
+/* TODO:  Add any necessary callback functions.
 */
+
+BaseType_t adcFromISR(int *adcVal){
+    return xQueueSendFromISR(adc_appData.msgToAdcQ, adcVal, 0);
+}
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Local Functions
 // *****************************************************************************
 // *****************************************************************************
-
-uint16_t read_distance()
-{
-   uint16_t ADCOUT;
-    uint16_t CONVERSION_FACTOR;
-    CONVERSION_FACTOR = 256;
-    while(!PLIB_ADC_ConversionHasCompleted(ADC_ID_1));
-    ADCOUT = PLIB_ADC_ResultGetByIndex(ADC_ID_1, 0) / CONVERSION_FACTOR;
-    
-    return ADCOUT;
-}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -121,7 +114,8 @@ uint16_t read_distance()
 
 void ADC_APP_Initialize ( void )
 {
-    
+    // Initializing the queue for the ADC values
+    adc_appData.msgToAdcQ = xQueueCreate(16, 10); 
 }
 
 
@@ -135,10 +129,16 @@ void ADC_APP_Initialize ( void )
 
 void ADC_APP_Tasks ( void )
 {
-    char ADCValue;
-    while (1) {
-        ADCValue = read_distance();
-        setDebugVal(ADCValue);
+    /*
+     * This portion of code displays the ADC values from the queue on the logic 
+     * analyzer. This is value is ten bits
+     */
+    int curVal;
+    DRV_ADC_Open();
+    while(1){
+        if(xQueueReceive(adc_appData.msgToAdcQ, &curVal, portMAX_DELAY)){
+            TenBitsetDebugVal(curVal);
+        } 
     }
 }
  

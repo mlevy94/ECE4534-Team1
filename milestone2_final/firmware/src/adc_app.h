@@ -40,7 +40,7 @@ INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR
 CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
 SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
- *******************************************************************************/
+*******************************************************************************/
 //DOM-IGNORE-END
 
 #ifndef _ADC_APP_H
@@ -58,9 +58,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
-
 #include "debug.h"
+#include "app_public.h"
 #include "peripheral/adc/plib_adc.h"
+#include <queue.h>
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -93,8 +94,9 @@ extern "C" {
 
 typedef struct
 {
-    
-
+    /* TODO: Define any additional data used by the application. */
+    QueueHandle_t msgToAdcQ;
+    char* AdcData;
 } ADC_APP_DATA;
 
 

@@ -84,10 +84,10 @@ void DRV_ADC_Initialize(void)
     /* Channel Selections */
     /* MUX A Negative Input Select */
     PLIB_ADC_MuxChannel0InputNegativeSelect(DRV_ADC_ID_1, ADC_MUX_A, ADC_INPUT_NEGATIVE_VREF_MINUS);
- 
 
     /* MUX A Positive Input Select */
     PLIB_ADC_MuxChannel0InputPositiveSelect(DRV_ADC_ID_1, ADC_MUX_A, ADC_INPUT_POSITIVE_AN0);
+ 
  
     /* Initialize ADC Interrupt */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);

@@ -14,6 +14,8 @@ extern "C" {
 
     void addToInMsgQ(char* val);
     BaseType_t addToInMsgQFromISR(char* val);
+    // Passes the values from the ADC to the ADC APP
+    BaseType_t adcFromISR(int *adcVal);
     
 #ifdef	__cplusplus
 }

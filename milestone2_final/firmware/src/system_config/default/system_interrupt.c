@@ -62,6 +62,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include <xc.h>
 #include <sys/attribs.h>
+#include "app.h"
+#include "usart_tx.h"
+#include "usart_rx.h"
+#include "adc_app.h"
 #include "system_definitions.h"
 
 #include "txbuffer_public.h"
@@ -78,6 +82,13 @@ void IntHandlerDrvAdc(void)
 {
     /* Clear ADC Interrupt Flag */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
+    PLIB_ADC_SampleAutoStartEnable(ADC_ID_1);
+    setDebugBool(pdTRUE);
+    int adcVal;
+    adcVal = PLIB_ADC_ResultGetByIndex(ADC_ID_1, 0);
+    //adcVal = adcVal / 2; // Conversion to cm
+    adcFromISR(&adcVal);
+    setDebugBool(pdFALSE);
 }
 
 // UART
