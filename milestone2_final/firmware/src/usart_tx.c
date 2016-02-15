@@ -172,19 +172,15 @@ void addToOutQ(char* val){
 }
 
 void addToPrioirtyTxQ(char* val){
-    
     xQueueSend(usart_txData.usart_prioirtyTxQ, val, portMAX_DELAY);
-    
 }
 
 BaseType_t addToPrioirtyTxQFromISR(char* val){
-    
-    return xQueueSend(usart_txData.usart_prioirtyTxQ, val, portMAX_DELAY);
-    
+    return xQueueSendFromISR(usart_txData.usart_prioirtyTxQ, val, 0);
 }
 
 BaseType_t addToOutQFromISR(char* val) {
-    return xQueueSendFromISR(usart_txData.usart_txQ, val, portMAX_DELAY);
+    return xQueueSendFromISR(usart_txData.usart_txQ, val, 0);
 }
 
 void buildMessageCharArray(char * outCharArray, char source, char msg_counter, char type, char payloadSize, char * payload){
