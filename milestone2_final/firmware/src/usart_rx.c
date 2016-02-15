@@ -145,7 +145,7 @@ void USART_RX_Tasks ( void )
 }
  
 BaseType_t addToUsartRxQFromISR(char* val){
-    xQueueSendFromISR(usart_rxData.usart_rxQ, val, 0);
+    return xQueueSendFromISR(usart_rxData.usart_rxQ, val, 0);
 }
  
 

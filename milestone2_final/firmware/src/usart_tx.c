@@ -19,7 +19,7 @@
     the modules in the system or make any assumptions about when those functions
     are called.  That is the responsibility of the configuration-specific system
     files.
- *******************************************************************************/
+*******************************************************************************/
 
 // DOM-IGNORE-BEGIN
 /*******************************************************************************
@@ -43,7 +43,7 @@ INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE OR
 CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
 SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
- *******************************************************************************/
+*******************************************************************************/
 // DOM-IGNORE-END
 
 
@@ -115,9 +115,8 @@ USART_TX_DATA usart_txData;
 void USART_TX_Initialize ( void )
 {
     usart_txData.usart_txQ = xQueueCreate(OUT_BUF_SIZE, MAX_MSG_SIZE);
-    
-    usart_txData.usart_prioirtyTxQ = xQueueCreate(TX_PRIORITY_Q_SIZE, MAX_MSG_SIZE);
-    
+    usart_txData.usart_prioirtyTxQ = xQueueCreate(TX_PRIORITY_Q_SIZE,
+                                                  MAX_MSG_SIZE);
     usart_txData.message_counter = 0;
     
 }
@@ -157,14 +156,12 @@ void USART_TX_Tasks ( void )
        //}
         
         // Check outQ for message
-        if(xQueueReceive(usart_txData.usart_txQ, &internal_msg, portMAX_DELAY)) {
-            
-            // char source, char message_counter, char type, char payloadSize, char payload
-            buildMessageCharArray( outCharArray, MY_ROLE, usart_txData.message_counter, internal_msg.INTERNAL_TYPE, PAYLOAD_4BYTE, internal_msg.INTERNAL_MESSAGE );      
-            
+        if(xQueueReceive(usart_txData.usart_txQ, &internal_msg, portMAX_DELAY)){
+ // char source, char message_counter, char type, char payloadSize, char payload
+            buildMessageCharArray( outCharArray, MY_ROLE, 
+                    usart_txData.message_counter, internal_msg.INTERNAL_TYPE, 
+                    PAYLOAD_4BYTE, internal_msg.INTERNAL_MESSAGE );      
             putInTXBufferQ(outCharArray);
-            
-            
         }
     }
 }
@@ -182,7 +179,7 @@ void addToPrioirtyTxQ(char* val){
 
 BaseType_t addToPrioirtyTxQFromISR(char* val){
     
-    xQueueSend(usart_txData.usart_prioirtyTxQ, val, portMAX_DELAY);
+    return xQueueSend(usart_txData.usart_prioirtyTxQ, val, portMAX_DELAY);
     
 }
 
