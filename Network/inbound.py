@@ -1,3 +1,4 @@
+from configs import STARTBYTE, ENDBYTE
 import threading
 
 class InboundWorker:
@@ -18,13 +19,15 @@ class InboundWorker:
       inMsg = b''
       while 1:
         inMsg += self.client.recv(4096)
-        nullLocation = inMsg.find(b'\0')
-        while nullLocation != -1:
-          msg = inMsg[:nullLocation]
-          inMsg = inMsg[nullLocation + 1:]
+        start = inMsg.find(STARTBYTE)
+        end = inMsg.find(ENDBYTE)
+
+        while start != -1 and end != -1 and start < end:
+          msg = inMsg[:end]
+          inMsg = inMsg[end + 1:]
           print("Recv {}: {}".format(self.address, msg))
           self.outQueue.put(msg)
-          nullLocation = inMsg.find(b'\0')
+          end = inMsg.find(b'\0')
     except:
       if self.clientList is not None:
         self.clientList.remove(self)

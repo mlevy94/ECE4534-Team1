@@ -3,7 +3,6 @@ from configs import getIPAddr, getPort
 from outbound import OutboundWorker
 from inbound import InboundWorker
 from threading import Thread
-from time import sleep
 
 class Connector:
 
@@ -19,7 +18,6 @@ class Connector:
     listenThread = Thread(target=self.listener, args=[listener], daemon=True)
     listenThread.start()
     cmdString = ""
-    sleep(0.5)
     try:
       while cmdString.lower() != "shutdown":
         cmdString = input()

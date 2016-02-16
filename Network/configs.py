@@ -7,3 +7,6 @@ def getIPAddr():
 
 def getPort():
   return 56677
+
+STARTBYTE = b'\SOH'
+ENDBYTE = b'\ACK'

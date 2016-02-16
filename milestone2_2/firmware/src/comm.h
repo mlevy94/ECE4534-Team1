@@ -1,0 +1,101 @@
+/* 
+ * File:   comm.h
+ * Author: MLTop
+ *
+ * Created on February 9, 2016, 4:48 AM
+ */
+
+#ifndef COMM_H
+#define	COMM_H
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+///////////////////////////////////////////////////////////////////////////////
+// Roles / Msg Sources
+///////////////////////////////////////////////////////////////////////////////
+#define CLIENT              0x01
+#define LEAD_ROVER          0x02
+#define FOLLOWER            0x04
+#define SENSORS             0x08
+#define COORDINATOR         0x10
+#define MONITOR             0x11
+
+///////////////////////////////////////////////////////////////////////////////    
+// Define This Device's Role
+///////////////////////////////////////////////////////////////////////////////
+#define MY_ROLE CLIENT
+    
+///////////////////////////////////////////////////////////////////////////////
+// Message and buffer sizes
+///////////////////////////////////////////////////////////////////////////////
+#define MAX_MSG_SIZE 128     // bits
+#define TX_BUF_SIZE 64       // bytes
+#define RX_BUF_SIZE 64       // bytes
+#define OUT_BUF_SIZE 16      // messages
+#define IN_BUF_SIZE 16       // messages
+#define INTERNAL_MSG_SIZE 12 // bytes
+
+///////////////////////////////////////////////////////////////////////////////
+// Message Structure for network communication
+// Str Byte | Msg Src | Msg Num | Msg Type | Payload Size | Payload | Checksum | End Byte
+///////////////////////////////////////////////////////////////////////////////
+typedef unsigned MSG_FIELD;  
+typedef struct{
+
+    MSG_FIELD MSG_START:8;
+    MSG_FIELD MSG_SRC:8;
+    MSG_FIELD MSG_NUM:8;
+    MSG_FIELD MSG_TYPE:8;
+    MSG_FIELD PAYLOAD_SIZE:8;
+    MSG_FIELD PAYLOAD:32;
+    MSG_FIELD CHKSUM:16;
+    MSG_FIELD MSG_END:8;
+    
+} TEAM1_MSG;
+
+///////////////////////////////////////////////////////////////////////////////
+// Special Characters
+///////////////////////////////////////////////////////////////////////////////
+#define START_BYTE 0x00
+#define END_BYTE   0xff 
+
+///////////////////////////////////////////////////////////////////////////////
+// Message Types
+///////////////////////////////////////////////////////////////////////////////
+#define DEBUG_MSG           0x01
+#define CLIENT_ROLE         0x02
+#define INITIALIZE          0x04
+#define READY_TO_START      0x08
+#define LEAD_PO             0x10
+#define FOLLOW_PO           0x11
+#define OBS_INFO            0x12
+#define MOTOR_MOVE          0x14
+#define TOKEN_FOUND         0x18
+
+///////////////////////////////////////////////////////////////////////////////
+// Payload Configs
+///////////////////////////////////////////////////////////////////////////////
+#define PAYLOAD_4BYTE   4
+#define PAYLOAD_3BYTE   3
+#define PAYLOAD_2BYTE   2
+#define PAYLOAD_1BYTE   1
+
+///////////////////////////////////////////////////////////////////////////////
+// Internal message structure for passing between threads
+///////////////////////////////////////////////////////////////////////////////
+typedef struct{
+
+    char type;
+    char msg[INTERNAL_MSG_SIZE];
+    
+}InternalMessage;
+
+InternalMessage makeMessage(char msgType, char* msg);
+
+#ifdef	__cplusplus
+}
+#endif
+
+#endif	/* COMM_H */
+
