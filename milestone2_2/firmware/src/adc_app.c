@@ -5,7 +5,7 @@
     Microchip Technology Inc.
   
   File Name:
-    app.c
+    adc_app.c
 
   Summary:
     This file contains the source code for the MPLAB Harmony application.
@@ -53,7 +53,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include "app.h"
+#include "adc_app.h"
+#include "adc_app_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -76,7 +77,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-APP_DATA appData;
+ADC_APP_DATA adc_appData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -93,9 +94,13 @@ APP_DATA appData;
 // *****************************************************************************
 // *****************************************************************************
 
-/* TODO:  Add any necessary local functions.
-*/
+BaseType_t addToADCQ(int val) {
+    xQueueSend(adc_appData.adcQ, &val, portMAX_DELAY);
+}
 
+BaseType_t addToADCQFromISR(int val) {
+    xQueueSendFromISR(adc_appData.adcQ, &val, 0);
+}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -105,35 +110,47 @@ APP_DATA appData;
 
 /*******************************************************************************
   Function:
-    void APP_Initialize ( void )
+    void ADC_APP_Initialize ( void )
 
   Remarks:
-    See prototype in app.h.
+    See prototype in adc_app.h.
  */
 
-void APP_Initialize ( void )
+void ADC_APP_Initialize ( void )
 {
-
+    adc_appData.adcQ = xQueueCreate(16, 10);
 }
 
 
 /******************************************************************************
   Function:
-    void APP_Tasks ( void )
+    void ADC_APP_Tasks ( void )
 
   Remarks:
-    See prototype in app.h.
+    See prototype in adc_app.h.
  */
 
-void APP_Tasks ( void )
+void ADC_APP_Tasks ( void )
 {
-    char myMsg[] = { "team1\0" };
-    InternalMessage msg = makeMessage(DEBUG_MSG, myMsg);
-    while(1) {
+    /*
+     * This portion of code displays the ADC values from the queue on the logic 
+     * analyzer. This is value is ten bits
+     */
+    unsigned int curVal;
+    DRV_ADC_Open();
+    
+    InternalMessage msg;
+    msg.type = DEBUG_MSG;
+    while(1){
 #ifdef DEBUG_ON
-        setDebugVal(TASK_APP);
+        setDebugVal(TASK_ADC_APP);
 #endif
-        addToUartTXQ(msg);
+        if(xQueueReceive(adc_appData.adcQ, &curVal, portMAX_DELAY)){
+            curVal /= 2;
+            msg.msg[0] = curVal;
+            msg.msg[1] = '\0';
+            addToUartTXQ(msg);
+        } 
     }
 }
  

@@ -187,6 +187,8 @@ void SYS_Initialize ( void* data )
 #endif
     
     /* Initialize Drivers */
+    /* Initialize ADC */
+    DRV_ADC_Initialize();
     DRV_USART0_Initialize();  
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_UART);
@@ -211,6 +213,14 @@ void SYS_Initialize ( void* data )
      UART_TX_APP_Initialize();
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_UART_TX_APP);
+#endif
+    UART_RX_APP_Initialize();
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_UART_RX_APP);
+#endif
+    ADC_APP_Initialize();
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_ADC_APP);
 #endif
 }
 

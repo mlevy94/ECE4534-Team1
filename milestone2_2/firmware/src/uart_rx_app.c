@@ -5,7 +5,7 @@
     Microchip Technology Inc.
   
   File Name:
-    app.c
+    uart_rx_app.c
 
   Summary:
     This file contains the source code for the MPLAB Harmony application.
@@ -53,7 +53,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include "app.h"
+#include "uart_rx_app.h"
+#include "uart_rx_app_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -76,7 +77,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-APP_DATA appData;
+UART_RX_APP_DATA uart_rx_appData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -93,8 +94,13 @@ APP_DATA appData;
 // *****************************************************************************
 // *****************************************************************************
 
-/* TODO:  Add any necessary local functions.
-*/
+BaseType_t addToUartRXQ(char msg) {
+    xQueueSend(uart_rx_appData.rxMessageQ, &msg, portMAX_DELAY);
+}
+
+BaseType_t addToUartRXQFromISR(char msg) {
+    xQueueSendFromISR(uart_rx_appData.rxMessageQ, &msg, 0);
+}
 
 
 // *****************************************************************************
@@ -105,35 +111,38 @@ APP_DATA appData;
 
 /*******************************************************************************
   Function:
-    void APP_Initialize ( void )
+    void UART_RX_APP_Initialize ( void )
 
   Remarks:
-    See prototype in app.h.
+    See prototype in uart_rx_app.h.
  */
 
-void APP_Initialize ( void )
+void UART_RX_APP_Initialize ( void )
 {
-
+    uart_rx_appData.rxMessageQ = xQueueCreate(64, 8);
+    uart_rx_appData.msgCount = 0;
 }
 
 
 /******************************************************************************
   Function:
-    void APP_Tasks ( void )
+    void UART_RX_APP_Tasks ( void )
 
   Remarks:
-    See prototype in app.h.
+    See prototype in uart_rx_app.h.
  */
 
-void APP_Tasks ( void )
+void UART_RX_APP_Tasks ( void )
 {
-    char myMsg[] = { "team1\0" };
-    InternalMessage msg = makeMessage(DEBUG_MSG, myMsg);
+    char inChar;
     while(1) {
 #ifdef DEBUG_ON
-        setDebugVal(TASK_APP);
+        setDebugVal(TASK_UART_RX_APP);
 #endif
-        addToUartTXQ(msg);
+        xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY);
+        // assemble entire message
+        // unpack message
+        // place in correct Q based on message type
     }
 }
  

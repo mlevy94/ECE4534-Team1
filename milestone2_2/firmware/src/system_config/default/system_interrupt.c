@@ -64,18 +64,36 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <sys/attribs.h>
 #include "app.h"
 #include "uart_tx_app.h"
+#include "uart_rx_app.h"
+#include "adc_app.h"
 #include "system_definitions.h"
 
 #include <queue.h>
-#include "txbuffer_public.h"
 #include "comm.h"
 #include "debug.h"
+#include "txbuffer_public.h"
+#include "adc_app_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
+void IntHandlerDrvAdc(void)
+{
+#ifdef DEBUG_ON
+    setDebugVal(INT_ADC0_START);
+#endif
+    //PLIB_ADC_SampleAutoStartEnable(ADC_ID_1);
+    int adcVal;
+    adcVal = PLIB_ADC_ResultGetByIndex(ADC_ID_1, 0);
+    addToADCQFromISR(adcVal);
+    /* Clear ADC Interrupt Flag */
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
+#ifdef DEBUG_ON
+    setDebugVal(INT_ADC0_END);
+#endif
+}
 
 QueueHandle_t txbufferQ;
 void initializeTXBufferQ() {

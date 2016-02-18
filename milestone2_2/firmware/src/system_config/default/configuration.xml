@@ -145,10 +145,6 @@
     </Files>
     <Templates>
       <Template>
-        <Name>uart_tx_app.h</Name>
-        <Path>Header Files/app</Path>
-      </Template>
-      <Template>
         <Name>uart_tx_app.c</Name>
         <Path>Source Files/app</Path>
       </Template>
@@ -158,32 +154,27 @@
         <Checksum>A2DF5CE79555D9A65327EB8038B85FC5</Checksum>
       </Template>
       <Template>
-        <Name>system_init.c</Name>
-        <Path>Source Files/app/system_config/default</Path>
-        <Checksum>E3810354E1EF2247E89DDE09F6692395</Checksum>
-      </Template>
-      <Template>
-        <Name>main.c</Name>
-        <Path>Source Files/app</Path>
-      </Template>
-      <Template>
         <Name>system_interrupt_a.S</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>5C0D911C19B5E425D7F0FB89E579F457</Checksum>
+        <Checksum>2AADE7885E66E00DBB7FE911439FFA49</Checksum>
       </Template>
       <Template>
-        <Name>system_definitions.h</Name>
-        <Path>Header Files/app/system_config/default</Path>
-        <Checksum>8A7BEC0E63D60180EBB779B5EC68975D</Checksum>
+        <Name>adc_app.h</Name>
+        <Path>Header Files/app</Path>
       </Template>
       <Template>
-        <Name>system_exceptions.c</Name>
-        <Path>Source Files/app/system_config/default</Path>
-        <Checksum>C111969CA43D6CEA1E9E33A6164E7AE0</Checksum>
-      </Template>
-      <Template>
-        <Name>app.c</Name>
+        <Name>adc_app.c</Name>
         <Path>Source Files/app</Path>
+      </Template>
+      <Template>
+        <Name>drv_adc_static.h</Name>
+        <Path>Header Files/app/system_config/default/framework/driver/adc</Path>
+        <Checksum>DA228C4429B405DC81984D73AB97988D</Checksum>
+      </Template>
+      <Template>
+        <Name>drv_adc_static.c</Name>
+        <Path>Source Files/app/system_config/default/framework/driver/adc/src</Path>
+        <Checksum>DA0DD9BF26AD02F718444950E5121438</Checksum>
       </Template>
       <Template>
         <Name>drv_usart_static.c</Name>
@@ -191,19 +182,65 @@
         <Checksum>38429A7188481055C632068D50F0407E</Checksum>
       </Template>
       <Template>
+        <Name>FreeRTOSConfig.h</Name>
+        <Path>Header Files/app/system_config/default</Path>
+        <Checksum>90844BA435D93DB00FA00D7EF6AE567B</Checksum>
+      </Template>
+      <Template>
+        <Name>sys_clk_static.h</Name>
+        <Path>Header Files/app/system_config/default/framework/system/clk</Path>
+        <Checksum>999179DADE9ECD59953526F5E9F83ACC</Checksum>
+      </Template>
+      <Template>
+        <Name>system_interrupt.c</Name>
+        <Path>Source Files/app/system_config/default</Path>
+        <Checksum>7C147A111034FE9F5F75AA42E81D2336</Checksum>
+      </Template>
+      <Template>
+        <Name>sys_clk_static.c</Name>
+        <Path>Source Files/app/system_config/default/framework/system/clk/src</Path>
+        <Checksum>1B968DA82B5DD869A6119C3B7628D753</Checksum>
+      </Template>
+      <Template>
+        <Name>uart_tx_app.h</Name>
+        <Path>Header Files/app</Path>
+      </Template>
+      <Template>
+        <Name>system_init.c</Name>
+        <Path>Source Files/app/system_config/default</Path>
+        <Checksum>A0B49DFA757E9CAAC0DDADA3C1679388</Checksum>
+      </Template>
+      <Template>
+        <Name>main.c</Name>
+        <Path>Source Files/app</Path>
+      </Template>
+      <Template>
+        <Name>system_definitions.h</Name>
+        <Path>Header Files/app/system_config/default</Path>
+        <Checksum>3E63707334C69389D0375C8579F7E907</Checksum>
+      </Template>
+      <Template>
+        <Name>system_exceptions.c</Name>
+        <Path>Source Files/app/system_config/default</Path>
+        <Checksum>C111969CA43D6CEA1E9E33A6164E7AE0</Checksum>
+      </Template>
+      <Template>
+        <Name>uart_rx_app.h</Name>
+        <Path>Header Files/app</Path>
+      </Template>
+      <Template>
+        <Name>app.c</Name>
+        <Path>Source Files/app</Path>
+      </Template>
+      <Template>
         <Name>drv_usart_static.h</Name>
         <Path>Header Files/app/system_config/default/framework/driver/usart</Path>
         <Checksum>66C127084540B78CD4F78E2FBCC6D29F</Checksum>
       </Template>
       <Template>
-        <Name>FreeRTOSConfig.h</Name>
-        <Path>Header Files/app/system_config/default</Path>
-        <Checksum>FC2FE36FE7140F99BD59E64FBC4C2768</Checksum>
-      </Template>
-      <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>84FCE708810D53F6F59444176ABB3018</Checksum>
+        <Checksum>4F607956C8CBD419FF6224DFA9A50F7D</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
@@ -215,24 +252,13 @@
         <Path>Header Files/app</Path>
       </Template>
       <Template>
-        <Name>sys_clk_static.h</Name>
-        <Path>Header Files/app/system_config/default/framework/system/clk</Path>
-        <Checksum>999179DADE9ECD59953526F5E9F83ACC</Checksum>
-      </Template>
-      <Template>
-        <Name>system_interrupt.c</Name>
-        <Path>Source Files/app/system_config/default</Path>
-        <Checksum>E6CDB0E66EC36129C92FDDD656147E59</Checksum>
-      </Template>
-      <Template>
         <Name>rtos_hooks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
         <Checksum>FA52743264536E5207D2ADBE57B48D05</Checksum>
       </Template>
       <Template>
-        <Name>sys_clk_static.c</Name>
-        <Path>Source Files/app/system_config/default/framework/system/clk/src</Path>
-        <Checksum>1B968DA82B5DD869A6119C3B7628D753</Checksum>
+        <Name>uart_rx_app.c</Name>
+        <Path>Source Files/app</Path>
       </Template>
     </Templates>
     <CompilerItems>

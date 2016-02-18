@@ -1,27 +1,24 @@
 /*******************************************************************************
-  MPLAB Harmony Application Source File
-  
+  MPLAB Harmony Application Header File
+
   Company:
     Microchip Technology Inc.
-  
+
   File Name:
-    app.c
+    adc_app.h
 
   Summary:
-    This file contains the source code for the MPLAB Harmony application.
+    This header file provides prototypes and definitions for the application.
 
   Description:
-    This file contains the source code for the MPLAB Harmony application.  It 
-    implements the logic of the application's state machine and it may call 
-    API routines of other MPLAB Harmony modules in the system, such as drivers,
-    system services, and middleware.  However, it does not call any of the
-    system interfaces (such as the "Initialize" and "Tasks" functions) of any of
-    the modules in the system or make any assumptions about when those functions
-    are called.  That is the responsibility of the configuration-specific system
-    files.
- *******************************************************************************/
+    This header file provides function prototypes and data type definitions for
+    the application.  Some of these are required by the system (such as the
+    "APP_Initialize" and "APP_Tasks" prototypes) and some of them are only used
+    internally by the application (such as the "APP_STATES" definition).  Both
+    are defined here for convenience.
+*******************************************************************************/
 
-// DOM-IGNORE-BEGIN
+//DOM-IGNORE-BEGIN
 /*******************************************************************************
 Copyright (c) 2013-2014 released Microchip Technology Inc.  All rights reserved.
 
@@ -44,22 +41,43 @@ CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT OF
 SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
  *******************************************************************************/
-// DOM-IGNORE-END
+//DOM-IGNORE-END
 
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Included Files 
-// *****************************************************************************
-// *****************************************************************************
-
-#include "app.h"
+#ifndef _ADC_APP_H
+#define _ADC_APP_H
 
 // *****************************************************************************
 // *****************************************************************************
-// Section: Global Data Definitions
+// Section: Included Files
 // *****************************************************************************
 // *****************************************************************************
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include "system_config.h"
+#include "system_definitions.h"
+
+#include <queue.h>
+#include "peripheral/adc/plib_adc.h"
+#include "debug.h"
+#include "uart_tx_app_public.h"
+
+// DOM-IGNORE-BEGIN
+#ifdef __cplusplus  // Provide C++ Compatibility
+
+extern "C" {
+
+#endif
+// DOM-IGNORE-END 
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Type Definitions
+// *****************************************************************************
+// *****************************************************************************
+
 
 // *****************************************************************************
 /* Application Data
@@ -71,32 +89,25 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     This structure holds the application's data.
 
   Remarks:
-    This structure should be initialized by the APP_Initialize function.
-    
     Application strings and buffers are be defined outside this structure.
+ */
+
+typedef struct
+{
+    QueueHandle_t adcQ;
+    char* AdcData;
+} ADC_APP_DATA;
+
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Application Callback Routines
+// *****************************************************************************
+// *****************************************************************************
+/* These routines are called by drivers when certain events occur.
 */
 
-APP_DATA appData;
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Application Callback Functions
-// *****************************************************************************
-// *****************************************************************************
-
-/* TODO:  Add any necessary callback funtions.
-*/
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Application Local Functions
-// *****************************************************************************
-// *****************************************************************************
-
-/* TODO:  Add any necessary local functions.
-*/
-
-
+	
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Initialization and State Machine Functions
@@ -105,39 +116,80 @@ APP_DATA appData;
 
 /*******************************************************************************
   Function:
-    void APP_Initialize ( void )
+    void ADC_APP_Initialize ( void )
+
+  Summary:
+     MPLAB Harmony application initialization routine.
+
+  Description:
+    This function initializes the Harmony application.  It places the 
+    application in its initial state and prepares it to run so that its 
+    APP_Tasks function can be called.
+
+  Precondition:
+    All other system initialization routines should be called before calling
+    this routine (in "SYS_Initialize").
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    ADC_APP_Initialize();
+    </code>
 
   Remarks:
-    See prototype in app.h.
- */
+    This routine must be called from the SYS_Initialize function.
+*/
 
-void APP_Initialize ( void )
-{
-
-}
+void ADC_APP_Initialize ( void );
 
 
-/******************************************************************************
+/*******************************************************************************
   Function:
-    void APP_Tasks ( void )
+    void ADC_APP_Tasks ( void )
+
+  Summary:
+    MPLAB Harmony Demo application tasks function
+
+  Description:
+    This routine is the Harmony Demo application's tasks function.  It
+    defines the application's state machine and core logic.
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    ADC_APP_Tasks();
+    </code>
 
   Remarks:
-    See prototype in app.h.
+    This routine must be called from SYS_Tasks() routine.
  */
 
-void APP_Tasks ( void )
-{
-    char myMsg[] = { "team1\0" };
-    InternalMessage msg = makeMessage(DEBUG_MSG, myMsg);
-    while(1) {
-#ifdef DEBUG_ON
-        setDebugVal(TASK_APP);
-#endif
-        addToUartTXQ(msg);
-    }
+void ADC_APP_Tasks( void );
+
+
+#endif /* _ADC_APP_H */
+
+//DOM-IGNORE-BEGIN
+#ifdef __cplusplus
 }
- 
+#endif
+//DOM-IGNORE-END
 
 /*******************************************************************************
  End of File
  */
+

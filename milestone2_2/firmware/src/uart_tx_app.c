@@ -112,7 +112,7 @@ BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg) {
 
 void packAndSend(InternalMessage msg) {
     // update message count
-    if (uart_tx_appData.msgCount < 254) {
+    if (uart_tx_appData.msgCount < 253) {
         uart_tx_appData.msgCount++;
     }
     else {

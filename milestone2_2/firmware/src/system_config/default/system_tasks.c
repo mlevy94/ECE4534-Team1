@@ -56,6 +56,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_definitions.h"
 #include "app.h"
 #include "uart_tx_app.h"
+#include "uart_rx_app.h"
+#include "adc_app.h"
 
 
 // *****************************************************************************
@@ -67,6 +69,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 static void _SYS_Tasks ( void );
 static void _APP_Tasks(void);
 static void _UART_TX_APP_Tasks(void);
+static void _UART_RX_APP_Tasks(void);
+static void _ADC_APP_Tasks(void);
 
 
 // *****************************************************************************
@@ -91,14 +95,24 @@ void SYS_Tasks ( void )
                 1024, NULL, 1, NULL);
 
     /* Create OS Thread for APP Tasks. */
-    xTaskCreate((TaskFunction_t) _APP_Tasks,
-                "APP Tasks",
-                1024, NULL, 2, NULL);
+//    xTaskCreate((TaskFunction_t) _APP_Tasks,
+//                "APP Tasks",
+//                1024, NULL, 2, NULL);
 
     /* Create OS Thread for UART_TX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_TX_APP_Tasks,
                 "UART_TX_APP Tasks",
+                1024, NULL, 2, NULL);
+
+    /* Create OS Thread for UART_RX_APP Tasks. */
+    xTaskCreate((TaskFunction_t) _UART_RX_APP_Tasks,
+                "UART_RX_APP Tasks",
                 1024, NULL, 1, NULL);
+
+    /* Create OS Thread for ADC_APP Tasks. */
+    xTaskCreate((TaskFunction_t) _ADC_APP_Tasks,
+                "ADC_APP Tasks",
+                1024, NULL, 2, NULL);
 
     /**************
      * Start RTOS * 
@@ -161,6 +175,40 @@ static void _UART_TX_APP_Tasks(void)
     while(1)
     {
         UART_TX_APP_Tasks();
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+    void _UART_RX_APP_Tasks ( void )
+
+  Summary:
+    Maintains state machine of UART_RX_APP.
+*/
+
+static void _UART_RX_APP_Tasks(void)
+{
+    while(1)
+    {
+        UART_RX_APP_Tasks();
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+    void _ADC_APP_Tasks ( void )
+
+  Summary:
+    Maintains state machine of ADC_APP.
+*/
+
+static void _ADC_APP_Tasks(void)
+{
+    while(1)
+    {
+        ADC_APP_Tasks();
     }
 }
 

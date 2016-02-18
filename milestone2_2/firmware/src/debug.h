@@ -41,8 +41,8 @@ void debugFailOnNotVal(char value, char expected);
 // app init
 #define SYS_INIT_APP            0x08
 #define SYS_INIT_UART_TX_APP    0x09
-#define SYS_INIT_APP_RESERVED2  0x0A
-#define SYS_INIT_APP_RESERVED3  0x0B
+#define SYS_INIT_UART_RX_APP    0x0A
+#define SYS_INIT_ADC_APP        0x0B
 #define SYS_INIT_APP_RESERVED4  0x0C
 // interrupts
 #define INT_UART0_START         0x0D
@@ -63,7 +63,7 @@ void debugFailOnNotVal(char value, char expected);
 #define TASK_APP                0x1B
 #define TASK_UART_TX_APP        0x1C
 #define TASK_UART_RX_APP        0x1D
-#define TASK_APP_RESERVED1      0x1E
+#define TASK_ADC_APP            0x1E
 #define TASK_APP_RESERVED2      0x1F
 #define TASK_APP_RESERVED3      0x20
 #define TASK_APP_RESERVED4      0x21
