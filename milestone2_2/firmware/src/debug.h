@@ -8,7 +8,7 @@
 #include "system_config.h"
 #include "system_definitions.h"
 
-#define DEBUG_ON
+//#define DEBUG_ON
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

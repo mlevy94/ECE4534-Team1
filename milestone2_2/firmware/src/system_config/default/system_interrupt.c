@@ -115,11 +115,11 @@ void IntHandlerDrvUsartInstance0(void)
 #ifdef DEBUG_ON
     setDebugVal(INT_UART0_START);
 #endif
+    char sendbyte;
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT)){
 #ifdef DEBUG_ON
         setDebugVal(INT_UART0_TX);
 #endif
-        char sendbyte;
         while(!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)) {
             if(xQueueReceiveFromISR(txbufferQ, &sendbyte, 0)) {
                PLIB_USART_TransmitterByteSend(USART_ID_1, sendbyte);
@@ -136,6 +136,12 @@ void IntHandlerDrvUsartInstance0(void)
 #ifdef DEBUG_ON
         setDebugVal(INT_UART0_RX);
 #endif
+        // while there are characters to read
+        while(PLIB_USART_ReceiverDataIsAvailable(USART_ID_1)){
+            // read a character
+            sendbyte = PLIB_USART_ReceiverByteReceive(USART_ID_1);
+            addToUartRXQFromISR(sendbyte);
+        }
     }
     
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_ERROR)){

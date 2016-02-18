@@ -95,11 +95,11 @@ UART_RX_APP_DATA uart_rx_appData;
 // *****************************************************************************
 
 BaseType_t addToUartRXQ(char msg) {
-    xQueueSend(uart_rx_appData.rxMessageQ, &msg, portMAX_DELAY);
+    return xQueueSend(uart_rx_appData.rxMessageQ, &msg, portMAX_DELAY);
 }
 
 BaseType_t addToUartRXQFromISR(char msg) {
-    xQueueSendFromISR(uart_rx_appData.rxMessageQ, &msg, 0);
+    return xQueueSendFromISR(uart_rx_appData.rxMessageQ, &msg, 0);
 }
 
 
