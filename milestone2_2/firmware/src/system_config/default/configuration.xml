@@ -174,7 +174,7 @@
       <Template>
         <Name>drv_adc_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/driver/adc/src</Path>
-        <Checksum>DA0DD9BF26AD02F718444950E5121438</Checksum>
+        <Checksum>864743696EBA306B4D820560C4A3E135</Checksum>
       </Template>
       <Template>
         <Name>drv_usart_static.c</Name>

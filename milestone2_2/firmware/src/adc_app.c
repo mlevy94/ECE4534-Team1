@@ -138,7 +138,6 @@ void ADC_APP_Tasks ( void )
      */
     unsigned int curVal;
     DRV_ADC_Open();
-    
     InternalMessage msg;
     msg.type = DEBUG_MSG;
     while(1){
@@ -146,11 +145,11 @@ void ADC_APP_Tasks ( void )
         setDebugVal(TASK_ADC_APP);
 #endif
         if(xQueueReceive(adc_appData.adcQ, &curVal, portMAX_DELAY)){
-            curVal /= 2;
             msg.msg[0] = curVal >> 8 & 0xff;
             msg.msg[1] = curVal & 0xff;
             msg.msg[2] = '\0';
-            addToUartTXQ(msg);
+            setDebugVal(curVal);
+            //addToUartTXQ(msg);
         } 
     }
 }

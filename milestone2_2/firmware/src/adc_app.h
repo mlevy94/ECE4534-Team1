@@ -60,6 +60,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_definitions.h"
 
 #include <queue.h>
+#include "comm.h"
 #include "peripheral/adc/plib_adc.h"
 #include "debug.h"
 #include "uart_tx_app_public.h"

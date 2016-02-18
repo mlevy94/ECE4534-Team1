@@ -84,8 +84,12 @@ void IntHandlerDrvAdc(void)
 #ifdef DEBUG_ON
     setDebugVal(INT_ADC0_START);
 #endif
-    int adcVal;
-    adcVal = PLIB_ADC_ResultGetByIndex(ADC_ID_1, 0);
+    int adcVal = 0;
+    int i;
+    for (i =0; i < 16; i++ ) {
+        adcVal += PLIB_ADC_ResultGetByIndex(ADC_ID_1, i);
+    }
+    adcVal /= 16;
     addToADCQFromISR(adcVal);
     /* Clear ADC Interrupt Flag */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_ADC_1);
