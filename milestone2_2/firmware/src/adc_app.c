@@ -147,8 +147,9 @@ void ADC_APP_Tasks ( void )
 #endif
         if(xQueueReceive(adc_appData.adcQ, &curVal, portMAX_DELAY)){
             curVal /= 2;
-            msg.msg[0] = curVal;
-            msg.msg[1] = '\0';
+            msg.msg[0] = curVal >> 8 & 0xff;
+            msg.msg[1] = curVal & 0xff;
+            msg.msg[2] = '\0';
             addToUartTXQ(msg);
         } 
     }

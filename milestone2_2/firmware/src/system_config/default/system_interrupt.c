@@ -84,7 +84,6 @@ void IntHandlerDrvAdc(void)
 #ifdef DEBUG_ON
     setDebugVal(INT_ADC0_START);
 #endif
-    //PLIB_ADC_SampleAutoStartEnable(ADC_ID_1);
     int adcVal;
     adcVal = PLIB_ADC_ResultGetByIndex(ADC_ID_1, 0);
     addToADCQFromISR(adcVal);
