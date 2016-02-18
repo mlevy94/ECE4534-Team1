@@ -95,19 +95,19 @@ UART_TX_APP_DATA uart_tx_appData;
 // *****************************************************************************
 
 BaseType_t addToUartTXQ(InternalMessage msg) {
-    xQueueSend(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY);
+    return xQueueSend(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY);
 }
 
 BaseType_t addToUartTXQFromISR(InternalMessage msg) {
-    xQueueSendFromISR(uart_tx_appData.txMessageQ, &msg, 0);
+    return xQueueSendFromISR(uart_tx_appData.txMessageQ, &msg, 0);
 }
 
 BaseType_t priorityAddToUartTXQ(InternalMessage msg) {
-    xQueueSendToFront(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY);
+    return xQueueSendToFront(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY);
 }
 
 BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg) {
-    xQueueSendToFrontFromISR(uart_tx_appData.txMessageQ, &msg, 0);
+    return xQueueSendToFrontFromISR(uart_tx_appData.txMessageQ, &msg, 0);
 }
 
 void packAndSend(InternalMessage msg) {

@@ -95,11 +95,11 @@ ADC_APP_DATA adc_appData;
 // *****************************************************************************
 
 BaseType_t addToADCQ(int val) {
-    xQueueSend(adc_appData.adcQ, &val, portMAX_DELAY);
+    return xQueueSend(adc_appData.adcQ, &val, portMAX_DELAY);
 }
 
 BaseType_t addToADCQFromISR(int val) {
-    xQueueSendFromISR(adc_appData.adcQ, &val, 0);
+    return xQueueSendFromISR(adc_appData.adcQ, &val, 0);
 }
 
 // *****************************************************************************
