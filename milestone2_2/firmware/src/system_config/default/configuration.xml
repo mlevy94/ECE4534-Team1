@@ -184,7 +184,7 @@
       <Template>
         <Name>FreeRTOSConfig.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>90844BA435D93DB00FA00D7EF6AE567B</Checksum>
+        <Checksum>0DCA445D1B5D83BC3F358CA353866FB5</Checksum>
       </Template>
       <Template>
         <Name>sys_clk_static.h</Name>
@@ -240,7 +240,7 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>4F607956C8CBD419FF6224DFA9A50F7D</Checksum>
+        <Checksum>09431A380F9415115790B2535631273F</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
