@@ -223,6 +223,9 @@ void UART_RX_APP_Tasks ( void )
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
             inmsg[idx] = inChar;
             setDebugVal(inmsg[idx]);
+            if (idx > 0) {
+                setDebugVal(inmsg[idx - 1]);
+            }
             if ((inmsg[idx] & 0xff) == END_BYTE) {
                 processedMsg = processMessage(inmsg, idx + 1);
                 // check for error message
