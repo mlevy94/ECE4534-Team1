@@ -136,9 +136,11 @@ void packAndSend(InternalMessage msg) {
     for (i = 0; i < msgSize; i++) {
         addToTXBufferQ(msg.msg[i]);
     }
-    addToTXBufferQ(checksum >> 8 & 0xff);
-    addToTXBufferQ(checksum & 0xff);
+    addToTXBufferQ(checksum >> 7 & 0x7f);
+    addToTXBufferQ(checksum & 0x7f);
     addToTXBufferQ(END_BYTE);
+    // cache sent message
+    //addToUartSentQ(uart_tx_appData.msgCount, msg);
 }
 
 

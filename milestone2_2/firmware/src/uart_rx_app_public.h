@@ -14,6 +14,8 @@ extern "C" {
 
 BaseType_t addToUartRXQ(char msg);
 BaseType_t addToUartRXQFromISR(char msg);
+BaseType_t addToUartSentQ(char num, InternalMessage msg);
+BaseType_t addToUartSentQFromISR(char num, InternalMessage msg);
 
 
 #ifdef	__cplusplus

@@ -148,7 +148,7 @@ void ADC_APP_Tasks ( void )
             msg.msg[0] = curVal >> 8 & 0xff;
             msg.msg[1] = curVal & 0xff;
             msg.msg[2] = '\0';
-            setDebugVal(curVal);
+            //setDebugVal(curVal);
             //addToUartTXQ(msg);
         } 
     }

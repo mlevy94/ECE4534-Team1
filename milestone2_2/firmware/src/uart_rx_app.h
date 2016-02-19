@@ -62,6 +62,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <queue.h>
 #include "comm.h"
 #include "debug.h"
+#include "uart_tx_app_public.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -94,9 +95,15 @@ extern "C" {
 typedef struct
 {
     QueueHandle_t rxMessageQ;
+    QueueHandle_t sentMessageQ;
     char msgCount;
 
 } UART_RX_APP_DATA;
+
+typedef struct {
+    char num; // message number
+    InternalMessage msg;
+} SentMessage;
 
 
 // *****************************************************************************

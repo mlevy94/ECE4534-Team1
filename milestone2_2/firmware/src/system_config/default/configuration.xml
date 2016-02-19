@@ -179,7 +179,7 @@
       <Template>
         <Name>drv_usart_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/driver/usart</Path>
-        <Checksum>38429A7188481055C632068D50F0407E</Checksum>
+        <Checksum>EABF0C55835D1911E2FF5A9CF07E2301</Checksum>
       </Template>
       <Template>
         <Name>FreeRTOSConfig.h</Name>

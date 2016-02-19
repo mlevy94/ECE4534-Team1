@@ -102,6 +102,63 @@ BaseType_t addToUartRXQFromISR(char msg) {
     return xQueueSendFromISR(uart_rx_appData.rxMessageQ, &msg, 0);
 }
 
+BaseType_t addToUartSentQ(char num, InternalMessage msg) {
+    SentMessage newMsg = { num, msg };
+    return xQueueSend(uart_rx_appData.sentMessageQ, &newMsg, portMAX_DELAY);
+}
+
+BaseType_t addToUartSentQFromISR(char num, InternalMessage msg) {
+    SentMessage newMsg = { num, msg };
+    return xQueueSendFromISR(uart_rx_appData.sentMessageQ, &newMsg, 0);
+}
+
+int getChecksum(char msg[]) {
+    int checksum = 0;
+    int i;
+    for (i = 1; i < HEADER_SIZE + msg[4]; i++) {
+        checksum += msg[i];
+    }
+    return checksum;
+}
+
+InternalMessage processMessage(char msg[], int len) {
+    // check message for errors
+    int checksum = msg[HEADER_SIZE + msg[4]] << 7 + msg[HEADER_SIZE + msg[4] + 1];
+    if (msg[0] == START_BYTE &&
+        len == HEADER_SIZE + TAIL_SIZE + msg[4] &&
+        checksum == getChecksum(msg)) {
+        // check for any missed messages and request them
+        for (; uart_rx_appData.msgCount < msg[2]; uart_rx_appData.msgCount++) {
+            priorityAddToUartTXQ(makeMessageChar(MSG_REQUEST, uart_rx_appData.msgCount));
+        }
+        // process message
+        char msgcontent[msg[4]];
+        int i;
+        for (i = 0; i < msg[4]; i++) {
+            msgcontent[i] = msg[HEADER_SIZE + i];
+        }
+        return makeMessage(msg[3], msgcontent);
+    }
+    else {
+        return makeMessage(BAD_MSG, 0);
+    }
+}
+
+void sortMessage(InternalMessage msg) {
+    // place message in correct Q based on type field
+    int i;
+    switch(msg.type) {
+        case MSG_REQUEST:
+            
+            break;
+        case DEBUG_MSG:
+        default:
+            for (i = 0; msg.msg[i] != '\0'; i++) {
+                setDebugVal(msg.msg[i]);
+            }
+            break;
+    }
+}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -119,7 +176,8 @@ BaseType_t addToUartRXQFromISR(char msg) {
 
 void UART_RX_APP_Initialize ( void )
 {
-    uart_rx_appData.rxMessageQ = xQueueCreate(64, 8);
+    uart_rx_appData.rxMessageQ = xQueueCreate(RX_BUF_SIZE, 8);
+    uart_rx_appData.sentMessageQ = xQueueCreate(SENT_MSG_Q_SIZE, sizeof(SentMessage));
     uart_rx_appData.msgCount = 0;
 }
 
@@ -135,14 +193,26 @@ void UART_RX_APP_Initialize ( void )
 void UART_RX_APP_Tasks ( void )
 {
     char inChar;
+    char inmsg[INTERNAL_MSG_SIZE];
+    int idx = 0;
+    InternalMessage processedMsg;
     while(1) {
 #ifdef DEBUG_ON
         setDebugVal(TASK_UART_RX_APP);
 #endif
-        xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY);
-        // assemble entire message
-        // unpack message
-        // place in correct Q based on message type
+        if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
+            inmsg[idx] = inChar;
+            if (inChar == END_BYTE) {
+                processedMsg = processMessage(inmsg, idx + 1);
+                // check for error message
+                setDebugVal(2);
+                if (processedMsg.type != BAD_MSG) {
+                    // place in correct Q based on message type
+                    sortMessage(processedMsg);
+                }
+                idx = 0; // reset message buffer
+            }
+        }
     }
 }
  
