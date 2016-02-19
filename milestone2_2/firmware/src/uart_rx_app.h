@@ -152,8 +152,6 @@ typedef struct {
     This routine must be called from the SYS_Initialize function.
 */
 
-InternalMessage processMessage(char*, int);
-
 void UART_RX_APP_Initialize ( void );
 
 
