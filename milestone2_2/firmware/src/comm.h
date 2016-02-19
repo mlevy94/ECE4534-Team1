@@ -51,7 +51,14 @@ extern "C" {
 // -3 Checksum -- 2 7 bit bytes.  
 // -1 End Byte
 ///////////////////////////////////////////////////////////////////////////////
-
+typedef struct {
+    char sender;
+    char number;
+    char type;
+    char msgsize;
+    char msg[INTERNAL_MSG_SIZE];
+    int checksum;
+} NetMessage;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Special Characters

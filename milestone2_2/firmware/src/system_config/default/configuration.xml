@@ -240,7 +240,7 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>09431A380F9415115790B2535631273F</Checksum>
+        <Checksum>930FFD0CACDD0BAF807CBD2AC7923C76</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
