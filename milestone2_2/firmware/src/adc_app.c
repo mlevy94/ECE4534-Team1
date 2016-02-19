@@ -140,6 +140,7 @@ void ADC_APP_Tasks ( void )
     DRV_ADC_Open();
     InternalMessage msg;
     msg.type = DEBUG_MSG;
+    int tempAdcVal = 0;
     while(1){
 #ifdef DEBUG_ON
         setDebugVal(TASK_ADC_APP);
@@ -148,6 +149,11 @@ void ADC_APP_Tasks ( void )
             msg.msg[0] = (curVal >> 7) & 0x7f;
             msg.msg[1] = curVal & 0x7f;
             msg.msg[2] = '\0';
+            
+            tempAdcVal = curVal + 3;
+            tempAdcVal /= 6787;
+            tempAdcVal += 10; // Final ADC Value
+            //TenBitsetDebugVal(tempAdcVal);
             //setDebugVal(curVal);
             //addToUartTXQ(msg);
         } 

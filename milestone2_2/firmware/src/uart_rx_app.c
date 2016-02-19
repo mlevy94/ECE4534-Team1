@@ -209,7 +209,7 @@ void UART_RX_APP_Initialize ( void )
 void UART_RX_APP_Tasks ( void )
 {
     char inChar;
-    char inmsg[INTERNAL_MSG_SIZE];
+    char inmsg[NET_MSG_SIZE];
     int idx = 0;
     InternalMessage processedMsg;
     while(1) {
@@ -218,8 +218,8 @@ void UART_RX_APP_Tasks ( void )
 #endif
         //setDebugVal(1);
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
+            setDebugVal(inmsg[idx]);
             inmsg[idx] = inChar;
-            setDebugVal(inChar);
             if ((inChar & 0xff) == END_BYTE) {
                 processedMsg = processMessage(inmsg, idx + 1);
                 // check for error message

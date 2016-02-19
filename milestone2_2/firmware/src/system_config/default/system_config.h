@@ -95,9 +95,17 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define SYS_PORT_CNPUE          0x0
 #define SYS_PORT_CNEN           0x0
 
+#define SYS_PORT_D_TRIS         0xfbdf
+#define SYS_PORT_D_LAT          0x0
+#define SYS_PORT_D_ODC          0x0
+
 #define SYS_PORT_E_TRIS         0x300
 #define SYS_PORT_E_LAT          0x0
 #define SYS_PORT_E_ODC          0x0
+
+#define SYS_PORT_G_TRIS         0xf34f
+#define SYS_PORT_G_LAT          0x0
+#define SYS_PORT_G_ODC          0x0
 
 
 // *****************************************************************************
