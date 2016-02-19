@@ -116,16 +116,32 @@ int getChecksum(char msg[]) {
     int checksum = 0;
     int i;
     for (i = 1; i < HEADER_SIZE + msg[4]; i++) {
-        checksum += msg[i];
+        checksum += (msg[i] & 0xff);
     }
     return checksum;
 }
 
-InternalMessage processMessage(char msg[], int len) {
+InternalMessage processMessage(char* msg, int len) {
     // check message for errors
-    int checksum = msg[HEADER_SIZE + msg[4]] << 7 + msg[HEADER_SIZE + msg[4] + 1];
+    setDebugVal(0);
+    setDebugVal(len);
+    int i;
+    for (i = 0; i < len; i++) {
+        setDebugVal(msg[i]);
+    }
+    int checksum = (msg[HEADER_SIZE + (msg[4] & 0xff)] << 7) + 
+                   (msg[HEADER_SIZE + (msg[4] & 0xff) + 1] & 0x7f);
+//    if (msg[0] == START_BYTE) {
+//        setDebugVal(7);
+//    }
+//    if (len == HEADER_SIZE + TAIL_SIZE + msg[4]) {
+//        setDebugVal(8);
+//    }
+//    if (checksum == getChecksum(msg)) {
+//        setDebugVal(9);
+//    }
     if (msg[0] == START_BYTE &&
-        len == HEADER_SIZE + TAIL_SIZE + msg[4] &&
+        len == HEADER_SIZE + TAIL_SIZE + (msg[4] & 0xff) &&
         checksum == getChecksum(msg)) {
         // check for any missed messages and request them
         for (; uart_rx_appData.msgCount < msg[2]; uart_rx_appData.msgCount++) {
@@ -140,7 +156,7 @@ InternalMessage processMessage(char msg[], int len) {
         return makeMessage(msg[3], msgcontent);
     }
     else {
-        return makeMessage(BAD_MSG, 0);
+        return makeMessageChar(BAD_MSG, 0);
     }
 }
 
@@ -154,7 +170,7 @@ void sortMessage(InternalMessage msg) {
         case DEBUG_MSG:
         default:
             for (i = 0; msg.msg[i] != '\0'; i++) {
-                setDebugVal(msg.msg[i]);
+                //setDebugVal(msg.msg[i]);
             }
             break;
     }
@@ -200,17 +216,21 @@ void UART_RX_APP_Tasks ( void )
 #ifdef DEBUG_ON
         setDebugVal(TASK_UART_RX_APP);
 #endif
+        //setDebugVal(1);
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
             inmsg[idx] = inChar;
-            if (inChar == END_BYTE) {
+            setDebugVal(inChar);
+            if ((inChar & 0xff) == END_BYTE) {
                 processedMsg = processMessage(inmsg, idx + 1);
                 // check for error message
-                setDebugVal(2);
                 if (processedMsg.type != BAD_MSG) {
                     // place in correct Q based on message type
                     sortMessage(processedMsg);
                 }
                 idx = 0; // reset message buffer
+            }
+            else {
+                idx++;
             }
         }
     }

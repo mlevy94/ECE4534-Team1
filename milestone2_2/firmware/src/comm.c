@@ -25,9 +25,9 @@ InternalMessage makeMessageChar(char msgType, char val) {
 InternalMessage makeMessageInt(char msgType, int val) {
     InternalMessage newMsg;
     newMsg.type = msgType;
-    newMsg.msg[0] = val >> 24 & 0xff;
-    newMsg.msg[1] = val >> 16 & 0xff;
-    newMsg.msg[2] = val >>  8 & 0xff;
+    newMsg.msg[0] = (val >> 24) & 0xff;
+    newMsg.msg[1] = (val >> 16) & 0xff;
+    newMsg.msg[2] = (val >>  8) & 0xff;
     newMsg.msg[3] = val & 0xff;
     newMsg.msg[4] = '\0';
     return newMsg;

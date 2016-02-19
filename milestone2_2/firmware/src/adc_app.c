@@ -145,8 +145,8 @@ void ADC_APP_Tasks ( void )
         setDebugVal(TASK_ADC_APP);
 #endif
         if(xQueueReceive(adc_appData.adcQ, &curVal, portMAX_DELAY)){
-            msg.msg[0] = curVal >> 8 & 0xff;
-            msg.msg[1] = curVal & 0xff;
+            msg.msg[0] = (curVal >> 7) & 0x7f;
+            msg.msg[1] = curVal & 0x7f;
             msg.msg[2] = '\0';
             //setDebugVal(curVal);
             //addToUartTXQ(msg);
