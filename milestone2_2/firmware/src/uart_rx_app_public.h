@@ -8,8 +8,6 @@
 #ifndef UART_RX_APP_PUBLIC_H
 #define	UART_RX_APP_PUBLIC_H
 
-#include "initDelay.h"
-
 #ifdef	__cplusplus
 extern "C" {
 #endif

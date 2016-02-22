@@ -13,7 +13,6 @@ extern "C" {
 #endif
 
 #include "comm.h"
-#include "initDelay.h"
     
 BaseType_t addToUartTXQ(InternalMessage msg);
 BaseType_t addToUartTXQFromISR(InternalMessage msg);
