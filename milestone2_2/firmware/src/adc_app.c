@@ -133,6 +133,11 @@ void ADC_APP_Initialize ( void )
 void ADC_APP_Tasks ( void )
 {
     /*
+     * Five second Delay Timer
+     */
+    while(!fiveSecTimerBool);
+    
+    /*
      * This portion of code displays the ADC values from the queue on the logic 
      * analyzer. This is value is ten bits
      */

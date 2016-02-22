@@ -191,6 +191,11 @@ void UART_RX_APP_Initialize ( void )
 
 void UART_RX_APP_Tasks ( void )
 {
+    /*
+     * Five second Delay Timer
+     */
+    while(!fiveSecTimerBool);
+    
     char inChar;
     InternalMessage processedMsg;
     while(1) {

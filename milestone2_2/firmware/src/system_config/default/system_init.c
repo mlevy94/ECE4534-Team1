@@ -51,6 +51,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_definitions.h"
 #include "txbuffer_public.h"
 #include "debug.h"
+#include "initDelay.h"
 
 
 // ****************************************************************************
@@ -202,9 +203,13 @@ void SYS_Initialize ( void* data )
 
     /* Initialize Middleware */
     initializeTXBufferQ();
+    
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_TX_BUF);
 #endif
+    
+    initializeTimer(); // Initializing one shot timer
+    
     /* Initialize the Application */
     APP_Initialize();
 #ifdef DEBUG_ON

@@ -175,6 +175,11 @@ void UART_TX_APP_Initialize ( void )
 
 void UART_TX_APP_Tasks ( void )
 {
+    /*
+     * Five second Delay Timer
+     */
+    while(!fiveSecTimerBool);
+    
 #ifdef DEBUG_ON
     setDebugVal(TASK_UART_TX_APP);
 #endif
