@@ -5,7 +5,6 @@
 #include "initDelay.h"
 #include "debug.h"
 
-int fiveThousandMilliseconds;
 TimerHandle_t timerHandle; // Declaring the timer global
 
 void vTimerCallback( TimerHandle_t pxTimer );
@@ -18,7 +17,7 @@ void initializeTimer() {
                                pdFALSE, // Setting a One-Hot Timer
                                (void *) 2,
                                vTimerCallback);
-    fiveThousandMilliseconds = 0;
+    fiveSecTimerBool = pdFALSE;
     
     if( xTimerStart( timerHandle, 0) != pdPASS)
     {
@@ -28,15 +27,5 @@ void initializeTimer() {
 
 void vTimerCallback( TimerHandle_t pxTimer )
 {
-    //setDebugBool(pdTRUE);
-    
-    fiveThousandMilliseconds++;
-    // I dont think we need this any longer and probably not the
-    // count variable either since we are not using it currently
-//    // Checks if 100 milliseconds has occurred based on a 50 millisecond period.
-//    if (fiveThousandMilliseconds % 2 == 1)
-//    {
-//        // Not sure what to do here
-//    }
-    //setDebugBool(pdFALSE);
+    fiveSecTimerBool = pdTRUE; // Triggering true for 5s timer
 }

@@ -8,6 +8,8 @@
 #ifndef ADC_APP_PUBLIC_H
 #define	ADC_APP_PUBLIC_H
 
+#include "initDelay.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif

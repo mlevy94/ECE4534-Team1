@@ -22,6 +22,8 @@ extern "C" {
 #endif
 
     void initializeTimer();
+    
+    bool fiveSecTimerBool;
 
 #ifdef	__cplusplus
 }

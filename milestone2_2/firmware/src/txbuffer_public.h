@@ -8,6 +8,8 @@
 #ifndef TXBUFFER_PUBLIC_H
 #define	TXBUFFER_PUBLIC_H
 
+#include "initDelay.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
