@@ -151,7 +151,7 @@
       <Template>
         <Name>sys_ports_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/system/ports/src</Path>
-        <Checksum>A2DF5CE79555D9A65327EB8038B85FC5</Checksum>
+        <Checksum>856C079DA900348CFB00898AD36E7790</Checksum>
       </Template>
       <Template>
         <Name>system_interrupt_a.S</Name>
@@ -240,12 +240,12 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>930FFD0CACDD0BAF807CBD2AC7923C76</Checksum>
+        <Checksum>09431A380F9415115790B2535631273F</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>C8391BF39B2748C71072A7F8C3BEDEE5</Checksum>
+        <Checksum>3CC11D481FCA7D4E112FFE61ADD62107</Checksum>
       </Template>
       <Template>
         <Name>app.h</Name>
@@ -263,19 +263,19 @@
     </Templates>
     <CompilerItems>
       <C32-AS>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
       </C32-AS>
       <C32>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
         <Define value="__XC"/>
       </C32>
     </CompilerItems>
     <Libraries>
-      <Library value="../../../../../../../../../microchip/harmony/v1_06_02/bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
+      <Library value="../../../../../../../../microchip/harmony/v1_06_02/bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
     </Libraries>
   </Manifest>
 </configuration>

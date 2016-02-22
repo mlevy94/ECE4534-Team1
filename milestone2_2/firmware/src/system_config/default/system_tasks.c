@@ -97,7 +97,7 @@ void SYS_Tasks ( void )
     /* Create OS Thread for APP Tasks. */
     xTaskCreate((TaskFunction_t) _APP_Tasks,
                 "APP Tasks",
-                4096, NULL, 1, NULL);
+                4096, NULL, 2, NULL);
 
     /* Create OS Thread for UART_TX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_TX_APP_Tasks,

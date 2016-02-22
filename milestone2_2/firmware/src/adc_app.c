@@ -137,6 +137,7 @@ void ADC_APP_Tasks ( void )
      * analyzer. This is value is ten bits
      */
     unsigned int curVal;
+    unsigned int tempAdcVal = 0;
     DRV_ADC_Open();
     InternalMessage msg;
     msg.type = DEBUG_MSG;
@@ -145,8 +146,12 @@ void ADC_APP_Tasks ( void )
         setDebugVal(TASK_ADC_APP);
 #endif
         if(xQueueReceive(adc_appData.adcQ, &curVal, portMAX_DELAY)){
-            msg.msg[0] = (curVal >> 7) & 0x7f;
-            msg.msg[1] = curVal & 0x7f;
+            tempAdcVal = curVal + 3;
+            tempAdcVal /= 6787;
+            tempAdcVal += 10; // Final ADC Value
+            //TenBitsetDebugVal(tempAdcVal);
+            msg.msg[0] = (tempAdcVal >> 7) & 0x7f;
+            msg.msg[1] = tempAdcVal & 0x7f;
             msg.msg[2] = '\0';
             //setDebugVal(curVal);
             //addToUartTXQ(msg);
