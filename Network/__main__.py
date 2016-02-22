@@ -1,14 +1,15 @@
 from socket import socket
-from configs import getIPAddr, getPort
+from configs import *  # too many variables to import explicitly
 from outbound import OutboundWorker
-from inbound import InboundWorker
+from client import ClientWorker
 from threading import Thread
+from time import sleep
 
 class Connector:
 
   def __init__(self):
-    self.clientDict = None
     self.clientList = []
+    self.clientDict = {}
     self.outbound = OutboundWorker(self.clientList, self.clientDict)
     self.queue = self.outbound.queue
 
@@ -18,10 +19,14 @@ class Connector:
     listenThread = Thread(target=self.listener, args=[listener], daemon=True)
     listenThread.start()
     cmdString = ""
+    sleep(0.5)
     try:
       while cmdString.lower() != "shutdown":
-        cmdString = input()
-        self.queue.put(cmdString.encode() + b'\0')
+        msgstring = input()
+        while msgstring:
+          msg = InternalMessage(ROUTER, DEBUG_MSG, msgstring[:INTERNAL_MSG_SIZE + 1])
+          self.queue.put(msg)
+          msgstring = msgstring[INTERNAL_MSG_SIZE + 1:]
     finally:
       listener.close()
 
@@ -31,10 +36,10 @@ class Connector:
     try:
       listener.bind((getIPAddr(), getPort()))
       listener.listen()
-      print("Listening on {}:{}".format(getIPAddr(),getPort()))
+      print("Listening on {}:{}".format(getIPAddr(), getPort()))
       while 1:
         newSocket, addr = listener.accept()
-        newClient = InboundWorker(newSocket, self.queue, addr, self.clientList)
+        newClient = ClientWorker(newSocket, self.outbound, addr)
         newClient.start()
         self.clientList.append(newClient)
         print("Client connected from {}".format(addr))
