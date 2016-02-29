@@ -39,6 +39,7 @@ extern "C" {
 #define TAIL_SIZE          3 // bytes
 #define INTERNAL_MSG_SIZE 12 // bytes
 #define NET_MSG_SIZE      HEADER_SIZE + INTERNAL_MSG_SIZE + TAIL_SIZE
+#define MAX_MSG_COUNT     127 // messages
 
 ///////////////////////////////////////////////////////////////////////////////
 // Message Structure for network communication

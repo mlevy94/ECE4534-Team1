@@ -130,7 +130,7 @@ void APP_Tasks ( void )
     /*
      * Five second Delay Timer
      */
-    while(!fiveSecTimerBool);
+    while(!START_EXECUTION);
     
     char myMsg[] = { "team1\0" };
     InternalMessage msg = makeMessage(DEBUG_MSG, myMsg);

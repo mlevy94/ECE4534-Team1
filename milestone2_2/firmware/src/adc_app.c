@@ -135,7 +135,7 @@ void ADC_APP_Tasks ( void )
     /*
      * Five second Delay Timer
      */
-    while(!fiveSecTimerBool);
+    while(!START_EXECUTION);
     
     /*
      * This portion of code displays the ADC values from the queue on the logic 
@@ -155,8 +155,8 @@ void ADC_APP_Tasks ( void )
             tempAdcVal /= 6787;
             tempAdcVal += 10; // Final ADC Value
             //TenBitsetDebugVal(tempAdcVal);
-            msg.msg[0] = (tempAdcVal >> 7) & 0x7f;
-            msg.msg[1] = tempAdcVal & 0x7f;
+            msg.msg[0] = (tempAdcVal >> 8) & 0xff;
+            msg.msg[1] = tempAdcVal & 0xff;
             msg.msg[2] = '\0';
             //setDebugVal(curVal);
             //addToUartTXQ(msg);

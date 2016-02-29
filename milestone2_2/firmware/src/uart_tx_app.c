@@ -111,13 +111,6 @@ BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg) {
 }
 
 void packAndSend(InternalMessage msg) {
-    // update message count
-    if (uart_tx_appData.msgCount < 253) {
-        uart_tx_appData.msgCount++;
-    }
-    else {
-        uart_tx_appData.msgCount = 0;
-    }
     int i = 0;
     int msgSize = 0;
     int checksum = 0;
@@ -141,6 +134,13 @@ void packAndSend(InternalMessage msg) {
     addToTXBufferQ(END_BYTE);
     // cache sent message
     //addToUartSentQ(uart_tx_appData.msgCount, msg);
+    // update message count
+    if (uart_tx_appData.msgCount < MAX_MSG_COUNT) {
+        uart_tx_appData.msgCount++;
+    }
+    else {
+        uart_tx_appData.msgCount = 0;
+    }
 }
 
 
@@ -178,7 +178,7 @@ void UART_TX_APP_Tasks ( void )
     /*
      * Five second Delay Timer
      */
-    while(!fiveSecTimerBool);
+    while(!START_EXECUTION);
     
 #ifdef DEBUG_ON
     setDebugVal(TASK_UART_TX_APP);

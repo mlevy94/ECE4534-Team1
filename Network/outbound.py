@@ -25,7 +25,8 @@ class OutboundWorker:
       # check for predefined target
       if msg.target is not None:
         if msg.msgtype == CLIENT_ROLE:
-          self.clientList.remove(msg.target)
+          if msg.msg[0] != CLIENT:
+            self.clientList.remove(msg.target)
           self.clientDict[msg.msg[0]] = msg.target
           print("Role Assigned: {} - {}".format(VAL_TO_ROLE[msg.msg[0]], msg.target.name()))
         elif isinstance(msg.target, list):
@@ -33,6 +34,7 @@ class OutboundWorker:
             target.send(msg)
         else:
           msg.target.send(msg)
+        self.queue.task_done()
         continue
       # send to client list
       for client in self.clientList:
@@ -42,4 +44,5 @@ class OutboundWorker:
         except ConnectionResetError:
           self.clientList.remove(client)
           print("Client Disconnected: {}".format(client.address))
+      self.queue.task_done()
 

@@ -21,8 +21,10 @@ class Connector:
     cmdString = ""
     sleep(0.5)
     try:
-      while cmdString.lower() != "shutdown":
-        msgstring = input()
+      while 1:
+        msgstring = input().encode()
+        if msgstring == b'shutdown':
+          break
         while msgstring:
           msg = InternalMessage(ROUTER, DEBUG_MSG, msgstring[:INTERNAL_MSG_SIZE + 1])
           self.queue.put(msg)

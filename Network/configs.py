@@ -77,7 +77,7 @@ VAL_TO_MSG = OrderedDict((
 ))
 
 ########## MESSAGE SPECIFIC VALUES ########
-MAX_MSG_COUNT = 254
+MAX_MSG_COUNT = 128
 HEADER_SIZE = 5
 TAIL_SIZE = 3
 INTERNAL_MSG_SIZE = 12
@@ -135,6 +135,8 @@ class NetMessage:
     return STARTBYTE + source + count + msgtype + msgsize + self.msg + checksum + ENDBYTE
 
 def bytetoval(val):
+    if val == b'':
+      return 0
     if isinstance(val, bytes):
       return val[0]
     else:

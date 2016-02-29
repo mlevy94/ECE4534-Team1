@@ -23,7 +23,7 @@ extern "C" {
 
     void initializeTimer();
     
-    bool fiveSecTimerBool;
+bool START_EXECUTION;
 
 #ifdef	__cplusplus
 }
