@@ -22,7 +22,11 @@ class Listener:
 
   def close(self):
     if self.listener is not None:
-      self.listener.close()
+      try:
+        self.listener.shutdown(SHUT_RDWR)
+        self.listener.close()
+      except:
+        pass
 
 
   def listenThread(self):
@@ -38,6 +42,7 @@ class Listener:
         newClient.start()
         self.clientList.append(newClient)
         print("Client connected from {}".format(addr))
+        newClient.client.send(bytes([0x50 for _ in range(30)]))
+        self.queue.put(InternalMessage(ROUTER, INITIALIZE, b'1', newClient))
     finally:
-      self.listener.shutdown(SHUT_RDWR)
-      self.listener.close()
+      self.close()

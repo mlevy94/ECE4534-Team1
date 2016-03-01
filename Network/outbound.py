@@ -30,11 +30,11 @@ class OutboundWorker:
           self.clientDict[msg.msg[0]] = msg.target
           print("Role Assigned: {} - {}".format(VAL_TO_ROLE[msg.msg[0]], msg.target.address))
         else:
-          for target in msg.target:
-            if target.send(msg):
-              print("Sent {}: {} - {}".format(msg.target.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+          for client in msg.target:
+            if client.send(msg):
+              print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
             else:
-              self.clientDisconnect(target)
+              self.clientDisconnect(client)
         self.queue.task_done()
         continue
       # send to client list

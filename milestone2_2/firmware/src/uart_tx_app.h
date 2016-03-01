@@ -95,6 +95,7 @@ extern "C" {
 typedef struct
 {
     QueueHandle_t txMessageQ;
+    QueueHandle_t initQ;
     char msgCount;
 } UART_TX_APP_DATA;
 

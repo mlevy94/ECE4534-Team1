@@ -14,6 +14,7 @@ extern "C" {
 
 #include "comm.h"
     
+BaseType_t addToInitTXQ(char msg);
 BaseType_t addToUartTXQ(InternalMessage msg);
 BaseType_t addToUartTXQFromISR(InternalMessage msg);
 BaseType_t priorityAddToUartTXQ(InternalMessage msg);

@@ -94,6 +94,10 @@ UART_TX_APP_DATA uart_tx_appData;
 // *****************************************************************************
 // *****************************************************************************
 
+BaseType_t addToInitTXQ(char msg) {
+    return xQueueSend(uart_tx_appData.initQ, &msg, portMAX_DELAY);
+}
+
 BaseType_t addToUartTXQ(InternalMessage msg) {
     return xQueueSend(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY);
 }
@@ -151,6 +155,7 @@ void packAndSend(InternalMessage msg) {
 
 void UART_TX_APP_Initialize ( void )
 {
+    uart_tx_appData.initQ = xQueueCreate(1, 8);
     uart_tx_appData.txMessageQ = xQueueCreate(16, sizeof(InternalMessage));
     uart_tx_appData.msgCount = 0;
 }
@@ -169,6 +174,9 @@ void UART_TX_APP_Tasks ( void )
 #ifdef DEBUG_ON
     setDebugVal(TASK_UART_TX_APP);
 #endif
+    char start;
+    while(!xQueueReceive(uart_tx_appData.initQ, &start, portMAX_DELAY));
+    setDebugVal(0x55);
     InternalMessage msg;
     // declare role
     msg.type = CLIENT_ROLE;

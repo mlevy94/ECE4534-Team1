@@ -125,7 +125,12 @@ void sortMessage(InternalMessage msg) {
     // add message types here. the case should place the messages in Q's for
     // the correct thread to act upon. DEBUG_MSG are just printed to the debug
     // line one byte at a time.
+    setDebugVal(0xff);
+    setDebugVal(msg.type);
     switch(msg.type) {
+        case INITIALIZE:
+            addToInitTXQ(msg.msg[0]);
+            break;
         case DEBUG_MSG:
             for (i = 0; msg.msg[i] != '\0'; i++) {
                 setDebugVal(msg.msg[i]);
@@ -171,12 +176,24 @@ void UART_RX_APP_Initialize ( void )
 void UART_RX_APP_Tasks ( void )
 {
     char inChar;
-    int i;
+    int i = 0;
+    while(i < 20) {
+        setDebugVal(0x15);
+        if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
+            if (inChar == 0x50) {
+                i++;
+            }
+            else {
+                i = 0;
+            }
+        }
+    }
     InternalMessage processedMsg;
     while(1) {
 #ifdef DEBUG_ON
         setDebugVal(TASK_UART_RX_APP);
 #endif
+        setDebugVal(0x20);
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
             // get start byte
             if ((inChar & 0xff) == START_BYTE) {
@@ -200,9 +217,12 @@ void UART_RX_APP_Tasks ( void )
                 }
                 // get end byte
                 while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
+                setDebugVal(0x35);
                 if ((inChar & 0xff) == END_BYTE) {
                     // place in correct Q based on message type
-                    sortMessage(processMessage(inmsg));
+                    processedMsg = processMessage(inmsg);
+                    sortMessage(processedMsg);
+                    setDebugVal(0x37);
                 }
             }
         }

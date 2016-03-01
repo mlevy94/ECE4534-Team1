@@ -159,14 +159,6 @@
         <Checksum>2AADE7885E66E00DBB7FE911439FFA49</Checksum>
       </Template>
       <Template>
-        <Name>adc_app.h</Name>
-        <Path>Header Files/app</Path>
-      </Template>
-      <Template>
-        <Name>adc_app.c</Name>
-        <Path>Source Files/app</Path>
-      </Template>
-      <Template>
         <Name>drv_adc_static.h</Name>
         <Path>Header Files/app/system_config/default/framework/driver/adc</Path>
         <Checksum>DA228C4429B405DC81984D73AB97988D</Checksum>
@@ -194,7 +186,7 @@
       <Template>
         <Name>system_interrupt.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>7C147A111034FE9F5F75AA42E81D2336</Checksum>
+        <Checksum>97529EE61A6CD378382BD2B87DBA026D</Checksum>
       </Template>
       <Template>
         <Name>sys_clk_static.c</Name>
@@ -208,7 +200,7 @@
       <Template>
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>9B39D039CB971C92134116A642E3C065</Checksum>
+        <Checksum>A4EFAE5F4A1347A1362BBA73A8B1055C</Checksum>
       </Template>
       <Template>
         <Name>main.c</Name>
@@ -217,7 +209,7 @@
       <Template>
         <Name>system_definitions.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>3E63707334C69389D0375C8579F7E907</Checksum>
+        <Checksum>A7046D735366C91AF77F3DFA1BF01425</Checksum>
       </Template>
       <Template>
         <Name>system_exceptions.c</Name>
@@ -240,7 +232,7 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>5E813B309EFA8F8F1B9E519C0B404C0C</Checksum>
+        <Checksum>9CFBC31BDF7F1083E6AFEC802189BA36</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
