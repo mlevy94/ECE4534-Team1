@@ -36,10 +36,10 @@ extern "C" {
 #define OUT_BUF_SIZE      16 // messages
 #define IN_BUF_SIZE       16 // messages
 #define HEADER_SIZE        5 // bytes
-#define TAIL_SIZE          3 // bytes
+#define TAIL_SIZE          1 // bytes
 #define INTERNAL_MSG_SIZE 12 // bytes
 #define NET_MSG_SIZE      HEADER_SIZE + INTERNAL_MSG_SIZE + TAIL_SIZE
-#define MAX_MSG_COUNT     127 // messages
+#define MAX_MSG_COUNT     255 // messages
 
 ///////////////////////////////////////////////////////////////////////////////
 // Message Structure for network communication
@@ -48,8 +48,7 @@ extern "C" {
 //  2 Message number
 //  3 Message Type
 //  4 Message Size
-//  x Message 
-// -3 Checksum -- 2 7 bit bytes.  
+//  x Message  
 // -1 End Byte
 ///////////////////////////////////////////////////////////////////////////////
 typedef struct {
@@ -58,7 +57,6 @@ typedef struct {
     char type;
     char msgsize;
     char msg[INTERNAL_MSG_SIZE];
-    int checksum;
 } NetMessage;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,16 +69,13 @@ typedef struct {
 // Message Types
 ///////////////////////////////////////////////////////////////////////////////
 #define DEBUG_MSG           0x01
-#define BAD_MSG             0x02 // makeMessage(BAD_MSG, 0);
-#define MSG_REQUEST         0x04 // makeMessageChar(MSG_REQUEST, <msg#>);
-#define CLIENT_ROLE         0x08
-#define INITIALIZE          0x10
-#define READY_TO_START      0x11
-#define ROVER_MOVE          0x12
-#define FOLLOW_PO           0x14
-#define OBS_INFO            0x18
-#define MOTOR_MOVE          0x20
-#define TOKEN_FOUND         0x21
+#define NET_STAT            0x02
+#define CLIENT_ROLE         0x04
+#define INITIALIZE          0x08
+#define READY_TO_START      0x10
+#define ROVER_MOVE          0x11
+#define OBJECT_POS          0x14
+#define TOKEN_FOUND         0x18
 
 ///////////////////////////////////////////////////////////////////////////////
 // ROVER_MOVE defines

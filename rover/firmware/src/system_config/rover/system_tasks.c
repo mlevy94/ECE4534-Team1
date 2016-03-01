@@ -55,6 +55,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_config.h"
 #include "system_definitions.h"
 #include "motorapp.h"
+#include "uart_tx_app.h"
+#include "uart_rx_app.h"
 
 
 // *****************************************************************************
@@ -65,6 +67,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
  
 static void _SYS_Tasks ( void );
 static void _MOTORAPP_Tasks(void);
+static void _UART_TX_APP_Tasks(void);
+static void _UART_RX_APP_Tasks(void);
 
 
 // *****************************************************************************
@@ -92,6 +96,16 @@ void SYS_Tasks ( void )
     xTaskCreate((TaskFunction_t) _MOTORAPP_Tasks,
                 "MOTORAPP Tasks",
                 1024, NULL, 1, NULL);
+
+    /* Create OS Thread for UART_TX_APP Tasks. */
+    xTaskCreate((TaskFunction_t) _UART_TX_APP_Tasks,
+                "UART_TX_APP Tasks",
+                4096, NULL, 2, NULL);
+
+    /* Create OS Thread for UART_RX_APP Tasks. */
+    xTaskCreate((TaskFunction_t) _UART_RX_APP_Tasks,
+                "UART_RX_APP Tasks",
+                4096, NULL, 2, NULL);
 
     /**************
      * Start RTOS * 
@@ -137,6 +151,40 @@ static void _MOTORAPP_Tasks(void)
     while(1)
     {
         MOTORAPP_Tasks();
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+    void _UART_TX_APP_Tasks ( void )
+
+  Summary:
+    Maintains state machine of UART_TX_APP.
+*/
+
+static void _UART_TX_APP_Tasks(void)
+{
+    while(1)
+    {
+        UART_TX_APP_Tasks();
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+    void _UART_RX_APP_Tasks ( void )
+
+  Summary:
+    Maintains state machine of UART_RX_APP.
+*/
+
+static void _UART_RX_APP_Tasks(void)
+{
+    while(1)
+    {
+        UART_RX_APP_Tasks();
     }
 }
 

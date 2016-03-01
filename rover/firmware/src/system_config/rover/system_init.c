@@ -49,6 +49,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
+#include "txbuffer_public.h"
+#include "debug.h"
 
 
 // ****************************************************************************
@@ -115,6 +117,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 //<editor-fold defaultstate="collapsed" desc="DRV_Timer Initialization Data">
 
 // </editor-fold>
+//<editor-fold defaultstate="collapsed" desc="DRV_USART Initialization Data">
+
+// </editor-fold>
 
 // *****************************************************************************
 // *****************************************************************************
@@ -179,12 +184,19 @@ void SYS_Initialize ( void* data )
     SYS_DEVCON_PerformanceConfig(SYS_CLK_SystemFrequencyGet());
     SYS_DEVCON_JTAGDisable();
     SYS_PORTS_Initialize();
+    
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_START); // has to be after ports init
+#endif
 
     /* Initialize Drivers */
     /*Initialize TMR0 */
     DRV_TMR0_Initialize();
  
- 
+    DRV_USART0_Initialize();
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_UART);
+#endif
 
     /*Initialize OC0 */
     DRV_OC0_Initialize();
@@ -194,11 +206,28 @@ void SYS_Initialize ( void* data )
 
     /* Initialize System Services */
     SYS_INT_Initialize();  
-
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_SYS);
+#endif
     /* Initialize Middleware */
-
+    initializeTXBufferQ();
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_TX_BUF);
+#endif
+    
     /* Initialize the Application */
     MOTORAPP_Initialize();
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_APP);
+#endif
+    UART_TX_APP_Initialize();
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_UART_TX_APP);
+#endif
+    UART_RX_APP_Initialize();
+#ifdef DEBUG_ON
+    setDebugVal(SYS_INIT_UART_RX_APP);
+#endif
 }
 
 

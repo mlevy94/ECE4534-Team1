@@ -149,13 +149,50 @@
     </Files>
     <Templates>
       <Template>
+        <Name>FreeRTOSConfig.h</Name>
+        <Path>Header Files/app/system_config/rover</Path>
+        <Checksum>718285948B47F384765F8CB0EC142F2C</Checksum>
+      </Template>
+      <Template>
+        <Name>uart_tx_app.c</Name>
+        <Path>Source Files/app</Path>
+      </Template>
+      <Template>
+        <Name>drv_usart_static.h</Name>
+        <Path>Header Files/app/system_config/rover/framework/driver/usart</Path>
+        <Checksum>66C127084540B78CD4F78E2FBCC6D29F</Checksum>
+      </Template>
+      <Template>
+        <Name>system_init.c</Name>
+        <Path>Source Files/app/system_config/rover</Path>
+        <Checksum>C7B2B03E04B0F598A2471C7B9E4846D1</Checksum>
+      </Template>
+      <Template>
+        <Name>drv_oc_static.h</Name>
+        <Path>Header Files/app/system_config/rover/framework/driver/oc</Path>
+        <Checksum>30853D3035027DABD2A7C0A53DD06E62</Checksum>
+      </Template>
+      <Template>
+        <Name>sys_ports_static.c</Name>
+        <Path>Source Files/app/system_config/rover/framework/system/ports/src</Path>
+        <Checksum>2F788B971B19264EF44B994EBFC864E6</Checksum>
+      </Template>
+      <Template>
+        <Name>system_tasks.c</Name>
+        <Path>Source Files/app/system_config/rover</Path>
+        <Checksum>E6526BB852B20D91DDEAE8391CFA24C6</Checksum>
+      </Template>
+      <Template>
+        <Name>motorapp.h</Name>
+        <Path>Header Files/app</Path>
+      </Template>
+      <Template>
         <Name>motorapp.c</Name>
         <Path>Source Files/app</Path>
       </Template>
       <Template>
-        <Name>FreeRTOSConfig.h</Name>
-        <Path>Header Files/app/system_config/rover</Path>
-        <Checksum>0C9573BE174B68F411CC2F91C809CDE5</Checksum>
+        <Name>uart_tx_app.h</Name>
+        <Path>Header Files/app</Path>
       </Template>
       <Template>
         <Name>main.c</Name>
@@ -172,9 +209,8 @@
         <Checksum>1B968DA82B5DD869A6119C3B7628D753</Checksum>
       </Template>
       <Template>
-        <Name>system_init.c</Name>
-        <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>2DA289669F4752888AB9A31F9C0E864F</Checksum>
+        <Name>uart_rx_app.h</Name>
+        <Path>Header Files/app</Path>
       </Template>
       <Template>
         <Name>system_exceptions.c</Name>
@@ -184,7 +220,7 @@
       <Template>
         <Name>system_interrupt.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>F2E9712820DF87D4F7993B5B7C881F51</Checksum>
+        <Checksum>B4046ACFC0D6CAB82DBE392BEC332DE5</Checksum>
       </Template>
       <Template>
         <Name>drv_tmr_static.h</Name>
@@ -199,36 +235,22 @@
       <Template>
         <Name>system_interrupt_a.S</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>B6CBE423647A8929F1046AB6F68B1BD1</Checksum>
+        <Checksum>208C38F4220EB3D701B5B9CC9CB6A378</Checksum>
       </Template>
       <Template>
-        <Name>drv_oc_static.h</Name>
-        <Path>Header Files/app/system_config/rover/framework/driver/oc</Path>
-        <Checksum>30853D3035027DABD2A7C0A53DD06E62</Checksum>
-      </Template>
-      <Template>
-        <Name>sys_ports_static.c</Name>
-        <Path>Source Files/app/system_config/rover/framework/system/ports/src</Path>
-        <Checksum>2F788B971B19264EF44B994EBFC864E6</Checksum>
+        <Name>drv_usart_static.c</Name>
+        <Path>Source Files/app/system_config/rover/framework/driver/usart</Path>
+        <Checksum>EABF0C55835D1911E2FF5A9CF07E2301</Checksum>
       </Template>
       <Template>
         <Name>system_definitions.h</Name>
         <Path>Header Files/app/system_config/rover</Path>
-        <Checksum>E656559611A4AFD7B9646A94DC82803C</Checksum>
+        <Checksum>33E4B84B90D8F6560D9C2BDA85B43190</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/rover</Path>
         <Checksum>15DB5161E72DDE7A101D7EF5C9C22934</Checksum>
-      </Template>
-      <Template>
-        <Name>system_tasks.c</Name>
-        <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>E54FF817DFFE5E97B3C5919EBCD275A8</Checksum>
-      </Template>
-      <Template>
-        <Name>motorapp.h</Name>
-        <Path>Header Files/app</Path>
       </Template>
       <Template>
         <Name>sys_clk_static.h</Name>
@@ -239,6 +261,10 @@
         <Name>drv_tmr_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/driver/tmr/src</Path>
         <Checksum>34ED7782B3E2217517D9C8BE54D228D5</Checksum>
+      </Template>
+      <Template>
+        <Name>uart_rx_app.c</Name>
+        <Path>Source Files/app</Path>
       </Template>
     </Templates>
     <CompilerItems>

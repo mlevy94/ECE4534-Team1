@@ -34,7 +34,7 @@ class Listener:
       self.listener = socket()
     try:
       self.listener.bind((getIPAddr(), getPort()))
-      self.listener.listen()
+      self.listener.listen(0)
       print("Listening on {}:{}".format(getIPAddr(), getPort()))
       while 1:
         newSocket, addr = self.listener.accept()

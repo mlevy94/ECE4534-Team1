@@ -73,9 +73,19 @@ typedef struct {
 #define CLIENT_ROLE         0x04
 #define INITIALIZE          0x08
 #define READY_TO_START      0x10
-#define MOTOR_MOVE          0x11
+#define ROVER_MOVE          0x11
 #define OBJECT_POS          0x14
 #define TOKEN_FOUND         0x18
+
+///////////////////////////////////////////////////////////////////////////////
+// ROVER_MOVE defines
+///////////////////////////////////////////////////////////////////////////////
+
+#define ROVER_FORWARD      0x01
+#define ROVER_BACKWARD     0x02
+#define ROVER_LEFT         0x04
+#define ROVER_RIGHT        0x08
+#define ROVER_STOP         0x10
 
 ///////////////////////////////////////////////////////////////////////////////
 // Internal message structure for passing between threads
@@ -90,6 +100,12 @@ typedef struct{
 InternalMessage makeMessage(char msgType, char* msg);
 InternalMessage makeMessageChar(char msgType, char val);
 InternalMessage makeMessageInt(char msgType, int val);
+
+///////////////////////////////////////////////////////////////////////////////
+// ROVER_MOVE helpers
+///////////////////////////////////////////////////////////////////////////////
+
+InternalMessage makeRoverMove(char direction, char distance);
 
 #ifdef	__cplusplus
 }

@@ -54,7 +54,7 @@ NET_STAT             = 0x02
 CLIENT_ROLE          = 0x04
 INITIALIZE           = 0x08
 READY_TO_START       = 0x10
-MOTOR_MOVE           = 0x11
+ROVER_MOVE           = 0x11
 OBJECT_POS           = 0x14
 TOKEN_FOUND          = 0x18
 
@@ -65,10 +65,18 @@ VAL_TO_MSG = OrderedDict((
   (CLIENT_ROLE, "Client Role"),
   (INITIALIZE, "Initialize"),
   (READY_TO_START, "Ready to Start"),
-  (MOTOR_MOVE, "Moter Move"),
+  (ROVER_MOVE, "Rover Move"),
   (OBJECT_POS, "Object Position"),
   (TOKEN_FOUND, "Token Found"),
 ))
+
+########## ROVER MOVE DEFINES #############
+
+ROVER_FORWARD       = 0x01
+ROVER_BACKWARD      = 0x02
+ROVER_LEFT          = 0x04
+ROVER_RIGHT         = 0x08
+ROVER_STOP          = 0x10
 
 ########## MESSAGE SPECIFIC VALUES ########
 MAX_MSG_COUNT = 255

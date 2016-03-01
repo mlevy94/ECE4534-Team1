@@ -32,3 +32,12 @@ InternalMessage makeMessageInt(char msgType, int val) {
     newMsg.msg[4] = '\0';
     return newMsg;
 }
+
+InternalMessage makeRoverMove(char direction, char distance) {
+    InternalMessage newMsg;
+    newMsg.type = ROVER_MOVE;
+    newMsg.msg[0] = direction;
+    newMsg.msg[1] = distance;
+    newMsg.msg[2] = '\0';
+    return newMsg;
+}

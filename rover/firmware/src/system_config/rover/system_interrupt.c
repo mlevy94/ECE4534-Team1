@@ -63,7 +63,14 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <xc.h>
 #include <sys/attribs.h>
 #include "motorapp.h"
+#include "uart_tx_app.h"
+#include "uart_rx_app.h"
 #include "system_definitions.h"
+
+#include <queue.h>
+#include "comm.h"
+#include "debug.h"
+#include "txbuffer_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -79,6 +86,81 @@ void IntHandlerDrvTmrInstance0(void)
     PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
 
 }
+ 
+QueueHandle_t txbufferQ;
+void initializeTXBufferQ() {
+    txbufferQ = xQueueCreate(TX_BUF_SIZE, 8);
+}
+
+BaseType_t addToTXBufferQ(char msg) {
+    // Turn TX Interrupt on
+    PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
+    return xQueueSend(txbufferQ, &msg, portMAX_DELAY);
+}
+    
+BaseType_t addToTXBufferQFromISR(char msg) {
+    PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
+    return xQueueSendFromISR(txbufferQ, &msg, 0);
+}
+
+
+void IntHandlerDrvUsartInstance0(void)
+{
+#ifdef DEBUG_ON
+    setDebugVal(INT_UART0_START);
+#endif
+    char sendbyte;
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT)){
+#ifdef DEBUG_ON
+        setDebugVal(INT_UART0_TX);
+#endif
+        while(!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)) {
+            if(xQueueReceiveFromISR(txbufferQ, &sendbyte, 0)) {
+               PLIB_USART_TransmitterByteSend(USART_ID_1, sendbyte);
+            }
+            else {
+               // nothing to write. Disable interrupt
+               PLIB_INT_SourceDisable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
+               break;
+            }
+        }
+    }
+
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_RECEIVE)){
+#ifdef DEBUG_ON
+        setDebugVal(INT_UART0_RX);
+#endif
+        // while there are characters to read
+        while(PLIB_USART_ReceiverDataIsAvailable(USART_ID_1)){
+            // read a character
+            sendbyte = PLIB_USART_ReceiverByteReceive(USART_ID_1);
+            addToUartRXQFromISR(sendbyte);
+        }
+    }
+    
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_1_ERROR)){
+        //not sure what we are doing yet
+    }
+
+    /* Clear pending interrupt */
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_ERROR);
+#ifdef DEBUG_ON
+    setDebugVal(INT_UART0_END);
+#endif
+}
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+
+ 
+ 
  
  
 /*******************************************************************************

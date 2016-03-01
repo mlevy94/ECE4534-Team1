@@ -118,6 +118,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define DRV_TMR_INTERRUPT_SOURCE_IDX0       INT_SOURCE_TIMER_2
  
  
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Middleware & Other Library Configuration

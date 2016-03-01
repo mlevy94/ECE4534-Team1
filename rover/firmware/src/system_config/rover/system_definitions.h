@@ -58,6 +58,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system/int/sys_int.h"
 #include "driver/tmr/drv_tmr_static.h"
 #include "peripheral/int/plib_int.h"
+#include "driver/usart/drv_usart_static.h"
+#include "peripheral/usart/plib_usart.h"
+#include "peripheral/int/plib_int.h"
 #include "system/ports/sys_ports.h"
 
 
@@ -65,6 +68,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "FreeRTOS.h"
 #include "task.h"
 #include "motorapp.h"
+#include "uart_tx_app.h"
+#include "uart_rx_app.h"
 
 
 // DOM-IGNORE-BEGIN
