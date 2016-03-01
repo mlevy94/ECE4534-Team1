@@ -51,7 +51,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_definitions.h"
 #include "txbuffer_public.h"
 #include "debug.h"
-#include "initDelay.h"
 
 
 // ****************************************************************************
@@ -72,7 +71,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 /*** DEVCFG1 ***/
 
 #pragma config FNOSC =      FRCPLL
-#pragma config FSOSCEN =    ON
+#pragma config FSOSCEN =    OFF
 #pragma config IESO =       ON
 #pragma config POSCMOD =    OFF
 #pragma config OSCIOFNC =   OFF
@@ -84,8 +83,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 /*** DEVCFG2 ***/
 
 #pragma config FPLLIDIV =   DIV_2
-#pragma config FPLLMUL =    MUL_24
-#pragma config FPLLODIV =   DIV_2
+#pragma config FPLLMUL =    MUL_20
+#pragma config FPLLODIV =   DIV_1
 #pragma config UPLLIDIV =   DIV_2
 #pragma config UPLLEN =     OFF
 
@@ -207,8 +206,6 @@ void SYS_Initialize ( void* data )
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_TX_BUF);
 #endif
-    
-    initializeTimer(); // Initializing one shot timer
     
     /* Initialize the Application */
     APP_Initialize();

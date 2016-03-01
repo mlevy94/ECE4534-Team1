@@ -102,16 +102,6 @@ BaseType_t addToUartRXQFromISR(char msg) {
     return xQueueSendFromISR(uart_rx_appData.rxMessageQ, &msg, 0);
 }
 
-BaseType_t addToUartSentQ(char num, InternalMessage msg) {
-    SentMessage newMsg = { num, msg };
-    return xQueueSend(uart_rx_appData.sentMessageQ, &newMsg, portMAX_DELAY);
-}
-
-BaseType_t addToUartSentQFromISR(char num, InternalMessage msg) {
-    SentMessage newMsg = { num, msg };
-    return xQueueSendFromISR(uart_rx_appData.sentMessageQ, &newMsg, 0);
-}
-
 int getChecksum(NetMessage msg) {
     int i;
     int checksum = msg.sender + msg.number + msg.type + msg.msgsize;
@@ -122,37 +112,26 @@ int getChecksum(NetMessage msg) {
 }
 
 InternalMessage processMessage(NetMessage msg) {
-    // check message for errors
-    if (msg.checksum == getChecksum(msg)) {
-        // check for any missed messages and request them
-        for (; uart_rx_appData.msgCount < msg.number; uart_rx_appData.msgCount++) {
-            priorityAddToUartTXQ(makeMessageChar(MSG_REQUEST, uart_rx_appData.msgCount));
-        }
-        // increment message once more.
-        uart_rx_appData.msgCount++;
-        // terminate message properly. Required for next step.
-        if (msg.msgsize < INTERNAL_MSG_SIZE) {
-            msg.msg[msg.msgsize] = '\0';
-        }
-        return makeMessage(msg.type, msg.msg);
+    uart_rx_appData.msgCount++;
+    // terminate message properly. Required for next step.
+    if (msg.msgsize < INTERNAL_MSG_SIZE) {
+        msg.msg[msg.msgsize] = '\0';
     }
-    else {
-        return makeMessageChar(BAD_MSG, 0);
-    }
+    return makeMessage(msg.type, msg.msg);
 }
 
 void sortMessage(InternalMessage msg) {
-    // place message in correct Q based on type field
     int i;
+    // add message types here. the case should place the messages in Q's for
+    // the correct thread to act upon. DEBUG_MSG are just printed to the debug
+    // line one byte at a time.
     switch(msg.type) {
-        case MSG_REQUEST:
-            
-            break;
         case DEBUG_MSG:
-        default:
             for (i = 0; msg.msg[i] != '\0'; i++) {
                 setDebugVal(msg.msg[i]);
             }
+            break;
+        default:
             break;
     }
 }
@@ -191,45 +170,39 @@ void UART_RX_APP_Initialize ( void )
 
 void UART_RX_APP_Tasks ( void )
 {
-    /*
-     * Five second Delay Timer
-     */
-    while(!START_EXECUTION);
-    
     char inChar;
+    int i;
     InternalMessage processedMsg;
     while(1) {
 #ifdef DEBUG_ON
         setDebugVal(TASK_UART_RX_APP);
 #endif
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
+            // get start byte
             if ((inChar & 0xff) == START_BYTE) {
                 NetMessage inmsg;
+                // get sender
                 while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
                 inmsg.sender = inChar;
+                // get message number
                 while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
                 inmsg.number = inChar;
+                // get message type
                 while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
                 inmsg.type = inChar;
+                // get message length
                 while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
                 inmsg.msgsize = inChar;
-                int i;
+                // get message
                 for (i = 0; i < inmsg.msgsize; i++ ) {
                     while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
                     inmsg.msg[i] = inChar;
                 }
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                inmsg.checksum = (int)(inChar & 0xff) << 8;
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                inmsg.checksum += (inChar & 0xff);
+                // get end byte
                 while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
                 if ((inChar & 0xff) == END_BYTE) {
-                    processedMsg = processMessage(inmsg);
-                    // check for error message
-                    if (processedMsg.type != BAD_MSG) {
-                        // place in correct Q based on message type
-                        sortMessage(processedMsg);
-                    }
+                    // place in correct Q based on message type
+                    sortMessage(processMessage(inmsg));
                 }
             }
         }

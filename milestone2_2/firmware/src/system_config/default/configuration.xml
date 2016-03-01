@@ -184,7 +184,7 @@
       <Template>
         <Name>FreeRTOSConfig.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>FCE56BD0E4EBE36356D2BF98A84AD160</Checksum>
+        <Checksum>614346027C68ABCABC6B743F1C25D4F2</Checksum>
       </Template>
       <Template>
         <Name>sys_clk_static.h</Name>
@@ -208,7 +208,7 @@
       <Template>
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>18A61A6B6E0733677466277D38E2F8D9</Checksum>
+        <Checksum>9B39D039CB971C92134116A642E3C065</Checksum>
       </Template>
       <Template>
         <Name>main.c</Name>
@@ -245,7 +245,7 @@
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>FA99FF79A118E249046A4F31FA16114B</Checksum>
+        <Checksum>3CC11D481FCA7D4E112FFE61ADD62107</Checksum>
       </Template>
       <Template>
         <Name>app.h</Name>

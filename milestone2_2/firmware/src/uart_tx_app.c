@@ -113,13 +113,8 @@ BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg) {
 void packAndSend(InternalMessage msg) {
     int i = 0;
     int msgSize = 0;
-    int checksum = 0;
-    // get size of message and its checksum
-    for (msgSize = 0; msg.msg[msgSize] != '\0' && msgSize <= INTERNAL_MSG_SIZE; msgSize++) {
-        checksum += msg.msg[msgSize];
-    }
-    checksum += MY_ROLE + uart_tx_appData.msgCount + 
-                msg.type + msgSize;
+    // get size of message
+    for (msgSize = 0; msg.msg[msgSize] != '\0' && msgSize <= INTERNAL_MSG_SIZE; msgSize++);
     addToTXBufferQ(START_BYTE);
     addToTXBufferQ(MY_ROLE);
     addToTXBufferQ(uart_tx_appData.msgCount);
@@ -129,11 +124,7 @@ void packAndSend(InternalMessage msg) {
     for (i = 0; i < msgSize; i++) {
         addToTXBufferQ(msg.msg[i]);
     }
-    addToTXBufferQ((checksum >> 8) & 0xff);
-    addToTXBufferQ(checksum & 0xff);
     addToTXBufferQ(END_BYTE);
-    // cache sent message
-    //addToUartSentQ(uart_tx_appData.msgCount, msg);
     // update message count
     if (uart_tx_appData.msgCount < MAX_MSG_COUNT) {
         uart_tx_appData.msgCount++;
@@ -174,12 +165,7 @@ void UART_TX_APP_Initialize ( void )
  */
 
 void UART_TX_APP_Tasks ( void )
-{
-    /*
-     * Five second Delay Timer
-     */
-    while(!START_EXECUTION);
-    
+{    
 #ifdef DEBUG_ON
     setDebugVal(TASK_UART_TX_APP);
 #endif
@@ -195,9 +181,6 @@ void UART_TX_APP_Tasks ( void )
         setDebugVal(TASK_UART_TX_APP);
 #endif
         if (xQueueReceive(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY)) {
-            if (msg.type == MSG_REQUEST) {
-                setDebugVal(253);
-            }
             packAndSend(msg);
         }
     }

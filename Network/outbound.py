@@ -1,5 +1,5 @@
-from queue import Queue
 from configs import *
+from socket import SHUT_RDWR
 import threading
 
 
@@ -7,12 +7,12 @@ import threading
 
 class OutboundWorker:
 
-  def __init__(self, clientList, clientDict={}):
+  def __init__(self, queue, clientList, clientDict={}):
     if not isinstance(clientList, list):
       clientList = [clientList]
     self.clientList = clientList
     self.clientDict = clientDict
-    self.queue = Queue()
+    self.queue = queue
     self.thread = None
 
   def start(self):
@@ -23,26 +23,37 @@ class OutboundWorker:
     while 1:
       msg = self.queue.get()
       # check for predefined target
-      if msg.target is not None:
+      if msg.target:
         if msg.msgtype == CLIENT_ROLE:
           if msg.msg[0] != CLIENT:
             self.clientList.remove(msg.target)
           self.clientDict[msg.msg[0]] = msg.target
-          print("Role Assigned: {} - {}".format(VAL_TO_ROLE[msg.msg[0]], msg.target.name()))
-        elif isinstance(msg.target, list):
-          for target in msg.target:
-            target.send(msg)
+          print("Role Assigned: {} - {}".format(VAL_TO_ROLE[msg.msg[0]], msg.target.address))
         else:
-          msg.target.send(msg)
+          for target in msg.target:
+            if target.send(msg):
+              print("Sent {}: {} - {}".format(msg.target.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+            else:
+              self.clientDisconnect(target)
         self.queue.task_done()
         continue
       # send to client list
       for client in self.clientList:
         try:
-          client.send(msg)
-          print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
-        except ConnectionResetError:
-          self.clientList.remove(client)
-          print("Client Disconnected: {}".format(client.address))
+          if client.send(msg):
+            print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+          else:
+            self.clientDisconnect(client)
+        except (ConnectionResetError, BrokenPipeError):
+          self.clientDisconnect(client)
+
       self.queue.task_done()
 
+  def clientDisconnect(self, client):
+    try:
+      client.client.shutdown(SHUT_RDWR)
+      client.client.close()
+    except:
+      pass
+    self.clientList.remove(client)
+    print("Client Disconnected: {}".format(client.address))
