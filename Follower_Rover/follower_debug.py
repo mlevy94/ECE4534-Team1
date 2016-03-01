@@ -51,8 +51,8 @@ def main():
   listener.start()
   while True:
     recv_queue_data = listener.queue.get()
-    recv_data = recv_queue_data.InternalMessage.msgtype
-    distance = recv_queue_data.InternalMessage.msg
+    recv_data = recv_queue_data.msgtype
+    distance = recv_queue_data.msg
     if recv_data == 0x05: # Follower to move forward
       totalMoves(distance)
       print ("Received Follower move forward")
