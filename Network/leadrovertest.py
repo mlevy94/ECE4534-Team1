@@ -32,7 +32,11 @@ def cmdInput(clientList):
       if msg is not None:
         for client in clientList:
           print("Message Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
-          client.send(msg)
+          try:
+            client.send(msg)
+          except (ConnectionResetError, BrokenPipeError):
+            clientList.remove(client)
+            print("Client Disconnected: {}".format(client.address))
   except KeyboardInterrupt:
     pass
 

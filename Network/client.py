@@ -4,7 +4,15 @@ import threading
 
 class ClientWorker:
 
-  def __init__(self, client, queue, address=None):
+  def __init__(self, client, queue, address=None, writefunc=None, readfunc=None):
+    if writefunc is None:
+      self.writefunc = self.client.sendall
+    else:
+      self.writefunc = writefunc
+    if readfunc is None:
+      self.readfunc = self.client.read
+    else:
+      self.readfunc = readfunc
     if address is None:
       self.address = client.getsockname()
     self.queue = queue
@@ -16,7 +24,7 @@ class ClientWorker:
     self.clientConnected = True
 
   def start(self):
-    self.client.send(bytes([0x50 for _ in range(30)]))
+    self.writefunc(bytes([0x50 for _ in range(30)]))
     self.queue.put(InternalMessage(ROUTER, INITIALIZE, b'1', self))
     self.thread = threading.Thread(target=self._clientRecv, daemon=True)
     self.thread.start()
@@ -26,7 +34,7 @@ class ClientWorker:
     try:
       serialstream = b''
       while 1:
-        serialstream += self.client.recv(4096)
+        serialstream += self.readfunc(4096)
         startbyte = serialstream.find(STARTBYTE)
         if startbyte < 0 or len(serialstream) < HEADER_SIZE:
           # keep looking for start byte or wait for more data
@@ -76,5 +84,5 @@ class ClientWorker:
       msgsize= len(intmsg.msg),
       msg= intmsg.msg,
     )
-    self.client.sendall(netmsg.serialize())
+    self.writefunc(netmsg.serialize())
     return True
