@@ -16,8 +16,11 @@ class ClientWorker:
     self.clientConnected = True
 
   def start(self):
+    self.client.send(bytes([0x50 for _ in range(30)]))
+    self.queue.put(InternalMessage(ROUTER, INITIALIZE, b'1', self))
     self.thread = threading.Thread(target=self._clientRecv, daemon=True)
     self.thread.start()
+
 
   def _clientRecv(self):
     try:
