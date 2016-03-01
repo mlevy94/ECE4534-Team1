@@ -52,21 +52,38 @@ ROLE_TO_VAL = OrderedDict((
 DEBUG_MSG            = 0x01
 NET_STAT             = 0x02
 CLIENT_ROLE          = 0x04
+FOLLOWER_FWD         = 0x05 # Tells Follower to move forward
+FOLLOWER_BKW         = 0x06 # Tells Follower to move backward
+FOLLOWER_LFT         = 0x07 # Tells Follower to move left
 INITIALIZE           = 0x08
+FOLLOWER_RHT         = 0x09 # Tells Follower to move right
 READY_TO_START       = 0x10
 MOTOR_MOVE           = 0x11
+FOLLOWER_TFD         = 0x13 # Follower reports found token
 OBJECT_POS           = 0x14
+SCAN_SERVO           = 0x15 # Scanning Follower Servo
+SCAN_LEAD_FND        = 0x16 # Scan returned Lead Found
+SCAN_OBJ_FND         = 0x17 # Scan returned Object Found
 TOKEN_FOUND          = 0x18
+MOTOR_MOVE           = 0x20
 
 # value to message conversion
 VAL_TO_MSG = OrderedDict((
   (DEBUG_MSG, "Debug Message"),
   (NET_STAT, "Network Statistic"),
   (CLIENT_ROLE, "Client Role"),
+  (FOLLOWER_FWD, "Follower Forward"),
+  (FOLLOWER_BKW, "Follower Backward"),
+  (FOLLOWER_LFT, "Follower Left"),
   (INITIALIZE, "Initialize"),
+  (FOLLOWER_RHT, "Follower Right"),
   (READY_TO_START, "Ready to Start"),
   (MOTOR_MOVE, "Moter Move"),
+  (FOLLOWER_TFD, "Follower Token Found"),
   (OBJECT_POS, "Object Position"),
+  (SCAN_SERVO, "Scanning Follower Servo"),
+  (SCAN_LEAD_FND, "Scan Lead Found"),
+  (SCAN_OBJ_FND, "Scan Object Found"),
   (TOKEN_FOUND, "Token Found"),
 ))
 
