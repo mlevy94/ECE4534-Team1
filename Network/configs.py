@@ -68,8 +68,8 @@ TOKEN_FOUND          = 0x18
 MOTOR_MOVE           = 0x20
 BLANK                = 0x21
 TOKEN                = 0x22
-LEAD_ROVER           = 0x23
-FOLLOWER_ROVER       = 0x24
+LEAD_ROVER_POS       = 0x23
+FOLLOWER_ROVER_POS   = 0x24
 OBSTACLE             = 0x25
 ALG_TIME             = 0x26
 
@@ -152,6 +152,7 @@ def bytetoval(val):
     else:
       return val
 
+# objectType is defined in the message_types
 def makeObjPosMsg(objectType, x, y, orientation):
   str = bytes([objectType])
   str += bytes([x >> 8 & 0xff, x & 0xff])
