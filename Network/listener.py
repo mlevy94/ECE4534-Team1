@@ -9,9 +9,7 @@ from configs import *  # too many variables to import explicitly
 
 class Listener:
 
-  def __init__(self, queue=None, writefunc=None, readfunc=None):
-    self.writefunc = writefunc
-    self.readfunc = readfunc
+  def __init__(self, queue=None):
     self.clientList = []
     self.clientDict = {}
     if queue is None:
@@ -40,7 +38,7 @@ class Listener:
       print("Listening on {}:{}".format(getIPAddr(), getPort()))
       while 1:
         newSocket, addr = self.listener.accept()
-        newClient = ClientWorker(newSocket, self.queue, addr, self.writefunc, self.readfunc)
+        newClient = ClientWorker(newSocket, self.queue, addr)
         newClient.start()
         self.clientList.append(newClient)
         print("Client connected from {}".format(addr))
