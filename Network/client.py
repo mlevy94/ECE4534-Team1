@@ -10,7 +10,7 @@ class ClientWorker:
     else:
       self.writefunc = writefunc
     if readfunc is None:
-      self.readfunc = self.client.read
+        self.readfunc = self.client.read
     else:
       self.readfunc = readfunc
     if address is None:
@@ -21,11 +21,13 @@ class ClientWorker:
     self.address = address
     self.rcvmsgcount = 0
     self.sentmsgcount = 0
-    self.clientConnected = True
+    self.clientConnected = False
+    self.lock = threading.Lock()
 
   def start(self):
     self.writefunc(bytes([0x50 for _ in range(30)]))
-    self.queue.put(InternalMessage(ROUTER, INITIALIZE, b'1', self))
+    self.clientConnected = True
+    self.send(InternalMessage(ROUTER, INITIALIZE, b'1', self))
     self.thread = threading.Thread(target=self._clientRecv, daemon=True)
     self.thread.start()
 
@@ -71,18 +73,19 @@ class ClientWorker:
     self.queue.put(msg)
 
   def send(self, intmsg):
-    if not self.clientConnected:
-      return False
-    if self.sentmsgcount < MAX_MSG_COUNT:
-      self.sentmsgcount += 1
-    else:
-      self.sentmsgcount = 0
-    netmsg = NetMessage(
-      source= intmsg.client,
-      count= self.sentmsgcount,
-      msgtype= intmsg.msgtype,
-      msgsize= len(intmsg.msg),
-      msg= intmsg.msg,
-    )
-    self.writefunc(netmsg.serialize())
-    return True
+    with self.lock:
+      if not self.clientConnected:
+        return False
+      if self.sentmsgcount < MAX_MSG_COUNT:
+        self.sentmsgcount += 1
+      else:
+        self.sentmsgcount = 0
+      netmsg = NetMessage(
+        source= intmsg.client,
+        count= self.sentmsgcount,
+        msgtype= intmsg.msgtype,
+        msgsize= len(intmsg.msg),
+        msg= intmsg.msg,
+      )
+      self.writefunc(netmsg.serialize())
+      return True
