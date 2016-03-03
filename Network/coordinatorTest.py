@@ -5,7 +5,6 @@ from queue import Queue
 from threading import Thread
 from rover import rover
 from configs import *
-from struct import *
 
 # Opening USB serial communication to port "COM5"
 # The Baud Rate is 57600 bits / second
@@ -33,6 +32,15 @@ usbClient.start()
 
 print('Client thread started')
 # Look to receive a message <- Blocking
+outmsg = InternalMessage(CLIENT, DEBUG_MSG, b'hello')
+def outfunc():
+    try:
+        while True:
+            usbClient.send(outmsg)
+    except ConnectionError:
+        pass
+outthread = Thread(target=outfunc, daemon=True)
+outthread.start()
 while True:
     msg = usbQ.get()
     print(msg.msg)
