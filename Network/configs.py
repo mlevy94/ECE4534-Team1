@@ -66,6 +66,12 @@ SCAN_LEAD_FND        = 0x16 # Scan returned Lead Found
 SCAN_OBJ_FND         = 0x17 # Scan returned Object Found
 TOKEN_FOUND          = 0x18
 MOTOR_MOVE           = 0x20
+BLANK                = 0x21
+TOKEN                = 0x22
+LEAD_ROVER           = 0x23
+FOLLOWER_ROVER       = 0x24
+OBSTACLE             = 0x25
+ALG_TIME             = 0x26
 
 # value to message conversion
 VAL_TO_MSG = OrderedDict((
@@ -145,3 +151,13 @@ def bytetoval(val):
       return val[0]
     else:
       return val
+
+def makeObjPosMsg(objectType, x, y, orientation):
+  str = bytes([objectType])
+  str += bytes([x >> 8 & 0xff, x & 0xff])
+  str += bytes([y >> 8 & 0xff, y & 0xff])
+  str += bytes([orientation])
+  return InternalMessage(CLIENT, OBJECT_POS, str)
+
+def roverMove(direction, distance):
+  return InternalMessage(CLIENT, ROVER_MOVE, bytes([direction, distance]))
