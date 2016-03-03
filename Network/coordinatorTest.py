@@ -10,7 +10,7 @@ from configs import *
 # The Baud Rate is 57600 bits / second
 # No timeout occurs to provide continual blocking until the correct amount of bytes are received
 # Updated: Timeout will occur after 3 seconds to account for a readline (not knowing the size of the message)
-usb = serial.Serial(port='COM9', baudrate=57600)
+usb = serial.Serial(port='COM5', baudrate=57600)
 
 # Create a message queue for the serial communication
 usbQ = Queue()
@@ -37,12 +37,14 @@ def outfunc():
     try:
         while True:
             usbClient.send(outmsg)
-    except ConnectionError:
+    except serial.SerialException:
         pass
 outthread = Thread(target=outfunc, daemon=True)
-outthread.start()
+#outthread.start()
 while True:
     msg = usbQ.get()
+    if msg.msgtype == INITIALIZE:
+        usbClient.send(msg)
     print(msg.msg)
 
 
