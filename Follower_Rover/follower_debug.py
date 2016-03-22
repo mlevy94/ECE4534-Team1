@@ -112,9 +112,9 @@ def main():
   incoming_message_Thread = Thread(target=incoming_message_handle, args=[listener], daemon=True)
   listener.start()
   incoming_message_Thread.start()
-  while True:
-  #while incoming_message_Thread.is_alive(): print("True")
-  #listener.close()
+  while incoming_message_Thread.is_alive(): print("True")
+  
+  listener.close()
 
 if __name__ == "__main__":
   main()
