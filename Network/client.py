@@ -5,18 +5,18 @@ import threading
 class ClientWorker:
 
   def __init__(self, client, queue, address=None, writefunc=None, readfunc=None):
+    self.client = client
     if writefunc is None:
       self.writefunc = self.client.sendall
     else:
       self.writefunc = writefunc
     if readfunc is None:
-        self.readfunc = self.client.read
+        self.readfunc = self.client.recv
     else:
       self.readfunc = readfunc
     if address is None:
       self.address = client.getsockname()
     self.queue = queue
-    self.client = client
     self.thread = None
     self.address = address
     self.rcvmsgcount = 0
@@ -63,7 +63,7 @@ class ClientWorker:
         msg = netmsg.getMessage()
         if netmsg.msgtype == CLIENT_ROLE:
           msg.target = self
-        print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+        #print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
         self._put(msg)
         self.rcvmsgcount += 1
     except ConnectionResetError:
