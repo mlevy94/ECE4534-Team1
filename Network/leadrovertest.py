@@ -18,9 +18,9 @@ def cmdInput(clientList):
       elif keyin == "test":
         msg = None
       elif keyin == "f":
-        msg = roverMove(ROVER_FORWARD, 30)
+        msg = roverMove(ROVER_FORWARD, 4)
       elif keyin == "b":
-        msg = roverMove(ROVER_BACKWARD, 30)
+        msg = roverMove(ROVER_BACKWARD, 4)
       elif keyin == "l":
         msg = roverMove(ROVER_LEFT, 90)
       elif keyin == "r":
@@ -31,9 +31,9 @@ def cmdInput(clientList):
         msg = None
       if msg is not None:
         for client in clientList:
-          print("Message Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
           try:
             client.send(msg)
+            print("Message Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
           except (ConnectionResetError, BrokenPipeError):
             clientList.remove(client)
             print("Client Disconnected: {}".format(client.address))

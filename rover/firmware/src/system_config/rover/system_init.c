@@ -194,6 +194,7 @@ void SYS_Initialize ( void* data )
     DRV_TMR0_Initialize();
  
     DRV_USART0_Initialize();
+     DRV_USART1_Initialize();
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_UART);
 #endif
@@ -209,6 +210,20 @@ void SYS_Initialize ( void* data )
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_SYS);
 #endif
+    
+    /*Setup the INT_SOURCE_EXTERNAL_2 and Enable it*/
+    SYS_INT_VectorPrioritySet(INT_VECTOR_INT2, INT_PRIORITY_LEVEL3);
+    SYS_INT_VectorSubprioritySet(INT_VECTOR_INT2, INT_SUBPRIORITY_LEVEL0);
+    SYS_INT_ExternalInterruptTriggerSet(INT_EXTERNAL_INT_SOURCE2,INT_EDGE_TRIGGER_RISING);
+    SYS_INT_SourceEnable(INT_SOURCE_EXTERNAL_2);
+
+    /*Setup the INT_SOURCE_EXTERNAL_1 and Enable it*/
+    SYS_INT_VectorPrioritySet(INT_VECTOR_INT1, INT_PRIORITY_LEVEL3);
+    SYS_INT_VectorSubprioritySet(INT_VECTOR_INT1, INT_SUBPRIORITY_LEVEL0);
+    SYS_INT_ExternalInterruptTriggerSet(INT_EXTERNAL_INT_SOURCE1,INT_EDGE_TRIGGER_RISING);
+    SYS_INT_SourceEnable(INT_SOURCE_EXTERNAL_1);
+    
+    
     /* Initialize Middleware */
     initializeTXBufferQ();
 #ifdef DEBUG_ON

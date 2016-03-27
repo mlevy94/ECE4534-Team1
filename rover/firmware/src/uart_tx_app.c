@@ -176,7 +176,6 @@ void UART_TX_APP_Tasks ( void )
 #endif
     char start;
     while(!xQueueReceive(uart_tx_appData.initQ, &start, portMAX_DELAY));
-    setDebugVal(0x55);
     InternalMessage msg;
     // declare role
     msg.type = CLIENT_ROLE;

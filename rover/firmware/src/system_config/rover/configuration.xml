@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<configuration version="1.0.7.9">
+<configuration version="1.0.7.16">
   <General>
     <HarmonyPath path="../../../../../../../microchip/harmony/v1_06_02"/>
     <ForceOptimization flag="true"/>
@@ -151,7 +151,7 @@
       <Template>
         <Name>FreeRTOSConfig.h</Name>
         <Path>Header Files/app/system_config/rover</Path>
-        <Checksum>718285948B47F384765F8CB0EC142F2C</Checksum>
+        <Checksum>614346027C68ABCABC6B743F1C25D4F2</Checksum>
       </Template>
       <Template>
         <Name>uart_tx_app.c</Name>
@@ -160,12 +160,13 @@
       <Template>
         <Name>drv_usart_static.h</Name>
         <Path>Header Files/app/system_config/rover/framework/driver/usart</Path>
-        <Checksum>66C127084540B78CD4F78E2FBCC6D29F</Checksum>
+        <Checksum>78816446BC37CA452E12C9F1F3586B2C</Checksum>
       </Template>
       <Template>
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>C7B2B03E04B0F598A2471C7B9E4846D1</Checksum>
+        <Checksum>EC0E61E2224F8D7F951E15E0928566D5</Checksum>
+        <ProjectFileChecksum>228ADBEAED55A3E2D27C439A16F8710C</ProjectFileChecksum>
       </Template>
       <Template>
         <Name>drv_oc_static.h</Name>
@@ -175,12 +176,12 @@
       <Template>
         <Name>sys_ports_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/system/ports/src</Path>
-        <Checksum>2F788B971B19264EF44B994EBFC864E6</Checksum>
+        <Checksum>A20CF5C89A0DA804F0837FBE133CFBF8</Checksum>
       </Template>
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>E6526BB852B20D91DDEAE8391CFA24C6</Checksum>
+        <Checksum>190CADB020599A280F7F08402A4A08E5</Checksum>
       </Template>
       <Template>
         <Name>motorapp.h</Name>
@@ -201,7 +202,7 @@
       <Template>
         <Name>drv_oc_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/driver/oc/src</Path>
-        <Checksum>1BE69B086FAC665277A4EADEBE9109BB</Checksum>
+        <Checksum>C1203EAA8C590EC31C56808BF93029B0</Checksum>
       </Template>
       <Template>
         <Name>sys_clk_static.c</Name>
@@ -220,7 +221,8 @@
       <Template>
         <Name>system_interrupt.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>B4046ACFC0D6CAB82DBE392BEC332DE5</Checksum>
+        <Checksum>DEF21207BCBE76A90C0B8E1DC11DD4AF</Checksum>
+        <ProjectFileChecksum>8B3E6EF6F8F777E59ADFB17344FDB057</ProjectFileChecksum>
       </Template>
       <Template>
         <Name>drv_tmr_static.h</Name>
@@ -235,12 +237,12 @@
       <Template>
         <Name>system_interrupt_a.S</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>208C38F4220EB3D701B5B9CC9CB6A378</Checksum>
+        <Checksum>038BA52CECDC3D12BD271C2E8EA6EBC6</Checksum>
       </Template>
       <Template>
         <Name>drv_usart_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/driver/usart</Path>
-        <Checksum>EABF0C55835D1911E2FF5A9CF07E2301</Checksum>
+        <Checksum>5729E5B189AB354E41AE256F9696F51F</Checksum>
       </Template>
       <Template>
         <Name>system_definitions.h</Name>
@@ -250,7 +252,7 @@
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/rover</Path>
-        <Checksum>15DB5161E72DDE7A101D7EF5C9C22934</Checksum>
+        <Checksum>06DE09F1954A478D24D8F742866F863D</Checksum>
       </Template>
       <Template>
         <Name>sys_clk_static.h</Name>
@@ -260,7 +262,7 @@
       <Template>
         <Name>drv_tmr_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/driver/tmr/src</Path>
-        <Checksum>34ED7782B3E2217517D9C8BE54D228D5</Checksum>
+        <Checksum>44830BF004BA1E157F6DA569B7A97FA4</Checksum>
       </Template>
       <Template>
         <Name>uart_rx_app.c</Name>

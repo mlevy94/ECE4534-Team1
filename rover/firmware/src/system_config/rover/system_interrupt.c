@@ -71,6 +71,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "comm.h"
 #include "debug.h"
 #include "txbuffer_public.h"
+#include "motorapp_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -78,16 +79,30 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
+void IntHandlerExternalInterruptInstance0(void)
+{           
+    incLeftEn();
+    incMoveCount();
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_EXTERNAL_2);
+
+}
+
+void IntHandlerExternalInterruptInstance1(void)
+{        
+    incRightEn();
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_EXTERNAL_1);
+
+}
+
 void IntHandlerDrvTmrInstance0(void)
 
 {
     PLIB_TMR_Counter16BitClear(TMR_ID_2);
-    
     PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
 
 }
- 
-QueueHandle_t txbufferQ;
+
+static QueueHandle_t txbufferQ;
 void initializeTXBufferQ() {
     txbufferQ = xQueueCreate(TX_BUF_SIZE, 8);
 }
@@ -154,12 +169,27 @@ void IntHandlerDrvUsartInstance0(void)
  
  
 
+
+void IntHandlerDrvUsartInstance1(void)
+{
+
+
+    /* TODO: Add code to process interrupt here */
+
+    /* Clear pending interrupt */
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_TRANSMIT);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_ERROR);
+
+}
+ 
+ 
+
  
  
 
  
 
- 
  
  
  

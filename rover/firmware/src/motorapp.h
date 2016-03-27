@@ -87,14 +87,14 @@ extern "C" {
     determine the behavior of the application at various times.
 */
 
-typedef enum
-{
-	/* Application's state machine's initial state. */
-	MOTORAPP_STATE_INIT=0,
-
-	/* TODO: Define states used by the application state machine. */
-
-} MOTORAPP_STATES;
+typedef struct {
+    int16_t pwm;
+    uint16_t encoder;
+    uint16_t prevEncoder;
+    int16_t targetPWM;
+    uint16_t targetEncoder;
+    int16_t error;
+} Motor;
 
 
 // *****************************************************************************
@@ -110,14 +110,36 @@ typedef enum
     Application strings and buffers are be defined outside this structure.
  */
 
+/*
+ *  Motor Control MAX32 Pins:
+ *      Left Motor:
+ *          PIN  3 - OC1/PWM
+ *          PIN 78 - Direction
+ *          PIN 37 - Encoder1 (TMR2/Pin 22)
+ *          PIN  7 - Encoder2 INT2
+ * 
+ *      Right Motor:
+ *          PIN  5 - OC2/PWM
+ *          PIN  4 - Direction
+ *          PIN A6 - Encoder1 (TMR3/Pin 23)
+ *          PIN  2 - Encoder2 INT1
+ */
+
 typedef struct
 {
     /* The application's current state */
-    MOTORAPP_STATES state;
+    QueueHandle_t stopQ;
     QueueHandle_t motorQ;
-    uint16_t cmToms;
-    uint16_t leftOCVal;
-    uint16_t rightOCVal;
+    TimerHandle_t motorAdjTimer;
+    Motor leftMotorFull;
+    Motor leftMotorHalf;
+    Motor rightMotorFull;
+    Motor rightMotorHalf;
+    Motor stopMotor;
+    Motor* leftMotor;
+    Motor* rightMotor;
+    int16_t moveCounter;
+    int16_t moveStop;
 
 } MOTORAPP_DATA;
 

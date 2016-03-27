@@ -56,14 +56,31 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "motorapp.h"
 #include "motorapp_public.h"
 #include "peripheral/oc/plib_oc.h"
+#include "debug.h"
+#include "comm.h"
+#include "uart_tx_app_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: Global Data Definitions
 // *****************************************************************************
 // *****************************************************************************
-#define OC_LEFT  OC_ID_1
-#define OC_RIGHT OC_ID_2
+#define OC_LEFT  OC_ID_2
+#define OC_RIGHT OC_ID_1
+// Values for motor adjustment algorithm
+#define TARGET_MOVE_LEFT   26
+#define TARGET_MOVE_RIGHT  26
+#define TARGET_TURN_LEFT   17
+#define TARGET_TURN_RIGHT  17
+#define PWM_MAX_VAL      1000
+#define PWM_START_MAX     960
+#define PWM_START_HALF    500
+#define LEFT_ERROR          5
+#define LEFT_ERROR_INT      2
+#define RIGHT_ERROR        20
+#define RIGHT_ERROR_INT     1
+#define INCH_TO_EN        200
+#define DEG_TO_EN           8
 
 // *****************************************************************************
 /* Application Data
@@ -80,7 +97,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-MOTORAPP_DATA motorappData;
+MOTORAPP_DATA motorData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -114,53 +131,119 @@ void setRightForward(bool dir) {
     }
 }
 
-void motorStart() {
-    PLIB_TMR_Start(TMR_ID_2);
-    PLIB_OC_Enable(OC_LEFT);
-    PLIB_OC_Enable(OC_RIGHT);
+void motorStartMax() {
+    motorData.leftMotor = &motorData.leftMotorFull;
+    motorData.rightMotor = &motorData.rightMotorFull;
+}
+
+void motorStartHalf() {
+    motorData.leftMotor = &motorData.leftMotorHalf;
+    motorData.rightMotor = &motorData.rightMotorHalf;
 }
 
 void motorStop() {
-    PLIB_TMR_Stop(TMR_ID_2);
-    PLIB_OC_Disable(OC_LEFT);
-    PLIB_OC_Disable(OC_RIGHT);
+    motorData.leftMotor = &motorData.stopMotor;
+    motorData.rightMotor = &motorData.stopMotor;
 }
 
 void motorMove(char direction, char distance) {
     switch(direction) {
                 case(ROVER_FORWARD):
+                    setDebugVal(41);
                     setLeftForward(pdTRUE);
                     setRightForward(pdTRUE);
-                    motorStart();
+                    motorData.moveStop = distance * INCH_TO_EN;
+                    motorStartMax();
                     break;
                 case(ROVER_BACKWARD):
+                    setDebugVal(42);
                     setLeftForward(pdFALSE);
                     setRightForward(pdFALSE);
-                    motorStart();
+                    motorData.moveStop = distance * INCH_TO_EN;
+                    motorStartMax();
                     break;
                 case(ROVER_LEFT):
+                    setDebugVal(43);
                     setLeftForward(pdFALSE);
                     setRightForward(pdTRUE);
-                    motorStart();
+                    motorData.moveStop = distance * DEG_TO_EN;
+                    motorStartHalf();
                     break;
                 case(ROVER_RIGHT):
+                    setDebugVal(44);
                     setLeftForward(pdTRUE);
                     setRightForward(pdFALSE);
-                    motorStart();
+                    motorData.moveStop = distance * DEG_TO_EN;
+                    motorStartHalf();
                     break;
                 case(ROVER_STOP):
                 default:
+                    setDebugVal(45);
+                    motorData.moveStop = 0;
                     motorStop();
                     break;
             }
+    PLIB_OC_PulseWidth16BitSet(OC_LEFT, motorData.leftMotor->pwm);
+    PLIB_OC_PulseWidth16BitSet(OC_RIGHT, motorData.rightMotor->pwm);
+}
+
+void incLeftEn() {
+    motorData.leftMotor->encoder++;
+}
+
+void incRightEn() {
+    motorData.rightMotor->encoder++;
+}
+
+void incMoveCount() {
+    setDebugBool(pdTRUE);
+    if (motorData.moveStop == 0) {
+        setDebugVal(56);
+    }
+    else if (motorData.moveCounter == motorData.moveStop) {
+        setDebugVal(57);
+        if (xQueueSendFromISR(motorData.stopQ, &motorData.moveStop, 0)) {
+            setDebugVal(58);
+            motorData.moveCounter = 0;
+            motorData.moveStop == 0;
+        }
+    }
+    else {
+        setDebugVal(59);
+        motorData.moveCounter++;
+    }
+    setDebugBool(pdFALSE);
+}
+
+void pi(Motor* motor, int16_t errorC, int16_t errorCI) {
+    uint16_t encoder = motor->encoder - motor->prevEncoder;
+    motor->prevEncoder = motor->encoder;
+    int16_t error = (int16_t)(motor->targetEncoder - encoder);
+    motor->error += error;
+    motor->pwm = (error * errorC) + (motor->error * errorCI);
+    if (motor->pwm > PWM_MAX_VAL) {
+        motor->pwm = PWM_MAX_VAL;
+    }
+}
+
+void motorAdj() {
+    if (motorData.leftMotor == &motorData.stopMotor) {
+        return; // motors not running
+    }
+    pi(motorData.leftMotor, LEFT_ERROR, LEFT_ERROR_INT);
+    pi(motorData.rightMotor, RIGHT_ERROR, RIGHT_ERROR_INT);
+
+    // set adjusted values
+    PLIB_OC_PulseWidth16BitSet(OC_LEFT, motorData.leftMotor->pwm);
+    PLIB_OC_PulseWidth16BitSet(OC_RIGHT, motorData.rightMotor->pwm);
 }
 
 BaseType_t addToMotorQ(InternalMessage msg) {
-    return xQueueSend(motorappData.motorQ, &msg, portMAX_DELAY);
+    return xQueueSend(motorData.motorQ, &msg, portMAX_DELAY);
 }
 
 BaseType_t addToMotorQFromISR(InternalMessage msg) {
-    return xQueueSendFromISR(motorappData.motorQ, &msg, 0);
+    return xQueueSendFromISR(motorData.motorQ, &msg, 0);
 }
 
 // *****************************************************************************
@@ -177,12 +260,34 @@ BaseType_t addToMotorQFromISR(InternalMessage msg) {
     See prototype in motorapp.h.
  */
 
+void initMotor(Motor* motor, int16_t pwm, int16_t targetPWM, int16_t targetEncoder, int16_t error) {
+    motor->pwm = pwm;
+    motor->encoder = 0;
+    motor->prevEncoder = 0;
+    motor->targetPWM = targetPWM;
+    motor->targetEncoder = targetEncoder;
+    motor->error = error;
+}
+
 void MOTORAPP_Initialize ( void )
 {
-    motorappData.motorQ = xQueueCreate(10, 8);
-    motorappData.cmToms = 15;
-    motorappData.leftOCVal = 470;
-    motorappData.rightOCVal = 440;
+    motorData.stopQ = xQueueCreate(1, sizeof(int16_t)); 
+    motorData.motorQ = xQueueCreate(20, 8);
+    initMotor(&motorData.leftMotorFull, PWM_START_MAX, PWM_START_MAX, TARGET_MOVE_LEFT, PWM_START_MAX * 9 / 10);
+    initMotor(&motorData.rightMotorFull, PWM_START_MAX, PWM_START_MAX, TARGET_MOVE_RIGHT, PWM_START_MAX * 8 / 10);
+    initMotor(&motorData.leftMotorHalf, PWM_START_HALF, PWM_START_HALF, TARGET_TURN_LEFT, PWM_START_MAX * 6 / 10);
+    initMotor(&motorData.rightMotorHalf, PWM_START_HALF, PWM_START_HALF, TARGET_TURN_RIGHT, PWM_START_MAX * 6 / 10);
+    initMotor(&motorData.stopMotor, 0, 0, 0, 0);
+    motorData.moveCounter = 0;
+    motorData.moveStop = 0;
+    motorStop();
+    motorData.motorAdjTimer = xTimerCreate("motor adjust timer",
+                                              // Sets a timer frequency to 50 Hz
+                                              ( 3.3 * portTICK_PERIOD_MS ), 
+                                              pdTRUE,
+                                              (void *) 2,
+                                              motorAdj);
+    xTimerStart( motorData.motorAdjTimer, 0);
 }
 
 /******************************************************************************
@@ -195,13 +300,29 @@ void MOTORAPP_Initialize ( void )
 
 void MOTORAPP_Tasks ( void )
 {
+    PLIB_OC_Enable(OC_LEFT);
+    PLIB_OC_Enable(OC_RIGHT);
+    PLIB_TMR_Start(TMR_ID_2);
+    PLIB_TMR_Start(TMR_ID_3);
+    PLIB_TMR_Start(TMR_ID_4);
     setLeftForward(pdTRUE);
     setRightForward(pdTRUE);
     motorStop();
     InternalMessage msg;
+    int16_t go;
     while(1) {
-        if(xQueueReceive(motorappData.motorQ, &msg, portMAX_DELAY)) {
+        if(xQueueReceive(motorData.motorQ, &msg, portMAX_DELAY)) {
+            setDebugVal(100);
             motorMove(msg.msg[0], msg.msg[1]);
+            // wait until done with move to get next.
+            if ( msg.msg[1] > 0) {
+                setDebugVal(102);
+                while (!xQueueReceive(motorData.stopQ, &go, portMAX_DELAY));
+                setDebugVal(103);
+                motorStop();
+                PLIB_OC_PulseWidth16BitSet(OC_LEFT, motorData.leftMotor->pwm);
+                PLIB_OC_PulseWidth16BitSet(OC_RIGHT, motorData.rightMotor->pwm);
+            }
         }
     }
 }

@@ -30,7 +30,6 @@
             <itemPath>../src/system_config/rover/system_definitions.h</itemPath>
           </logicalFolder>
         </logicalFolder>
-        <itemPath>../src/motorapp.h</itemPath>
         <itemPath>../src/motorapp_public.h</itemPath>
         <itemPath>../src/comm.h</itemPath>
         <itemPath>../src/uart_tx_app.h</itemPath>
@@ -39,6 +38,7 @@
         <itemPath>../src/txbuffer_public.h</itemPath>
         <itemPath>../src/uart_rx_app_public.h</itemPath>
         <itemPath>../src/uart_tx_app_public.h</itemPath>
+        <itemPath>../src/motorapp.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">
@@ -131,12 +131,12 @@
             <itemPath>../src/system_config/rover/rtos_hooks.c</itemPath>
           </logicalFolder>
         </logicalFolder>
-        <itemPath>../src/motorapp.c</itemPath>
         <itemPath>../src/main.c</itemPath>
         <itemPath>../src/comm.c</itemPath>
         <itemPath>../src/uart_tx_app.c</itemPath>
         <itemPath>../src/uart_rx_app.c</itemPath>
         <itemPath>../src/debug.c</itemPath>
+        <itemPath>../src/motorapp.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="osal" projectFiles="true">
@@ -193,6 +193,7 @@
     <Elem>../src</Elem>
     <Elem>../../../../../../../microchip/harmony/v1_06_02</Elem>
     <Elem>../src/system_config/rover</Elem>
+    <Elem>../src/rover</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -238,7 +239,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../../../../../../../../../microchip/harmony/v1_06_02/framework;../src/system_config/rover/framework;../src/system_config/rover;../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX;../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
+                  value="../src;../../../../../../../../../microchip/harmony/v1_06_02/framework;../src/system_config/rover/framework;../src/rover;../src/system_config/rover;../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX;../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="true"/>

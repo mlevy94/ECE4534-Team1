@@ -14,6 +14,9 @@ extern "C" {
     
 #include "comm.h"
 
+void incLeftEn();
+void incRightEn();
+void incMoveCount();
 BaseType_t addToMotorQ(InternalMessage msg);
 BaseType_t addToMotorQFromISR(InternalMessage msg);
 
