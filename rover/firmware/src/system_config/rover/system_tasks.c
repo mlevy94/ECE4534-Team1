@@ -95,7 +95,7 @@ void SYS_Tasks ( void )
     /* Create OS Thread for MOTORAPP Tasks. */
     xTaskCreate((TaskFunction_t) _MOTORAPP_Tasks,
                 "MOTORAPP Tasks",
-                4096, NULL, 1, NULL);
+                4096, NULL, 4, NULL);
 
     /* Create OS Thread for UART_TX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_TX_APP_Tasks,

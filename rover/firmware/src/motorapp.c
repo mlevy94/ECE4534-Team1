@@ -68,19 +68,19 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define OC_LEFT  OC_ID_2
 #define OC_RIGHT OC_ID_1
 // Values for motor adjustment algorithm
-#define TARGET_MOVE_LEFT   26
-#define TARGET_MOVE_RIGHT  26
-#define TARGET_TURN_LEFT   17
-#define TARGET_TURN_RIGHT  17
-#define PWM_MAX_VAL      1000
-#define PWM_START_MAX     960
-#define PWM_START_HALF    500
-#define LEFT_ERROR          5
-#define LEFT_ERROR_INT      2
-#define RIGHT_ERROR        20
-#define RIGHT_ERROR_INT     1
-#define INCH_TO_EN        200
-#define DEG_TO_EN           8
+#define TARGET_MOVE_LEFT  250
+#define TARGET_MOVE_RIGHT 245
+#define TARGET_TURN_LEFT  100
+#define TARGET_TURN_RIGHT 110
+#define PWM_MAX_VAL     10000
+#define PWM_START_MAX    9600
+#define PWM_START_HALF   7000
+#define LEFT_ERROR          1
+#define LEFT_ERROR_INT      4
+#define RIGHT_ERROR         1
+#define RIGHT_ERROR_INT     4
+#define INCH_TO_EN        196
+#define DEG_TO_EN          35
 
 // *****************************************************************************
 /* Application Data
@@ -166,14 +166,14 @@ void motorMove(char direction, char distance) {
                     setDebugVal(43);
                     setLeftForward(pdFALSE);
                     setRightForward(pdTRUE);
-                    motorData.moveStop = distance * DEG_TO_EN;
+                    motorData.moveStop = (distance / 5) * DEG_TO_EN;
                     motorStartHalf();
                     break;
                 case(ROVER_RIGHT):
                     setDebugVal(44);
                     setLeftForward(pdTRUE);
                     setRightForward(pdFALSE);
-                    motorData.moveStop = distance * DEG_TO_EN;
+                    motorData.moveStop = (distance / 5) * DEG_TO_EN;
                     motorStartHalf();
                     break;
                 case(ROVER_STOP):
@@ -218,7 +218,7 @@ void incMoveCount() {
 void pi(Motor* motor, int16_t errorC, int16_t errorCI) {
     uint16_t encoder = motor->encoder - motor->prevEncoder;
     motor->prevEncoder = motor->encoder;
-    int16_t error = (int16_t)(motor->targetEncoder - encoder);
+    int16_t error = (int16_t)(motor->targetEncoder - (encoder * 10));
     motor->error += error;
     motor->pwm = (error * errorC) + (motor->error * errorCI);
     if (motor->pwm > PWM_MAX_VAL) {
@@ -273,10 +273,10 @@ void MOTORAPP_Initialize ( void )
 {
     motorData.stopQ = xQueueCreate(1, sizeof(int16_t)); 
     motorData.motorQ = xQueueCreate(20, 8);
-    initMotor(&motorData.leftMotorFull, PWM_START_MAX, PWM_START_MAX, TARGET_MOVE_LEFT, PWM_START_MAX * 9 / 10);
-    initMotor(&motorData.rightMotorFull, PWM_START_MAX, PWM_START_MAX, TARGET_MOVE_RIGHT, PWM_START_MAX * 8 / 10);
-    initMotor(&motorData.leftMotorHalf, PWM_START_HALF, PWM_START_HALF, TARGET_TURN_LEFT, PWM_START_MAX * 6 / 10);
-    initMotor(&motorData.rightMotorHalf, PWM_START_HALF, PWM_START_HALF, TARGET_TURN_RIGHT, PWM_START_MAX * 6 / 10);
+    initMotor(&motorData.leftMotorFull, PWM_START_MAX, PWM_START_MAX, TARGET_MOVE_LEFT, PWM_START_MAX / LEFT_ERROR_INT);
+    initMotor(&motorData.rightMotorFull, PWM_START_MAX, PWM_START_MAX, TARGET_MOVE_RIGHT, PWM_START_MAX / RIGHT_ERROR_INT);
+    initMotor(&motorData.leftMotorHalf, PWM_START_HALF, PWM_START_HALF, TARGET_TURN_LEFT, PWM_START_HALF / LEFT_ERROR_INT);
+    initMotor(&motorData.rightMotorHalf, PWM_START_HALF, PWM_START_HALF, TARGET_TURN_RIGHT, PWM_START_HALF / RIGHT_ERROR_INT);
     initMotor(&motorData.stopMotor, 0, 0, 0, 0);
     motorData.moveCounter = 0;
     motorData.moveStop = 0;

@@ -101,6 +101,14 @@ ROVER_LEFT          = 0x04
 ROVER_RIGHT         = 0x08
 ROVER_STOP          = 0x10
 
+VAL_TO_ROV = OrderedDict((
+  (ROVER_FORWARD, "Rover Forward"),
+  (ROVER_BACKWARD, "Rover Backward"),
+  (ROVER_LEFT, "Rover Left"),
+  (ROVER_RIGHT, "Rover Right"),
+  (ROVER_STOP, "Rover Stop"),
+))
+
 ########## MESSAGE SPECIFIC VALUES ########
 MAX_MSG_COUNT = 255
 HEADER_SIZE = 5

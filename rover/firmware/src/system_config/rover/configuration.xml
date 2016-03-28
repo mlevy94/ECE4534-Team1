@@ -181,7 +181,7 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>190CADB020599A280F7F08402A4A08E5</Checksum>
+        <Checksum>9CCE4CFB76DD3C8F71F94A9638091584</Checksum>
       </Template>
       <Template>
         <Name>motorapp.h</Name>
@@ -262,7 +262,7 @@
       <Template>
         <Name>drv_tmr_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/driver/tmr/src</Path>
-        <Checksum>44830BF004BA1E157F6DA569B7A97FA4</Checksum>
+        <Checksum>B3BD65793D4ADD053F88796B1B546F32</Checksum>
       </Template>
       <Template>
         <Name>uart_rx_app.c</Name>
