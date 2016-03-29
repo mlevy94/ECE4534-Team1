@@ -63,6 +63,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "comm.h"
 #include "debug.h"
 #include "uart_tx_app_public.h"
+#include "mainapp_public.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility

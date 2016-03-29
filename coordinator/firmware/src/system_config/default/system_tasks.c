@@ -90,7 +90,7 @@ void SYS_Tasks ( void )
     /* Create OS Thread for Sys Tasks. */
     xTaskCreate((TaskFunction_t) _SYS_Tasks,
                 "Sys Tasks",
-                1024, NULL, 1, NULL);
+                1024, NULL, 0, NULL);
 
     /* Create OS Thread for MAINAPP Tasks. */
     xTaskCreate((TaskFunction_t) _MAINAPP_Tasks,
@@ -100,12 +100,12 @@ void SYS_Tasks ( void )
     /* Create OS Thread for UART_TX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_TX_APP_Tasks,
                 "UART_TX_APP Tasks",
-                4096, NULL, 2, NULL);
+                4096, NULL, 1, NULL);
 
     /* Create OS Thread for UART_RX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_RX_APP_Tasks,
                 "UART_RX_APP Tasks",
-                4096, NULL, 2, NULL);
+                4096, NULL, 1, NULL);
 
     /**************
      * Start RTOS * 
@@ -134,7 +134,6 @@ static void _SYS_Tasks ( void )
         /* Maintain Middleware */
 
         /* Task Delay */
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 

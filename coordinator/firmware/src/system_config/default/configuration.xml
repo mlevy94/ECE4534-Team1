@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<configuration version="1.0.7.9">
+<configuration version="1.0.7.16">
   <General>
     <HarmonyPath path="../../../../../../../microchip/harmony/v1_06_02"/>
-    <ForceOptimization flag="true"/>
+    <ForceOptimization flag="false"/>
   </General>
   <Manifest>
     <Files>
@@ -161,6 +161,7 @@
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/default</Path>
         <Checksum>2E2AC889BD401BB0AF24AB0D8B16161B</Checksum>
+        <ProjectFileChecksum>A526A87C664C85322C55DD7DBBC93FC5</ProjectFileChecksum>
       </Template>
       <Template>
         <Name>main.c</Name>
@@ -207,7 +208,7 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>2C1F4414F167A7AB10F3B4ACF228BA5B</Checksum>
+        <Checksum>ECCA90417F618EFDE7733A41E3A27F28</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
@@ -223,6 +224,7 @@
         <Name>system_interrupt.c</Name>
         <Path>Source Files/app/system_config/default</Path>
         <Checksum>5570B208A2FCDE653B2F8F53A6F9F061</Checksum>
+        <ProjectFileChecksum>9B78AB507CF6CC471A7CE38552EE7A08</ProjectFileChecksum>
       </Template>
       <Template>
         <Name>rtos_hooks.c</Name>
@@ -245,19 +247,19 @@
     </Templates>
     <CompilerItems>
       <C32-AS>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
       </C32-AS>
       <C32>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
         <Define value="__XC"/>
       </C32>
     </CompilerItems>
     <Libraries>
-      <Library value="../../../../../../../../../microchip/harmony/v1_06_02/bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
+      <Library value="../../../../../../../../microchip/harmony/v1_06_02/bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
     </Libraries>
   </Manifest>
 </configuration>

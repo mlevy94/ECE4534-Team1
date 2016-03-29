@@ -59,6 +59,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_config.h"
 #include "system_definitions.h"
 
+#include <queue.h>
+#include "comm.h"
+#include "txbuffer_public.h"
+#include "uart_rx_app_public.h"
+#include "uart_tx_app_public.h"
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -93,6 +98,41 @@ typedef enum
 
 } MAINAPP_STATES;
 
+// Enumerated type for the types of objects available in a grid cell
+typedef enum
+{
+    blank = 0,
+    lead_rover = 1,
+    obstacle = 2,
+    follower_rover = 3,
+    token = 4        
+} CELL_TYPES;
+
+// Struct for the microGrid
+typedef struct
+{
+    CELL_TYPES microGrid[2][2];
+} GRID_CONVERSION;
+
+typedef enum
+{
+    north = 0,
+    south = 1,
+    east = 2,
+    west = 3,
+    defaultSetting = 4,
+} ROVER_ORIENTATION;
+
+// Struct for the message structure of the messages I will receive
+typedef struct
+{
+    char type;
+    uint16_t xPos;
+    uint16_t yPos;
+    ROVER_ORIENTATION orientation;
+    uint16_t length;
+    uint16_t width;
+} OBJECT_STRUCTURE;
 
 // *****************************************************************************
 /* Application Data
@@ -114,6 +154,25 @@ typedef struct
 
     /* TODO: Define any additional data used by the application. */
 
+    // Queue for the message handling
+    QueueHandle_t mainAppMsgQ;
+    
+    // Message sequence number for checking for message loss
+    char messageNumber;
+    
+    // Grid containing the whole playing field 8x8 (4.5" x 4.5")
+    GRID_CONVERSION macroGrid[9][9];
+    
+    // Rover position
+    OBJECT_STRUCTURE rover;
+    
+    // Rover Orientation
+    ROVER_ORIENTATION direction;
+    
+    // Obstacle positions
+    OBJECT_STRUCTURE obstacle[4];
+    
+    int obstacleCount;
 
 } MAINAPP_DATA;
 
@@ -125,7 +184,9 @@ typedef struct
 // *****************************************************************************
 /* These routines are called by drivers when certain events occur.
 */
-
+int microInchesToCell(int position);
+int macroInchesToCell(int position);
+OBJECT_STRUCTURE convertMessage(InternalMessage message);
 	
 // *****************************************************************************
 // *****************************************************************************

@@ -136,6 +136,9 @@ void sortMessage(InternalMessage msg) {
                 setDebugVal(msg.msg[i]);
             }
             break;
+        case OBJECT_POS:
+            addToMainAppQ(msg);
+            break;
         default:
             break;
     }
