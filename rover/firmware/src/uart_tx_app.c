@@ -116,16 +116,13 @@ BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg) {
 
 void packAndSend(InternalMessage msg) {
     int i = 0;
-    int msgSize = 0;
-    // get size of message
-    for (msgSize = 0; msg.msg[msgSize] != '\0' && msgSize <= INTERNAL_MSG_SIZE; msgSize++);
     addToTXBufferQ(START_BYTE);
     addToTXBufferQ(MY_ROLE);
     addToTXBufferQ(uart_tx_appData.msgCount);
     addToTXBufferQ(msg.type);
-    addToTXBufferQ(msgSize);
+    addToTXBufferQ(msg.size);
     // sent message
-    for (i = 0; i < msgSize; i++) {
+    for (i = 0; i < msg.size; i++) {
         addToTXBufferQ(msg.msg[i]);
     }
     addToTXBufferQ(END_BYTE);
@@ -176,11 +173,7 @@ void UART_TX_APP_Tasks ( void )
 #endif
     char start;
     while(!xQueueReceive(uart_tx_appData.initQ, &start, portMAX_DELAY));
-    InternalMessage msg;
-    // declare role
-    msg.type = CLIENT_ROLE;
-    msg.msg[0] = MY_ROLE;
-    msg.msg[1] = '\0';
+    InternalMessage msg = makeMessageChar(CLIENT_ROLE, MY_ROLE);
     packAndSend(msg);
     // process other messages
     while(1) {

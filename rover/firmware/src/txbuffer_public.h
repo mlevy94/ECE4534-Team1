@@ -15,6 +15,9 @@ extern "C" {
     void initializeTXBufferQ();
     BaseType_t addToTXBufferQ(char msg);
     BaseType_t addToTXBufferQFromISR(char msg);
+    void initializeNFCTXBufferQ();
+    BaseType_t addToNFCTXBufferQ(char msg);
+    BaseType_t addToNFCTXBufferQFromISR(char msg);
 
 
 #ifdef	__cplusplus

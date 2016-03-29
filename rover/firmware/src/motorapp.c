@@ -181,6 +181,7 @@ void motorMove(char direction, char distance) {
                     setDebugVal(45);
                     motorData.moveStop = 0;
                     motorStop();
+                    addToUartTXQ(roverStopped());
                     break;
             }
     PLIB_OC_PulseWidth16BitSet(OC_LEFT, motorData.leftMotor->pwm);
@@ -206,6 +207,7 @@ void incMoveCount() {
             setDebugVal(58);
             motorData.moveCounter = 0;
             motorData.moveStop == 0;
+            addToUartTXQFromISR(roverStopped());
         }
     }
     else {

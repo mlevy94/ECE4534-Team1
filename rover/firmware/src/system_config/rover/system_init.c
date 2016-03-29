@@ -194,7 +194,7 @@ void SYS_Initialize ( void* data )
     DRV_TMR0_Initialize();
  
     DRV_USART0_Initialize();
-     DRV_USART1_Initialize();
+    DRV_USART1_Initialize();
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_UART);
 #endif
@@ -226,6 +226,7 @@ void SYS_Initialize ( void* data )
     
     /* Initialize Middleware */
     initializeTXBufferQ();
+    initializeNFCTXBufferQ();
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_TX_BUF);
 #endif
@@ -243,6 +244,7 @@ void SYS_Initialize ( void* data )
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_UART_RX_APP);
 #endif
+    NFC_APP_Initialize();
 }
 
 

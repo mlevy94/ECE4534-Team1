@@ -65,6 +65,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "motorapp.h"
 #include "uart_tx_app.h"
 #include "uart_rx_app.h"
+#include "nfc_app.h"
 #include "system_definitions.h"
 
 #include <queue.h>
@@ -72,6 +73,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "debug.h"
 #include "txbuffer_public.h"
 #include "motorapp_public.h"
+#include "nfc_app_public.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -103,10 +105,12 @@ void IntHandlerDrvTmrInstance0(void)
 }
 
 static QueueHandle_t txbufferQ;
+static QueueHandle_t txNFCbufferQ;
 void initializeTXBufferQ() {
     txbufferQ = xQueueCreate(TX_BUF_SIZE, 8);
 }
 
+// Wifly
 BaseType_t addToTXBufferQ(char msg) {
     // Turn TX Interrupt on
     PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
@@ -116,6 +120,22 @@ BaseType_t addToTXBufferQ(char msg) {
 BaseType_t addToTXBufferQFromISR(char msg) {
     PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
     return xQueueSendFromISR(txbufferQ, &msg, 0);
+}
+
+void initializeNFCTXBufferQ() {
+    txNFCbufferQ = xQueueCreate(TX_BUF_SIZE, 8);
+}
+
+// NFC Reader
+BaseType_t addToNFCTXBufferQ(char msg) {
+    // Turn TX Interrupt on
+    PLIB_INT_SourceEnable(USART_ID_2, INT_SOURCE_USART_2_TRANSMIT);
+    return xQueueSend(txNFCbufferQ, &msg, portMAX_DELAY);
+}
+    
+BaseType_t addToNFCTXBufferQFromISR(char msg) {
+    PLIB_INT_SourceEnable(USART_ID_2, INT_SOURCE_USART_2_TRANSMIT);
+    return xQueueSendFromISR(txNFCbufferQ, &msg, 0);
 }
 
 
@@ -172,9 +192,34 @@ void IntHandlerDrvUsartInstance0(void)
 
 void IntHandlerDrvUsartInstance1(void)
 {
+    char sendbyte;
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_TRANSMIT)){
+        addToUartTXQ(makeMessage(DEBUG_MSG, "UART INT\0"));
+        while(!PLIB_USART_TransmitterBufferIsFull(USART_ID_2)) {
+            if(xQueueReceiveFromISR(txNFCbufferQ, &sendbyte, 0)) {
+               //addToUartTXQ(makeMessageChar(DEBUG_MSG, sendbyte));
+               PLIB_USART_TransmitterByteSend(USART_ID_2, sendbyte);
+            }
+            else {
+               // nothing to write. Disable interrupt
+               PLIB_INT_SourceDisable(USART_ID_2, INT_SOURCE_USART_2_TRANSMIT);
+               break;
+            }
+        }
+    }
 
-
-    /* TODO: Add code to process interrupt here */
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE)){
+        // while there are characters to read
+        while(PLIB_USART_ReceiverDataIsAvailable(USART_ID_2)){
+            // read a character
+            sendbyte = PLIB_USART_ReceiverByteReceive(USART_ID_2);
+            addToNFCrxQFromISR(sendbyte);
+        }
+    }
+    
+    if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_ERROR)){
+        //not sure what we are doing yet
+    }
 
     /* Clear pending interrupt */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_TRANSMIT);

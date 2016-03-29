@@ -37,35 +37,36 @@ class ClientWorker:
       serialstream = b''
       while 1:
         serialstream += self.readfunc(4096)
-        startbyte = serialstream.find(STARTBYTE)
-        if startbyte < 0 or len(serialstream) < HEADER_SIZE:
-          # keep looking for start byte or wait for more data
-          continue
-        else:
-          # trim extra bytes in beginning
-          serialstream = serialstream[startbyte:]
-        # get header values
-        (startbyte, source, count, msgtype, msgsize), serialstream = (serialstream[:HEADER_SIZE], serialstream[HEADER_SIZE:])
-        # get message
-        msg, serialstream = serialstream[:msgsize], serialstream[msgsize:]
-        netmsg = NetMessage(
-          source= source,
-          count = count,
-          msgtype= msgtype,
-          msgsize = msgsize,
-          msg=msg,
-        )
-        endbyte, serialstream = serialstream[0], serialstream[1:]
-        if endbyte != ENDBYTE[0]:
-          print("Bad End Byte: {}".format(self.address))
-          continue
-        # place in outbound queue
-        msg = netmsg.getMessage()
-        if netmsg.msgtype == CLIENT_ROLE:
-          msg.target = self
-        #print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
-        self._put(msg)
-        self.rcvmsgcount += 1
+        while len(serialstream) > HEADER_SIZE:
+          startbyte = serialstream.find(STARTBYTE)
+          if startbyte < 0 or len(serialstream) < HEADER_SIZE:
+            # keep looking for start byte or wait for more data
+            break
+          else:
+            # trim extra bytes in beginning
+            serialstream = serialstream[startbyte:]
+          # get header values
+          (startbyte, source, count, msgtype, msgsize), serialstream = (serialstream[:HEADER_SIZE], serialstream[HEADER_SIZE:])
+          # get message
+          msg, serialstream = serialstream[:msgsize], serialstream[msgsize:]
+          netmsg = NetMessage(
+            source= source,
+            count = count,
+            msgtype= msgtype,
+            msgsize = msgsize,
+            msg=msg,
+          )
+          endbyte, serialstream = serialstream[0], serialstream[1:]
+          if endbyte != ENDBYTE[0]:
+            print("Bad End Byte: {}".format(self.address))
+            continue
+          # place in outbound queue
+          msg = netmsg.getMessage()
+          if netmsg.msgtype == CLIENT_ROLE:
+            msg.target = self
+          #print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+          self._put(msg)
+          self.rcvmsgcount += 1
     except ConnectionResetError:
       pass
 

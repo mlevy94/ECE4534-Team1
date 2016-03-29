@@ -70,6 +70,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "motorapp.h"
 #include "uart_tx_app.h"
 #include "uart_rx_app.h"
+#include "nfc_app.h"
 
 
 // DOM-IGNORE-BEGIN

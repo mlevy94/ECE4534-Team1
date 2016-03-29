@@ -57,6 +57,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "motorapp.h"
 #include "uart_tx_app.h"
 #include "uart_rx_app.h"
+#include "nfc_app.h"
 
 
 // *****************************************************************************
@@ -69,6 +70,7 @@ static void _SYS_Tasks ( void );
 static void _MOTORAPP_Tasks(void);
 static void _UART_TX_APP_Tasks(void);
 static void _UART_RX_APP_Tasks(void);
+static void _NFC_APP_Tasks(void);
 
 
 // *****************************************************************************
@@ -106,6 +108,11 @@ void SYS_Tasks ( void )
     xTaskCreate((TaskFunction_t) _UART_RX_APP_Tasks,
                 "UART_RX_APP Tasks",
                 4096, NULL, 2, NULL);
+
+    /* Create OS Thread for NFC_APP Tasks. */
+    xTaskCreate((TaskFunction_t) _NFC_APP_Tasks,
+                "NFC_APP Tasks",
+                4096, NULL, 5, NULL);
 
     /**************
      * Start RTOS * 
@@ -185,6 +192,23 @@ static void _UART_RX_APP_Tasks(void)
     while(1)
     {
         UART_RX_APP_Tasks();
+    }
+}
+
+
+/*******************************************************************************
+  Function:
+    void _NFC_APP_Tasks ( void )
+
+  Summary:
+    Maintains state machine of NFC_APP.
+*/
+
+static void _NFC_APP_Tasks(void)
+{
+    while(1)
+    {
+        NFC_APP_Tasks();
     }
 }
 

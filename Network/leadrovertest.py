@@ -107,13 +107,6 @@ def basicTurnTest10(clientList):
   for _ in range(2):
     sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
 
-# turn right half a cirlce, then left half a circle
-def basicTurnTest11(clientList):
-  for _ in range(2):
-    sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  for _ in range(2):
-    sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-
 ###### COMPLEX TESTS #######
 
 # forward then left 4 times in a square
@@ -173,7 +166,7 @@ def complexTest4(clientList):
 # adjustment test. place rover at bottom right corner of square
 def complexTest5(clientList):
   sendMsg(roverMove(ROVER_LEFT, 45), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 3), clientList)
+  sendMsg(roverMove(ROVER_FORWARD, 2), clientList)
   sendMsg(roverMove(ROVER_RIGHT, 45), clientList)
   sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
 
@@ -210,7 +203,6 @@ BASIC_TURN_MENU = """
 8 - Turn Left Full Circle
 9 - Turn Right Full Circle
 10- Turn Left Half Cirlc, Turn Right Half Circle
-11- Turn Right Half Circle, Turn Left Half Circle
 """
 
 COMPLEX_MENU = """
@@ -230,6 +222,8 @@ def cmdInput(clientList):
       keyin = input().lower()
       if keyin == "shutdown":
         break
+      elif keyin == "":
+        continue
       elif keyin == "test":
         while keyin != "back":
           keyin = input(MAIN_MENU).lower()
@@ -279,8 +273,6 @@ def cmdInput(clientList):
                 basicTurnTest9(clientList)
               elif keyin == "10":
                 basicTurnTest10(clientList)
-              elif keyin == "11":
-                basicTurnTest11(clientList)
           elif keyin == "3":
             while keyin != "back":
               keyin = input(COMPLEX_MENU).lower()
@@ -297,13 +289,25 @@ def cmdInput(clientList):
               elif keyin == "5":
                 complexTest5(clientList)
       elif keyin[0] == "f":
-        msg = roverMove(ROVER_FORWARD, 0)
-      elif keyin == "b":
-        msg = roverMove(ROVER_BACKWARD, 0)
-      elif keyin == "l":
-        msg = roverMove(ROVER_LEFT, 0)
-      elif keyin == "r":
-        msg = roverMove(ROVER_RIGHT, 0)
+        try:
+          msg = roverMove(ROVER_FORWARD, int(keyin[1:]))
+        except (ValueError, IndexError):
+          msg = roverMove(ROVER_FORWARD, 0)
+      elif keyin[0] == "b":
+        try:
+          msg = roverMove(ROVER_BACKWARD, int(keyin[1:]))
+        except (ValueError, IndexError):
+          msg = roverMove(ROVER_BACKWARD, 0)
+      elif keyin[0] == "l":
+        try:
+          msg = roverMove(ROVER_LEFT, int(keyin[1:]))
+        except (ValueError, IndexError):
+          msg = roverMove(ROVER_LEFT, 0)
+      elif keyin[0] == "r":
+        try:
+          msg = roverMove(ROVER_RIGHT, int(keyin[1:]))
+        except (ValueError, IndexError):
+          msg = roverMove(ROVER_RIGHT, 0)
       elif keyin == "s":
         msg = roverMove(ROVER_STOP, 0)
       else:
@@ -320,7 +324,12 @@ if __name__ == "__main__":
   while cmdThread.is_alive():
     try:
       msg = listener.queue.get(timeout=1)
-      print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
+      if msg.msgtype == CLIENT_ROLE:
+        print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], VAL_TO_ROLE[msg.msg[0]]))
+      elif msg.msgtype == ROVER_MOVE:
+        print("Message Received: {} - {}, {}".format(VAL_TO_MSG[msg.msgtype], VAL_TO_ROV[msg.msg[0]], msg.msg[1]))
+      else:
+        print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
     except Empty:
       pass
   listener.close()

@@ -165,8 +165,12 @@
       <Template>
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>EC0E61E2224F8D7F951E15E0928566D5</Checksum>
+        <Checksum>62F4962A28C0E7DB286B8AA150DCA207</Checksum>
         <ProjectFileChecksum>228ADBEAED55A3E2D27C439A16F8710C</ProjectFileChecksum>
+      </Template>
+      <Template>
+        <Name>nfc_app.h</Name>
+        <Path>Header Files/app</Path>
       </Template>
       <Template>
         <Name>drv_oc_static.h</Name>
@@ -179,9 +183,13 @@
         <Checksum>A20CF5C89A0DA804F0837FBE133CFBF8</Checksum>
       </Template>
       <Template>
+        <Name>nfc_app.c</Name>
+        <Path>Source Files/app</Path>
+      </Template>
+      <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>9CCE4CFB76DD3C8F71F94A9638091584</Checksum>
+        <Checksum>AF77181911AB58D35DB59D8BFC1BD2EC</Checksum>
       </Template>
       <Template>
         <Name>motorapp.h</Name>
@@ -221,7 +229,7 @@
       <Template>
         <Name>system_interrupt.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>DEF21207BCBE76A90C0B8E1DC11DD4AF</Checksum>
+        <Checksum>A60E1B55B036605B67AC099EF4BD62F2</Checksum>
         <ProjectFileChecksum>8B3E6EF6F8F777E59ADFB17344FDB057</ProjectFileChecksum>
       </Template>
       <Template>
@@ -242,12 +250,12 @@
       <Template>
         <Name>drv_usart_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/driver/usart</Path>
-        <Checksum>5729E5B189AB354E41AE256F9696F51F</Checksum>
+        <Checksum>4C1FB85D48AB067CBF76AC30A13951D1</Checksum>
       </Template>
       <Template>
         <Name>system_definitions.h</Name>
         <Path>Header Files/app/system_config/rover</Path>
-        <Checksum>33E4B84B90D8F6560D9C2BDA85B43190</Checksum>
+        <Checksum>0992D78B0826DEC4798B4B9B993D5FDC</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>

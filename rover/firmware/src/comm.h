@@ -93,6 +93,7 @@ typedef struct {
 typedef struct{
 
     char type;
+    char size;
     char msg[INTERNAL_MSG_SIZE];
     
 }InternalMessage;
@@ -106,6 +107,7 @@ InternalMessage makeMessageInt(char msgType, int val);
 ///////////////////////////////////////////////////////////////////////////////
 
 InternalMessage makeRoverMove(char direction, char distance);
+InternalMessage roverStopped();
 
 #ifdef	__cplusplus
 }
