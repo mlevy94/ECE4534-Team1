@@ -36,10 +36,10 @@
 extern "C" {
 #endif
 
-
-BaseType_t addToMainApQ(InternalMessage msg);
+#include "comm.h"   
+    
+BaseType_t addToMainAppQ(InternalMessage msg);
 BaseType_t addToMainAppQFromISR(InternalMessage msg);
-
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus

@@ -48,19 +48,19 @@ Width:
   Width of the rover. This should be the West to East distance.
 """
 def convertToMessage(objectType, xPos, yPos, angle, length, width):
-  correctedXPosH = (xPos & 0xF0) >> 8
-  correctedXPosL = (xPos & 0x0F)
-  correctedYPosH = (xPos & 0xF0) >> 8
-  correctedYPosL = (xPos & 0x0F)
-  correctedAngleH = (angle & 0xF0) >> 8
-  correctedAngleL = (angle & 0x0F)
-  correctedLengthH = (length & 0xF0) >> 8
-  correctedLengthL = (length & 0x0F)
-  correctedWidthH = (width & 0xF0) >> 8
-  correctedWidthL = (width & 0x0F)
+  correctedXPosH = (xPos & 0xFF00) >> 8
+  correctedXPosL = (xPos & 0x00FF)
+  correctedYPosH = (yPos & 0xFF00) >> 8
+  correctedYPosL = (yPos & 0x00FF)
+  correctedAngleH = (angle & 0xFF00) >> 8
+  correctedAngleL = (angle & 0x00FF)
+  correctedLengthH = (length & 0xFF00) >> 8
+  correctedLengthL = (length & 0x00FF)
+  correctedWidthH = (width & 0xFF00) >> 8
+  correctedWidthL = (width & 0x00FF)
   return InternalMessage(ROUTER, OBJECT_POS, bytes([objectType, correctedXPosH, correctedXPosL, correctedYPosH,
                                                     correctedYPosL, correctedAngleH, correctedAngleL, correctedLengthH,
-                                                    correctedLengthL, correctedLengthH, correctedLengthL]))
+                                                    correctedLengthL, correctedWidthH, correctedWidthL]))
 
 """
 Function to return a list of the message data in the order expected <- I don't think I'll ever need to decipher this
@@ -708,8 +708,6 @@ if __name__ == "__main__":
       msg = listener.queue.get()
 
       # Here begins the message parsing to determine what needs to be done
-
-
 
       # Coming from the initialize, output that a client has been connected
       if msg.msgtype == CLIENT_ROLE:

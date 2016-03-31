@@ -123,17 +123,6 @@ typedef enum
     defaultSetting = 4,
 } ROVER_ORIENTATION;
 
-// Struct for the message structure of the messages I will receive
-typedef struct
-{
-    char type;
-    uint16_t xPos;
-    uint16_t yPos;
-    uint16_t angle;
-    uint16_t length;
-    uint16_t width;
-} OBJECT_STRUCTURE;
-
 // *****************************************************************************
 /* Application Data
 
@@ -166,6 +155,8 @@ typedef struct
     // Rover position
     OBJECT_STRUCTURE rover;
     
+    OBJECT_STRUCTURE object;
+    
     // Rover Orientation
     ROVER_ORIENTATION direction;
     
@@ -186,7 +177,7 @@ typedef struct
 */
 int microInchesToCell(int position);
 int macroInchesToCell(int position);
-OBJECT_STRUCTURE convertMessage(InternalMessage message);
+void convertMessage(InternalMessage message, OBJECT_STRUCTURE* obj);
 
 /*
  Methods for the full implementation for complete traversal

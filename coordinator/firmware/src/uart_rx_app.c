@@ -117,7 +117,7 @@ InternalMessage processMessage(NetMessage msg) {
     if (msg.msgsize < INTERNAL_MSG_SIZE) {
         msg.msg[msg.msgsize] = '\0';
     }
-    return makeMessage(msg.type, msg.msg);
+    return makeMessage(msg.type, msg.msg, msg.msgsize);
 }
 
 void sortMessage(InternalMessage msg) {
@@ -223,6 +223,7 @@ void UART_RX_APP_Tasks ( void )
                 for (i = 0; i < inmsg.msgsize; i++ ) {
                     while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
                     inmsg.msg[i] = inChar;
+                    setDebugVal(inmsg.msg[i]);
                 }
                 // get end byte
                 while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
