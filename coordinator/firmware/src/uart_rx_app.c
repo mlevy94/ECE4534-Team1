@@ -122,6 +122,7 @@ InternalMessage processMessage(NetMessage msg) {
 
 void sortMessage(InternalMessage msg) {
     int i;
+    InternalMessage returnMessage;
     // add message types here. the case should place the messages in Q's for
     // the correct thread to act upon. DEBUG_MSG are just printed to the debug
     // line one byte at a time.
@@ -129,6 +130,12 @@ void sortMessage(InternalMessage msg) {
     setDebugVal(msg.type);
     switch(msg.type) {
         case INITIALIZE:
+            /*
+            returnMessage.type = INITIALIZE;
+            returnMessage.msg[0] = 0x02;
+            addToInitTXQ(msg.msg[0]);
+            addToUartTXQ(returnMessage);
+            */
             addToInitTXQ(msg.msg[0]);
             break;
         case DEBUG_MSG:
@@ -181,7 +188,6 @@ void UART_RX_APP_Tasks ( void )
     char inChar;
     int i = 0;
     while(i < 20) {
-        setDebugVal(0x15);
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
             if (inChar == 0x50) {
                 i++;

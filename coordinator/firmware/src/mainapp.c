@@ -100,32 +100,114 @@ BaseType_t addToMainAppQFromISR(InternalMessage msg)
 // *****************************************************************************
 // *****************************************************************************
 
+/*
+ This function converts a number of inches to a cell number.
+ */
 int macroInchesToCell(int position)
 {
     // Inches per grid space
-    int ratio = 4;
+    int ratio = 6;
     return (position / ratio);
 }
 
+/*
+ This function converts a number of inches to a cell number.
+ */
 int microInchesToCell(int position)
 {
     // Inches per grid space
-    int ratioMacro = 4;
-    int ratioMicro = 2;
+    int ratioMacro = 6;
+    int ratioMicro = 6;
     
     int leftover = position % ratioMacro;
     return (leftover / ratioMicro);
 }
 
+/*
+ This function is used to convert an internal message to an OBJECT_STRUCTURE
+ that my code can easily implement.
+ */
 OBJECT_STRUCTURE convertMessage(InternalMessage message)
 {
     OBJECT_STRUCTURE ret;
     ret.type = message.msg[0];
     ret.xPos = message.msg[1] << 8 | message.msg[2];
     ret.yPos = message.msg[3] << 8 | message.msg[4];
-    ret.orientation = message.msg[5] << 8 | message.msg[6];
+    ret.angle = message.msg[5] << 8 | message.msg[6];
     ret.length = message.msg[7] << 8 | message.msg[8];
     ret.width = message.msg[9] << 8 | message.msg[10];
+}
+
+void leftToRight(void)
+{
+    
+}
+
+void rightToLeft(void)
+{
+    
+}
+
+void topToBottom(void)
+{
+    
+}
+
+void bottomToTop(void)
+{
+    
+}
+
+void centerAndSpreadOut(void)
+{
+    
+}
+
+/*
+ Function to send back a message of the rover's location as determined by the PICs
+ */
+void sendRoverLocation(void)
+{
+    InternalMessage roverPosition;
+    roverPosition.type = OBJECT_POS;
+    roverPosition.msg[0] = ROVER;
+    // MSB then LSB
+    roverPosition.msg[1] = mainappData.rover.xPos & 0xF0 >> 8;
+    roverPosition.msg[2] = mainappData.rover.xPos & 0x0F;
+    
+    roverPosition.msg[3] = mainappData.rover.yPos & 0xF0 >> 8;
+    roverPosition.msg[4] = mainappData.rover.yPos & 0x0F;
+    
+    roverPosition.msg[5] = mainappData.rover.angle & 0xF0 >> 8;
+    roverPosition.msg[6] = mainappData.rover.angle & 0x0F;
+    
+    roverPosition.msg[7] = mainappData.rover.length & 0xF0 >> 8;
+    roverPosition.msg[8] = mainappData.rover.length & 0x0F;
+    
+    roverPosition.msg[9] = mainappData.rover.width & 0xF0 >> 8;
+    roverPosition.msg[10] = mainappData.rover.width & 0x0F;
+    
+    addToUartTXQ(roverPosition);
+}
+
+// Large function to run the algorithm
+void runAlgorithm(void)
+{
+    // In this I may need to make a callback function for keeping track of where I want to go
+    int i;
+    // Empty map condition for testing
+    if(mainappData.obstacleCount == 0) {
+        // Empty map
+    }
+    // Non-empty map condition for testing
+    else {
+        for(i = 0; i < mainappData.obstacleCount; i++) {
+            if((mainappData.rover.angle < 90) && (mainappData.rover.angle >= 0)) {
+                // Facing approximately North x NorthEast
+                // Check for obstacles in front of you
+            }
+        }
+    }
 }
 
 // *****************************************************************************
@@ -144,6 +226,7 @@ OBJECT_STRUCTURE convertMessage(InternalMessage message)
 
 void MAINAPP_Initialize ( void )
 {
+    // Creating the messaging queue to receive messages from the UART RX
     mainappData.mainAppMsgQ = xQueueCreate(16,sizeof(InternalMessage));
     
     // Making the message sequence number 0
@@ -151,10 +234,10 @@ void MAINAPP_Initialize ( void )
     
     int i, j, k, l;
     // Making the grid cells initially blank
-    for(i = 0; i < 9; i++) {
-        for(j = 0; j < 9; j++) {
-            for(k = 0; k < 2; k++) {
-                for(l = 0; l < 2; l++) {
+    for(i = 0; i < 6; i++) {
+        for(j = 0; j < 6; j++) {
+            for(k = 0; k < 6; k++) {
+                for(l = 0; l < 6; l++) {
                     mainappData.macroGrid[i][j].microGrid[k][l] = blank;
                 }
             }
@@ -167,7 +250,7 @@ void MAINAPP_Initialize ( void )
     mainappData.rover.width = 4;
     mainappData.rover.xPos = 30;
     mainappData.rover.yPos = 30;
-    mainappData.rover.orientation = defaultSetting;
+    mainappData.rover.angle = 0;
     
     // The counter for the number of obstacles
     mainappData.obstacleCount = 0;
@@ -196,16 +279,26 @@ void MAINAPP_Initialize ( void )
 
 void MAINAPP_Tasks ( void )
 {
+    // Temporary variable that is used to extract a message from the queue
     InternalMessage inMessage;
     while(1) {
         if (xQueueReceive(mainappData.mainAppMsgQ, &inMessage, portMAX_DELAY)) {
+            // Checking for a message about updating the position of an object
             if(inMessage.type == OBJECT_POS) {
+                // Converting the message to data that can be used to update my rover or obstacle(s).
                 OBJECT_STRUCTURE object = convertMessage(inMessage);
+                // Object is a rover
                 if(object.type == ROVER) {
                     mainappData.rover = object;
+                    sendRoverLocation();
                 }
+                // Object is an obstacle
                 else if(object.type == OBSTACLE) {
+                    // Since this should only occur from the initial messages
+                    // Creating a new obstacle
                     mainappData.obstacle[mainappData.obstacleCount] = object;
+                    
+                    // Updating the number of obstacles
                     mainappData.obstacleCount++;
                 }
             }

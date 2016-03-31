@@ -111,7 +111,7 @@ typedef enum
 // Struct for the microGrid
 typedef struct
 {
-    CELL_TYPES microGrid[2][2];
+    CELL_TYPES microGrid[6][6];
 } GRID_CONVERSION;
 
 typedef enum
@@ -129,7 +129,7 @@ typedef struct
     char type;
     uint16_t xPos;
     uint16_t yPos;
-    ROVER_ORIENTATION orientation;
+    uint16_t angle;
     uint16_t length;
     uint16_t width;
 } OBJECT_STRUCTURE;
@@ -160,8 +160,8 @@ typedef struct
     // Message sequence number for checking for message loss
     char messageNumber;
     
-    // Grid containing the whole playing field 8x8 (4.5" x 4.5")
-    GRID_CONVERSION macroGrid[9][9];
+    // Grid containing the whole playing field 6x6 (6" x 6")
+    GRID_CONVERSION macroGrid[6][6];
     
     // Rover position
     OBJECT_STRUCTURE rover;
@@ -187,6 +187,22 @@ typedef struct
 int microInchesToCell(int position);
 int macroInchesToCell(int position);
 OBJECT_STRUCTURE convertMessage(InternalMessage message);
+
+/*
+ Methods for the full implementation for complete traversal
+ */
+void leftToRight(void);
+void rightToLeft(void);
+void topToBottom(void);
+void bottomToTop(void);
+void centerAndSpreadOut(void);
+
+/*
+ Method to send back the rover location to the simulation for debugging
+ */
+void sendRoverLocation(void);
+
+void runAlgorithm(void);
 	
 // *****************************************************************************
 // *****************************************************************************

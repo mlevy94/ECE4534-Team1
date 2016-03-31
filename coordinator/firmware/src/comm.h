@@ -100,6 +100,7 @@ typedef struct {
 typedef struct{
 
     char type;
+    char size;
     char msg[INTERNAL_MSG_SIZE];
     
 }InternalMessage;
