@@ -163,8 +163,11 @@ typedef struct
     // Obstacle positions
     OBJECT_STRUCTURE obstacle[4];
     
+    // Counter for the number of obstacles
     int obstacleCount;
 
+    // Queue for sending commands to the rover
+    QueueHandle_t mainAppCommandMsgQ;
 } MAINAPP_DATA;
 
 
@@ -179,14 +182,31 @@ int microInchesToCell(int position);
 int macroInchesToCell(int position);
 void convertMessage(InternalMessage message, OBJECT_STRUCTURE* obj);
 
+BaseType_t addToCommandMsgQ(InternalMessage msg);
+
 /*
  Methods for the full implementation for complete traversal
  */
-void leftToRight(void);
-void rightToLeft(void);
-void topToBottom(void);
-void bottomToTop(void);
-void centerAndSpreadOut(void);
+// Empty map
+void leftToRightEmpty(void);
+void rightToLeftEmpty(void);
+void topToBottomEmpty(void);
+void bottomToTopEmpty(void);
+void topToBottomEmptyCorners(uint16_t* y, uint16_t* angle);
+void bottomToTopEmptyCorners(uint16_t* y, uint16_t* angle);
+void moveHorizontalRightOnceCornerEmpty(uint16_t* x, uint16_t* angle);
+void moveHorizontalLeftOnceCornerEmpty(uint16_t* x, uint16_t* angle);
+void moveVerticalUpOnceCornerEmpty(uint16_t* y, uint16_t* angle);
+void moveVerticalDownOnceCornerEmpty(uint16_t* y, uint16_t* angle);
+void centerAndSpreadOutEmpty(void);
+void upperLeftCornerTraverseEmpty(void);
+void lowerLeftCornerTraverseEmpty(void);
+void upperRightCornerTraverseEmpty(void);
+void lowerRightCornerTraverseEmpty(void);
+void moveHorizontalRightOnceEmpty(void);
+void moveHorizontalLeftOnceEmpty(void);
+void moveVerticalUpOnceEmpty(void);
+void moveVerticalDownOnceEmpty(void);
 
 /*
  Method to send back the rover location to the simulation for debugging
