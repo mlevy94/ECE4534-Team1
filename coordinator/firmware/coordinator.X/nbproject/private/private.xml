@@ -4,13 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/mainapp.h</file>
-            <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/debug.h</file>
             <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/uart_tx_app_public.h</file>
             <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/comm.h</file>
             <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/mainapp.c</file>
-            <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/system_config/default/system_definitions.h</file>
             <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/comm.c</file>
-            <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/mainapp_public.h</file>
+            <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/uart_rx_app.c</file>
+            <file>file:/C:/Users/Owner/Documents/GitHub/ECE4534-Team1/coordinator/firmware/src/uart_tx_app.c</file>
         </group>
     </open-files>
 </project-private>
