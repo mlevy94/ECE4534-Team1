@@ -11,6 +11,13 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
+    
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include "system_config.h"
+    
 ///////////////////////////////////////////////////////////////////////////////
 // Roles / Msg Sources
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,8 +87,8 @@ typedef struct {
 //////////////////////////////////////////////////////////////////////////////
 // OBJECT_STRUCTURE defines
 //////////////////////////////////////////////////////////////////////////////
-#define ROVER       0x00
-#define OBSTACLE    0x01
+#define ROVER       0xA0
+#define OBSTACLE    0xA1
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,7 +112,7 @@ typedef struct{
     
 }InternalMessage;
 
-InternalMessage makeMessage(char msgType, char* msg);
+InternalMessage makeMessage(char msgType, char* msg, char size);
 InternalMessage makeMessageChar(char msgType, char val);
 InternalMessage makeMessageInt(char msgType, int val);
 
@@ -114,6 +121,19 @@ InternalMessage makeMessageInt(char msgType, int val);
 ///////////////////////////////////////////////////////////////////////////////
 
 InternalMessage makeRoverMove(char direction, char distance);
+
+// Struct for the message structure of the messages I will receive
+typedef struct
+{
+    char type;
+    uint16_t xPos;
+    uint16_t yPos;
+    uint16_t angle;
+    uint16_t length;
+    uint16_t width;
+} OBJECT_STRUCTURE;
+
+InternalMessage makeLocationMessage(OBJECT_STRUCTURE obj);
 
 #ifdef	__cplusplus
 }

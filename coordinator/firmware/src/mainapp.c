@@ -127,15 +127,23 @@ int microInchesToCell(int position)
  This function is used to convert an internal message to an OBJECT_STRUCTURE
  that my code can easily implement.
  */
-OBJECT_STRUCTURE convertMessage(InternalMessage message)
+void convertMessage(InternalMessage message, OBJECT_STRUCTURE* obj)
 {
     OBJECT_STRUCTURE ret;
-    ret.type = message.msg[0];
-    ret.xPos = message.msg[1] << 8 | message.msg[2];
-    ret.yPos = message.msg[3] << 8 | message.msg[4];
-    ret.angle = message.msg[5] << 8 | message.msg[6];
-    ret.length = message.msg[7] << 8 | message.msg[8];
-    ret.width = message.msg[9] << 8 | message.msg[10];
+    int i = 0;
+    setDebugBool(pdTRUE);
+    for (;i < 11; i++) {
+        setDebugVal(message.msg[i]);
+    }
+    obj->type = message.msg[0];
+    obj->xPos = message.msg[1] << 8 | message.msg[2];
+    obj->yPos = message.msg[3] << 8 | message.msg[4];
+    obj->angle = message.msg[5] << 8 | message.msg[6];
+    obj->length = message.msg[7] << 8 | message.msg[8];
+    obj->width = message.msg[9] << 8 | message.msg[10];
+    
+    setDebugBool(pdFALSE);
+    
 }
 
 void leftToRight(void)
@@ -170,22 +178,23 @@ void sendRoverLocation(void)
 {
     InternalMessage roverPosition;
     roverPosition.type = OBJECT_POS;
+    roverPosition.size = 11;
     roverPosition.msg[0] = ROVER;
     // MSB then LSB
-    roverPosition.msg[1] = mainappData.rover.xPos & 0xF0 >> 8;
-    roverPosition.msg[2] = mainappData.rover.xPos & 0x0F;
+    roverPosition.msg[1] = mainappData.rover.xPos & 0xFF00 >> 8;
+    roverPosition.msg[2] = mainappData.rover.xPos & 0x00FF;
     
-    roverPosition.msg[3] = mainappData.rover.yPos & 0xF0 >> 8;
-    roverPosition.msg[4] = mainappData.rover.yPos & 0x0F;
+    roverPosition.msg[3] = mainappData.rover.yPos & 0xFF00 >> 8;
+    roverPosition.msg[4] = mainappData.rover.yPos & 0x00FF;
     
-    roverPosition.msg[5] = mainappData.rover.angle & 0xF0 >> 8;
-    roverPosition.msg[6] = mainappData.rover.angle & 0x0F;
+    roverPosition.msg[5] = mainappData.rover.angle & 0xFF00 >> 8;
+    roverPosition.msg[6] = mainappData.rover.angle & 0x00FF;
     
-    roverPosition.msg[7] = mainappData.rover.length & 0xF0 >> 8;
-    roverPosition.msg[8] = mainappData.rover.length & 0x0F;
+    roverPosition.msg[7] = mainappData.rover.length & 0xFF00 >> 8;
+    roverPosition.msg[8] = mainappData.rover.length & 0x00FF;
     
-    roverPosition.msg[9] = mainappData.rover.width & 0xF0 >> 8;
-    roverPosition.msg[10] = mainappData.rover.width & 0x0F;
+    roverPosition.msg[9] = mainappData.rover.width & 0xFF00 >> 8;
+    roverPosition.msg[10] = mainappData.rover.width & 0x00FF;
     
     addToUartTXQ(roverPosition);
 }
@@ -286,17 +295,23 @@ void MAINAPP_Tasks ( void )
             // Checking for a message about updating the position of an object
             if(inMessage.type == OBJECT_POS) {
                 // Converting the message to data that can be used to update my rover or obstacle(s).
-                OBJECT_STRUCTURE object = convertMessage(inMessage);
+                convertMessage(inMessage, &mainappData.object);
                 // Object is a rover
-                if(object.type == ROVER) {
-                    mainappData.rover = object;
-                    sendRoverLocation();
+                
+                setDebugVal(0x72);
+                setDebugVal(mainappData.object.type);
+                setDebugVal(ROVER);
+                setDebugVal((mainappData.object.type & 0xff) == ROVER);
+                if((mainappData.object.type & 0xff) == ROVER) {
+                    mainappData.rover = mainappData.object;
+                    setDebugVal(0x73);
+                    addToUartTXQ(makeLocationMessage(mainappData.rover));
                 }
                 // Object is an obstacle
-                else if(object.type == OBSTACLE) {
+                else if(mainappData.object.type == OBSTACLE) {
                     // Since this should only occur from the initial messages
                     // Creating a new obstacle
-                    mainappData.obstacle[mainappData.obstacleCount] = object;
+                    mainappData.obstacle[mainappData.obstacleCount] = mainappData.object;
                     
                     // Updating the number of obstacles
                     mainappData.obstacleCount++;

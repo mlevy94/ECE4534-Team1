@@ -155,7 +155,7 @@
       <Template>
         <Name>sys_ports_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/system/ports/src</Path>
-        <Checksum>93766964B34AEDCBDDA9AF45E91B5D1A</Checksum>
+        <Checksum>EA425DBB02818CEF28D6D454B7F2C73B</Checksum>
       </Template>
       <Template>
         <Name>system_init.c</Name>
@@ -208,12 +208,12 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>ECCA90417F618EFDE7733A41E3A27F28</Checksum>
+        <Checksum>05C6FE1E594CBFE6216988BB09C6F99E</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>073CBB1C1BF93D061F0C079A46ED895B</Checksum>
+        <Checksum>2CF9C59CD3DCA5CE516E023FF6D69295</Checksum>
       </Template>
       <Template>
         <Name>sys_clk_static.h</Name>
