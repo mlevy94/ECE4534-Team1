@@ -151,7 +151,7 @@
       <Template>
         <Name>FreeRTOSConfig.h</Name>
         <Path>Header Files/app/system_config/rover</Path>
-        <Checksum>614346027C68ABCABC6B743F1C25D4F2</Checksum>
+        <Checksum>9A2965641778AF9092B5D4B21A32CDB9</Checksum>
       </Template>
       <Template>
         <Name>uart_tx_app.c</Name>
@@ -189,7 +189,7 @@
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>AF77181911AB58D35DB59D8BFC1BD2EC</Checksum>
+        <Checksum>5B612160A39DCEB544D010B6DA7E8AA6</Checksum>
       </Template>
       <Template>
         <Name>motorapp.h</Name>
@@ -250,7 +250,7 @@
       <Template>
         <Name>drv_usart_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/driver/usart</Path>
-        <Checksum>4C1FB85D48AB067CBF76AC30A13951D1</Checksum>
+        <Checksum>FB21C125391658D26A8925E434482B56</Checksum>
       </Template>
       <Template>
         <Name>system_definitions.h</Name>

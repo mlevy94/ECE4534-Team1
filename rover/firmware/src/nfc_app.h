@@ -5,7 +5,7 @@
     Microchip Technology Inc.
 
   File Name:
-    uart_tx_app.h
+    nfc_app.h
 
   Summary:
     This header file provides prototypes and definitions for the application.
@@ -43,8 +43,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
  *******************************************************************************/
 //DOM-IGNORE-END
 
-#ifndef _UART_TX_APP_H
-#define _UART_TX_APP_H
+#ifndef _NFC_APP_H
+#define _NFC_APP_H
 
 // *****************************************************************************
 // *****************************************************************************
@@ -60,9 +60,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_definitions.h"
 
 #include <queue.h>
-#include "debug.h"
-#include "comm.h"
-#include "uart_rx_app_public.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -77,6 +74,26 @@ extern "C" {
 // Section: Type Definitions
 // *****************************************************************************
 // *****************************************************************************
+
+// *****************************************************************************
+/* Application states
+
+  Summary:
+    Application states enumeration
+
+  Description:
+    This enumeration defines the valid application states.  These states
+    determine the behavior of the application at various times.
+*/
+
+typedef enum
+{
+	/* Application's state machine's initial state. */
+	NFC_APP_STATE_INIT=0,
+
+	/* TODO: Define states used by the application state machine. */
+
+} NFC_APP_STATES;
 
 
 // *****************************************************************************
@@ -94,12 +111,15 @@ extern "C" {
 
 typedef struct
 {
-    QueueHandle_t txMessageQ;
-    QueueHandle_t initQ;
+    QueueHandle_t rxQ;
+    QueueHandle_t inQ;
     QueueHandle_t txBufferQ;
-    InternalMessage msg;
-    char msgCount;
-} UART_TX_APP_DATA;
+} NFC_APP_DATA;
+
+typedef struct
+{
+    
+} NFCMessage;
 
 
 // *****************************************************************************
@@ -119,7 +139,7 @@ typedef struct
 
 /*******************************************************************************
   Function:
-    void UART_TX_APP_Initialize ( void )
+    void NFC_APP_Initialize ( void )
 
   Summary:
      MPLAB Harmony application initialization routine.
@@ -141,19 +161,19 @@ typedef struct
 
   Example:
     <code>
-    UART_TX_APP_Initialize();
+    NFC_APP_Initialize();
     </code>
 
   Remarks:
     This routine must be called from the SYS_Initialize function.
 */
 
-void UART_TX_APP_Initialize ( void );
+void NFC_APP_Initialize ( void );
 
 
 /*******************************************************************************
   Function:
-    void UART_TX_APP_Tasks ( void )
+    void NFC_APP_Tasks ( void )
 
   Summary:
     MPLAB Harmony Demo application tasks function
@@ -174,17 +194,17 @@ void UART_TX_APP_Initialize ( void );
 
   Example:
     <code>
-    UART_TX_APP_Tasks();
+    NFC_APP_Tasks();
     </code>
 
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
 
-void UART_TX_APP_Tasks( void );
+void NFC_APP_Tasks( void );
 
 
-#endif /* _UART_TX_APP_H */
+#endif /* _NFC_APP_H */
 
 //DOM-IGNORE-BEGIN
 #ifdef __cplusplus

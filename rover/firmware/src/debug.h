@@ -8,7 +8,7 @@
 #include "system_config.h"
 #include "system_definitions.h"
 
-//#define DEBUG_ON
+#define DEBUG_ON
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -19,7 +19,6 @@ extern "C" {
 void setDebugBool(bool val); // Output to pin 29 on ChipKit Max32
 void setDebugVal(char value); // Output to pins 30-37 on ChipKit Max32
 // Output to pins 38-39 on ChipKit Max32 and the same pins as setDebugVal
-void TenBitsetDebugVal(int value); 
 inline void debugFailOn0(char value);
 inline void debugFailOnNot0(char value);
 void debugFailOnVal(char value, char expected);
@@ -68,6 +67,15 @@ void debugFailOnNotVal(char value, char expected);
 #define TASK_APP_RESERVED3      0x20
 #define TASK_APP_RESERVED4      0x21
 
+extern char* motor_stop_q;
+extern char* motor_q;
+extern char* uart_tx_init_q;
+extern char* uart_tx_buffer_q;
+extern char* uart_tx_message_q;
+extern char* uart_rx_message_q;
+extern char* nfc_receive_q;
+extern char* nfc_uart_tx_q;
+extern char* nfc_uart_rx_q;
 
 #endif
 

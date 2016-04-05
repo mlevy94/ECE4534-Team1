@@ -120,7 +120,7 @@ void DRV_USART1_Initialize(void)
     PLIB_USART_OperationModeSelect(USART_ID_2, USART_ENABLE_TX_RX_USED);
     PLIB_USART_LineControlModeSelect(USART_ID_2, USART_8N1);
     PLIB_USART_TransmitterEnable(USART_ID_2);
-    PLIB_USART_TransmitterInterruptModeSelect(USART_ID_2, USART_TRANSMIT_FIFO_EMPTY);
+    PLIB_USART_TransmitterInterruptModeSelect(USART_ID_2, USART_TRANSMIT_FIFO_NOT_FULL);
     PLIB_USART_ReceiverEnable(USART_ID_2);
     PLIB_USART_ReceiverInterruptModeSelect(USART_ID_2, USART_RECEIVE_FIFO_ONE_CHAR);
     /* Initialize interrupts */
@@ -129,7 +129,7 @@ void DRV_USART1_Initialize(void)
     /* PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_USART_2_TRANSMIT); */
     PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);
     PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_USART_2_ERROR);
-    PLIB_INT_VectorPrioritySet(INT_ID_0, INT_VECTOR_UART2, INT_PRIORITY_LEVEL5);
+    PLIB_INT_VectorPrioritySet(INT_ID_0, INT_VECTOR_UART2, INT_PRIORITY_LEVEL2);
     PLIB_INT_VectorSubPrioritySet(INT_ID_0, INT_VECTOR_UART2, INT_SUBPRIORITY_LEVEL0);
 
     PLIB_USART_Enable(USART_ID_2);

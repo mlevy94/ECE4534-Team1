@@ -19,6 +19,8 @@ BaseType_t addToUartTXQ(InternalMessage msg);
 BaseType_t addToUartTXQFromISR(InternalMessage msg);
 BaseType_t priorityAddToUartTXQ(InternalMessage msg);
 BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg);
+BaseType_t readFromTXBufferQ(char* msg);
+BaseType_t readFromTXBufferQFromISR(char* msg);
 
 
 #ifdef	__cplusplus

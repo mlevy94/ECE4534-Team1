@@ -98,9 +98,10 @@ typedef struct{
     
 }InternalMessage;
 
-InternalMessage makeMessage(char msgType, char* msg);
+InternalMessage makeMessage(char msgType, char* msg, char size);
 InternalMessage makeMessageChar(char msgType, char val);
 InternalMessage makeMessageInt(char msgType, int val);
+void sendDebugMessage(char* msg);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ROVER_MOVE helpers

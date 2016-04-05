@@ -12,8 +12,8 @@
 extern "C" {
 #endif
 
-BaseType_t addToUartRXQ(char msg);
-BaseType_t addToUartRXQFromISR(char msg);
+BaseType_t addToUartRXQ(char* msg);
+BaseType_t addToUartRXQFromISR(char* msg);
 
 
 #ifdef	__cplusplus

@@ -102,12 +102,12 @@ void SYS_Tasks ( void )
     /* Create OS Thread for UART_TX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_TX_APP_Tasks,
                 "UART_TX_APP Tasks",
-                4096, NULL, 2, NULL);
+                6144, NULL, 2, NULL);
 
     /* Create OS Thread for UART_RX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_RX_APP_Tasks,
                 "UART_RX_APP Tasks",
-                4096, NULL, 2, NULL);
+                2048, NULL, 2, NULL);
 
     /* Create OS Thread for NFC_APP Tasks. */
     xTaskCreate((TaskFunction_t) _NFC_APP_Tasks,

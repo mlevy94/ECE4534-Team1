@@ -77,7 +77,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-UART_TX_APP_DATA uart_tx_appData;
+static UART_TX_APP_DATA uart_tx_appData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -112,6 +112,25 @@ BaseType_t priorityAddToUartTXQ(InternalMessage msg) {
 
 BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg) {
     return xQueueSendToFrontFromISR(uart_tx_appData.txMessageQ, &msg, 0);
+}
+
+BaseType_t addToTXBufferQ(char msg) {
+    // Turn TX Interrupt on
+    PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
+    return xQueueSend(uart_tx_appData.txBufferQ, &msg, portMAX_DELAY);
+}
+    
+BaseType_t addToTXBufferQFromISR(char msg) {
+    PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_USART_1_TRANSMIT);
+    return xQueueSendFromISR(uart_tx_appData.txBufferQ, &msg, 0);
+}
+
+BaseType_t readFromTXBufferQ(char* msg) {
+    return xQueueReceive(uart_tx_appData.txBufferQ, msg, portMAX_DELAY);
+}
+
+BaseType_t readFromTXBufferQFromISR(char* msg) {
+    return xQueueReceiveFromISR(uart_tx_appData.txBufferQ, msg, 0);
 }
 
 void packAndSend(InternalMessage msg) {
@@ -152,8 +171,12 @@ void packAndSend(InternalMessage msg) {
 
 void UART_TX_APP_Initialize ( void )
 {
-    uart_tx_appData.initQ = xQueueCreate(1, 8);
+    uart_tx_appData.initQ = xQueueCreate(1, sizeof(char));
+    vQueueAddToRegistry(uart_tx_appData.initQ, uart_tx_init_q);
     uart_tx_appData.txMessageQ = xQueueCreate(16, sizeof(InternalMessage));
+    vQueueAddToRegistry(uart_tx_appData.txMessageQ, uart_tx_message_q);
+    uart_tx_appData.txBufferQ = xQueueCreate(TX_BUF_SIZE, sizeof(char));
+    vQueueAddToRegistry(uart_tx_appData.txBufferQ, uart_tx_buffer_q);
     uart_tx_appData.msgCount = 0;
 }
 
@@ -168,20 +191,19 @@ void UART_TX_APP_Initialize ( void )
 
 void UART_TX_APP_Tasks ( void )
 {    
-#ifdef DEBUG_ON
-    setDebugVal(TASK_UART_TX_APP);
-#endif
+//#ifdef DEBUG_ON
+//    setDebugVal(TASK_UART_TX_APP);
+//#endif
     char start;
     while(!xQueueReceive(uart_tx_appData.initQ, &start, portMAX_DELAY));
-    InternalMessage msg = makeMessageChar(CLIENT_ROLE, MY_ROLE);
-    packAndSend(msg);
+    packAndSend(makeMessageChar(CLIENT_ROLE, MY_ROLE));
     // process other messages
     while(1) {
 #ifdef DEBUG_ON
         setDebugVal(TASK_UART_TX_APP);
 #endif
-        if (xQueueReceive(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY)) {
-            packAndSend(msg);
+        if (xQueueReceive(uart_tx_appData.txMessageQ, &uart_tx_appData.msg, portMAX_DELAY)) {
+            packAndSend(uart_tx_appData.msg);
         }
     }
 }

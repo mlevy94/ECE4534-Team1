@@ -77,7 +77,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-UART_RX_APP_DATA uart_rx_appData;
+static UART_RX_APP_DATA uart_rx_appData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -94,12 +94,12 @@ UART_RX_APP_DATA uart_rx_appData;
 // *****************************************************************************
 // *****************************************************************************
 
-BaseType_t addToUartRXQ(char msg) {
-    return xQueueSend(uart_rx_appData.rxMessageQ, &msg, portMAX_DELAY);
+BaseType_t addToUartRXQ(char* msg) {
+    return xQueueSend(uart_rx_appData.rxMessageQ, msg, portMAX_DELAY);
 }
 
-BaseType_t addToUartRXQFromISR(char msg) {
-    return xQueueSendFromISR(uart_rx_appData.rxMessageQ, &msg, 0);
+BaseType_t addToUartRXQFromISR(char* msg) {
+    return xQueueSendFromISR(uart_rx_appData.rxMessageQ, msg, 0);
 }
 
 int getChecksum(NetMessage msg) {
@@ -113,11 +113,7 @@ int getChecksum(NetMessage msg) {
 
 InternalMessage processMessage(NetMessage msg) {
     uart_rx_appData.msgCount++;
-    // terminate message properly. Required for next step.
-    if (msg.msgsize < INTERNAL_MSG_SIZE) {
-        msg.msg[msg.msgsize] = '\0';
-    }
-    return makeMessage(msg.type, msg.msg);
+    return makeMessage(msg.type, msg.msg, msg.msgsize);
 }
 
 void sortMessage(InternalMessage msg) {
@@ -127,10 +123,10 @@ void sortMessage(InternalMessage msg) {
     // line one byte at a time.
     switch(msg.type) {
         case INITIALIZE:
-            addToInitTXQ(msg.msg[0]);
+            while(!addToInitTXQ(msg.msg[0]));
             break;
         case ROVER_MOVE:
-            addToMotorQ(msg);
+            while(!addToMotorQ(msg));
         case DEBUG_MSG:
             for (i = 0; msg.msg[i] != '\0'; i++) {
                 setDebugVal(msg.msg[i]);
@@ -160,7 +156,7 @@ void sortMessage(InternalMessage msg) {
 void UART_RX_APP_Initialize ( void )
 {
     uart_rx_appData.rxMessageQ = xQueueCreate(RX_BUF_SIZE, 8);
-    uart_rx_appData.sentMessageQ = xQueueCreate(SENT_MSG_Q_SIZE, sizeof(SentMessage));
+    vQueueAddToRegistry(uart_rx_appData.rxMessageQ, uart_rx_message_q);
     uart_rx_appData.msgCount = 0;
 }
 
@@ -175,11 +171,10 @@ void UART_RX_APP_Initialize ( void )
 
 void UART_RX_APP_Tasks ( void )
 {
-    char inChar;
     int i = 0;
     while(i < 20) {
-        if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
-            if (inChar == 0x50) {
+        if (xQueueReceive(uart_rx_appData.rxMessageQ, &uart_rx_appData.inChar, portMAX_DELAY)) {
+            if (uart_rx_appData.inChar == 0x50) {
                 i++;
             }
             else {
@@ -187,38 +182,35 @@ void UART_RX_APP_Tasks ( void )
             }
         }
     }
-    InternalMessage processedMsg;
     while(1) {
 #ifdef DEBUG_ON
         setDebugVal(TASK_UART_RX_APP);
 #endif
-        if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
+        if (xQueueReceive(uart_rx_appData.rxMessageQ, &uart_rx_appData.inChar, portMAX_DELAY)) {
             // get start byte
-            if ((inChar & 0xff) == START_BYTE) {
-                NetMessage inmsg;
+            if ((uart_rx_appData.inChar & 0xff) == START_BYTE) {
                 // get sender
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                inmsg.sender = inChar;
+                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &uart_rx_appData.inChar, portMAX_DELAY));
+                uart_rx_appData.inmsg.sender = uart_rx_appData.inChar;
                 // get message number
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                inmsg.number = inChar;
+                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &uart_rx_appData.inChar, portMAX_DELAY));
+                uart_rx_appData.inmsg.number = uart_rx_appData.inChar;
                 // get message type
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                inmsg.type = inChar;
+                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &uart_rx_appData.inChar, portMAX_DELAY));
+                uart_rx_appData.inmsg.type = uart_rx_appData.inChar;
                 // get message length
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                inmsg.msgsize = inChar;
+                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &uart_rx_appData.inChar, portMAX_DELAY));
+                uart_rx_appData.inmsg.msgsize = uart_rx_appData.inChar;
                 // get message
-                for (i = 0; i < inmsg.msgsize; i++ ) {
-                    while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                    inmsg.msg[i] = inChar;
+                for (i = 0; i < uart_rx_appData.inmsg.msgsize; i++ ) {
+                    while (!xQueueReceive(uart_rx_appData.rxMessageQ, &uart_rx_appData.inChar, portMAX_DELAY));
+                    uart_rx_appData.inmsg.msg[i] = uart_rx_appData.inChar;
                 }
                 // get end byte
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                if ((inChar & 0xff) == END_BYTE) {
+                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &uart_rx_appData.inChar, portMAX_DELAY));
+                if ((uart_rx_appData.inChar & 0xff) == END_BYTE) {
                     // place in correct Q based on message type
-                    processedMsg = processMessage(inmsg);
-                    sortMessage(processedMsg);
+                    sortMessage(processMessage(uart_rx_appData.inmsg));
                 }
             }
         }

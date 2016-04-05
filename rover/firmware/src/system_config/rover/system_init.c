@@ -49,7 +49,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
-#include "txbuffer_public.h"
 #include "debug.h"
 
 
@@ -225,11 +224,6 @@ void SYS_Initialize ( void* data )
     
     
     /* Initialize Middleware */
-    initializeTXBufferQ();
-    initializeNFCTXBufferQ();
-#ifdef DEBUG_ON
-    setDebugVal(SYS_INIT_TX_BUF);
-#endif
     
     /* Initialize the Application */
     MOTORAPP_Initialize();

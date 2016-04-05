@@ -15,31 +15,11 @@ void setDebugVal(char value) {
     
 }
 
-void TenBitsetDebugVal(int value){
-    SYS_PORTS_Clear(PORTS_ID_0, PORT_CHANNEL_E, 0x00FF);
-    // Checks bits 7-0
-    SYS_PORTS_Set(PORTS_ID_0, PORT_CHANNEL_E, (value & 0xFF), 0x00FF);
-    // Checks bit 8
-    if(value & 0x100) {
-        SYS_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_10); 
-    }
-    else {
-        SYS_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_10);
-    }
-    // Checks bit 9
-    if(value & 0x200) {
-        SYS_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_5);
-    }
-    else {
-        SYS_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_5);
-    }
-}
-
-inline void debugFailOn0(char value) {
+void debugFailOn0(char value) {
     debugFailOnVal(value, 0);
 }
 
-inline void debugFailOnNot0(char value) {
+void debugFailOnNot0(char value) {
     debugFailOnNotVal(value, 0);
 }
 
@@ -63,3 +43,13 @@ void debugFailOnNotVal(char value, char expected) {
         while(1);
     }
 }
+
+char* motor_stop_q = "Motor Stop Q";
+char* motor_q = "Motor Q";
+char* uart_tx_init_q = "UART TX Init Q";
+char* uart_tx_buffer_q = "UART TX Buffer Q";
+char* uart_tx_message_q = "UART TX Message Q";
+char* uart_rx_message_q = "UART RX Receive Q";
+char* nfc_receive_q = "NFC Receive Q";
+char* nfc_uart_tx_q = "NFC UART TX Q";
+char* nfc_uart_rx_q = "NFC UART RX Q";

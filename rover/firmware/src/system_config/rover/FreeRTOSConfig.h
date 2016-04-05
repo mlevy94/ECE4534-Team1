@@ -89,16 +89,16 @@
 #define configTICK_RATE_HZ                      ( ( TickType_t ) 250 )
 #define configMAX_PRIORITIES                    ( 5UL )
 #define configMINIMAL_STACK_SIZE                ( 128 )
-#define configISR_STACK_SIZE                    ( 960 )
-#define configTOTAL_HEAP_SIZE                   ( ( size_t ) 81920 )
-#define configMAX_TASK_NAME_LEN                 ( 16 )
+#define configISR_STACK_SIZE                    ( 480 )
+#define configTOTAL_HEAP_SIZE                   ( ( size_t ) 92160 )
+#define configMAX_TASK_NAME_LEN                 ( 20 )
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             0
 #define configUSE_COUNTING_SEMAPHORES           1
 #define configUSE_TASK_NOTIFICATIONS            1
-#define configQUEUE_REGISTRY_SIZE               0
+#define configQUEUE_REGISTRY_SIZE               10
 #define configUSE_QUEUE_SETS                    0
 #define configUSE_TIME_SLICING                  1
 #define configUSE_NEWLIB_REENTRANT              0
@@ -112,8 +112,8 @@
 
 /* Run time and task stats gathering related definitions. */
 #define configGENERATE_RUN_TIME_STATS           0
-#define configUSE_TRACE_FACILITY                0
-#define configUSE_STATS_FORMATTING_FUNCTIONS    0
+#define configUSE_TRACE_FACILITY                1
+#define configUSE_STATS_FORMATTING_FUNCTIONS    1
 
 /* Co-routine related definitions. */
 #define configUSE_CO_ROUTINES                   0
