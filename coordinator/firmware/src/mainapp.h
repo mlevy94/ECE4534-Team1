@@ -165,6 +165,9 @@ typedef struct
     
     // Counter for the number of obstacles
     int obstacleCount;
+    
+    // Counter to increment to the total number of obstacles
+    int obstacleCur;
 
     // Queue for sending commands to the rover
     QueueHandle_t mainAppCommandMsgQ;
@@ -187,32 +190,99 @@ BaseType_t addToCommandMsgQ(InternalMessage msg);
 /*
  Methods for the full implementation for complete traversal
  */
-// Empty map
-void leftToRightEmpty(void);
-void rightToLeftEmpty(void);
-void topToBottomEmpty(void);
-void bottomToTopEmpty(void);
-void topToBottomEmptyCorners(uint16_t* y, uint16_t* angle);
-void bottomToTopEmptyCorners(uint16_t* y, uint16_t* angle);
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//          EMPTY MAP
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Moving around only once to make pass by reference
 void moveHorizontalRightOnceCornerEmpty(uint16_t* x, uint16_t* angle);
 void moveHorizontalLeftOnceCornerEmpty(uint16_t* x, uint16_t* angle);
 void moveVerticalUpOnceCornerEmpty(uint16_t* y, uint16_t* angle);
 void moveVerticalDownOnceCornerEmpty(uint16_t* y, uint16_t* angle);
-void centerAndSpreadOutEmpty(void);
+void topToBottomEmptyCorners(uint16_t* y, uint16_t* angle);
+void bottomToTopEmptyCorners(uint16_t* y, uint16_t* angle);
+
+// Corner cases
 void upperLeftCornerTraverseEmpty(void);
 void lowerLeftCornerTraverseEmpty(void);
 void upperRightCornerTraverseEmpty(void);
 void lowerRightCornerTraverseEmpty(void);
-void moveHorizontalRightOnceEmpty(void);
-void moveHorizontalLeftOnceEmpty(void);
-void moveVerticalUpOnceEmpty(void);
-void moveVerticalDownOnceEmpty(void);
 
+// Corner cases made pass by reference for the center case including the center case
+void centerAndSpreadOutEmpty(void);
+void upperLeftCornerTraverseEmptyParam(uint16_t* x, uint16_t* y, uint16_t* angle);
+void lowerLeftCornerTraverseEmptyParam(uint16_t* x, uint16_t* y, uint16_t* angle);
+void upperRightCornerTraverseEmptyParam(uint16_t* x, uint16_t* y, uint16_t* angle);
+void lowerRightCornerTraverseEmptyParam(uint16_t* x, uint16_t* y, uint16_t* angle);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//          MAP WITH OBSTACLES
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// Moving around only once to make pass by reference
+void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveVerticalUpOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveVerticalDownOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
+void topToBottomCorners(uint16_t* x, uint16_t* y, uint16_t* angle);
+void bottomToTopCorners(uint16_t* x, uint16_t* y, uint16_t* angle);
+
+// Obstacle Maneuvering
 /*
- Method to send back the rover location to the simulation for debugging
+ The first direction is the direction the rover needs to go
+ The second direction is the direction is the direction the rover will take to go around the obstacle
+
+ The parameters are for the location and angle of the rover
  */
+void moveRightUpAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveRightDownAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveLeftUpAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveLeftDownAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle);
+
+void moveUpRightAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveUpLeftAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveDownRightAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveDownLeftAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle);
+
+// Corner cases
+void upperLeftCornerTraverse(void);
+void lowerLeftCornerTraverse(void);
+void upperRightCornerTraverse(void);
+void lowerRightCornerTraverse(void);
+
+// Corner cases made pass by reference for the center case including the center case
+void centerAndSpreadOut(void);
+void upperLeftCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle);
+void lowerLeftCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle);
+void upperRightCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle);
+void lowerRightCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle);
+
+// Method to send back the rover location to the simulation for debugging
 void sendRoverLocation(void);
 
+// Method to send back the obstacle locations to the simulation for debugging
+void sendObstacleLocations(void);
+
+/*
+ Empty algorithm traversal throughout map
+ */
+void runAlgorithmEmpty(void);
+
+/*
+ Algorithm traversal throughout occupied map
+ */
 void runAlgorithm(void);
 	
 // *****************************************************************************
