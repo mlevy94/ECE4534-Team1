@@ -83,12 +83,15 @@ typedef struct {
 #define ROVER_MOVE          0x11
 #define OBJECT_POS          0x14
 #define TOKEN_FOUND         0x18
+#define TASK_COMPLETED      0x20
 
 //////////////////////////////////////////////////////////////////////////////
 // OBJECT_STRUCTURE defines
 //////////////////////////////////////////////////////////////////////////////
-#define ROVER       0xA0
-#define OBSTACLE    0xA1
+#define ROVER               0xA0
+#define OBSTACLE            0xA1
+#define LEAD_ROVER_UPDATE   0xA2
+#define TOKEN               0xA3
 
 
 ///////////////////////////////////////////////////////////////////////////////

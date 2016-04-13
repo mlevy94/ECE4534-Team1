@@ -164,50 +164,50 @@ void convertMessage(InternalMessage message, OBJECT_STRUCTURE* obj)
 void topToBottomEmptyCorners(uint16_t* y, uint16_t* angle)
 {
     // Taken from topToBottomEmpty()
-        InternalMessage roverCommand;
-        // The rover is not facing downwards
+    InternalMessage roverCommand;
+    // The rover is not facing downwards
+    setDebugVal(*angle);
+    if(*angle != 180) {
+        // Easier to turn left
+        if(*angle <= 359 && *angle > 180) {
+            uint16_t angleLeftover = *angle - 180;
+            *angle = *angle - angleLeftover;
+            roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+        }
+        // Easier to turn right
+        else {
+            uint16_t angleLeftover = 180 - *angle;
+            *angle = *angle + angleLeftover;
+            roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+        }
         setDebugVal(*angle);
-        if(*angle != 180) {
-            // Easier to turn left
-            if(*angle <= 359 && *angle > 180) {
-                uint16_t angleLeftover = *angle - 180;
-                *angle = *angle - angleLeftover;
-                roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-            }
-            // Easier to turn right
-            else {
-                uint16_t angleLeftover = 180 - *angle;
-                *angle = *angle + angleLeftover;
-                roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-            }
-            setDebugVal(*angle);
+        addToCommandMsgQ(roverCommand);
+    }
+    // The rover is facing downwards
+    // Have the rover move downwards
+    // Accounts for the center location of the rover along with the front of the rover
+    int counter = 0;
+    uint16_t endPoint = *y + (mainappData.rover.length / 2);
+    while(endPoint != 36) {
+        // Getting the rover to move the appropriate distance
+        if((endPoint + mainappData.rover.length) <= 36) {
+            counter++;
+            endPoint += mainappData.rover.length;
+        }
+        // Correction factor in case the center of the rover is not at the center of a grid cell
+        else if((36 - endPoint) < mainappData.rover.length) { // Updated from mainappData.rover.length / 2
+            uint16_t correction = 36 - endPoint;
+            roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
             addToCommandMsgQ(roverCommand);
+            endPoint += correction;
         }
-        // The rover is facing downwards
-        // Have the rover move downwards
-        // Accounts for the center location of the rover along with the front of the rover
-        int counter = 0;
-        uint16_t endPoint = *y + (mainappData.rover.length / 2);
-        while(endPoint != 36) {
-            // Getting the rover to move the appropriate distance
-            if((endPoint + mainappData.rover.length) <= 36) {
-                counter++;
-                endPoint += mainappData.rover.length;
-            }
-            // Correction factor in case the center of the rover is not at the center of a grid cell
-            else if((36 - endPoint) < mainappData.rover.length) { // Updated from mainappData.rover.length / 2
-                uint16_t correction = 36 - endPoint;
-                roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
-                addToCommandMsgQ(roverCommand);
-                endPoint += correction;
-            }
-        }
-        *y = endPoint - (mainappData.rover.length / 2);
-        int i;
-        for(i = 0; i < counter; i++) {
-            roverCommand = makeRoverMove(ROVER_FORWARD, mainappData.rover.length & 0x00FF);
-            addToCommandMsgQ(roverCommand);
-        }
+    }
+    *y = endPoint - (mainappData.rover.length / 2);
+    int i;
+    for(i = 0; i < counter; i++) {
+        roverCommand = makeRoverMove(ROVER_FORWARD, mainappData.rover.length & 0x00FF);
+        addToCommandMsgQ(roverCommand);
+    }
 }
 
 void bottomToTopEmptyCorners(uint16_t* y, uint16_t* angle)
@@ -795,10 +795,8 @@ void centerAndSpreadOutEmpty(void)
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
+void turnRight(uint16_t* angle)
 {
-    uint16_t testingEndPoint = *x + (mainappData.rover.length / 2);
-    // The rover is not facing right
     InternalMessage roverCommand;
     // The rover is not facing right
     if(*angle != 90) {
@@ -831,29 +829,11 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
         }
         addToCommandMsgQ(roverCommand);
     }
-    // Getting the rover to move the appropriate distance
-    uint16_t correction;
-    if(testingEndPoint != 36) {
-        // Correction factor in case the center of the rover is not at the center of a grid cell
-        if((testingEndPoint % mainappData.rover.length) < mainappData.rover.length) {
-            correction = mainappData.rover.length - (testingEndPoint % mainappData.rover.length);
-            roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
-            addToCommandMsgQ(roverCommand);
-            *x += correction;
-        }
-        else if((testingEndPoint + mainappData.rover.length) <= 36) {
-            correction = mainappData.rover.length;
-            roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
-            addToCommandMsgQ(roverCommand);
-            *x += correction;
-        }
-    }
 }
 
-void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
+void turnLeft(uint16_t* angle)
 {
     InternalMessage roverCommand;
-    uint16_t testingEndPoint = *x - (mainappData.rover.length / 2);
     // The rover is not facing left
     if(*angle != 270) {
         // Easier to turn right
@@ -862,7 +842,7 @@ void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             *angle = *angle + angleLeftover;
             roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
         }
-        
+
         // Easier to turn left
         else if(*angle <= 359 && *angle > 270) {
             uint16_t angleLeftover = *angle - 270;
@@ -872,24 +852,176 @@ void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
         else if(*angle >= 0 && *angle < 90) {
             // The 90 degrees is to get to the right quadrant
             uint16_t angleLeftover = *angle + 90;
-            *angle = (*angle - angleLeftover - 180) % 360;
+            *angle = angleLeftover + 180 - *angle;
             roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
         }
         addToCommandMsgQ(roverCommand);
     }
-    //setDebugVal(*angle);
+}
+
+void turnUp(uint16_t* angle)
+{
+    InternalMessage roverCommand;
+    // The rover is not facing upwards
+    if(*angle != 0) {
+        // Easier to turn right
+        if(*angle <= 359 && *angle > 180) {
+            uint16_t angleLeftover = 360 - *angle;
+            *angle = (*angle + angleLeftover) % 360;
+            roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+        }
+        // Easier to turn left
+        else {
+            // Need to move left the amount of angle that it is facing
+            roverCommand = makeRoverMove(ROVER_LEFT, *angle & 0x00FF);
+            *angle = (*angle - *angle);
+        }
+        addToCommandMsgQ(roverCommand);
+    }
+}
+
+void turnDown(uint16_t* angle)
+{
+    InternalMessage roverCommand;
+    // The rover is not facing downwards
+    if(*angle != 180) {
+        // Easier to turn left
+        if(*angle <= 359 && *angle > 180) {
+            uint16_t angleLeftover = *angle - 180;
+            *angle = (*angle - angleLeftover);
+            roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+        }
+        // Easier to turn right
+        else {
+            uint16_t angleLeftover = 180 - *angle;
+            *angle = *angle + angleLeftover;
+            roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+        }
+        addToCommandMsgQ(roverCommand);
+    }
+}
+
+void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
+{
+    uint16_t testingEndPoint = *x + (mainappData.rover.length / 2);
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
+    // The rover is not facing right
+    InternalMessage roverCommand;
+    // The rover is not facing right
+    turnRight(angle);
+    // Getting the rover to move the appropriate distance
+    uint16_t correction;
+    if(testingEndPoint != 36) {
+        // Getting the rover to move the appropriate distance
+        // Searching for the obstacle blocking the rover
+        for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+            // Finding the obstacle
+            if(((*x + 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
+                objInd = objIterator;
+                blocked = pdTRUE;
+            }
+        }
+        if(blocked == pdTRUE) {
+            if(mainappData.obstacleAversion == top) {
+                // First go downward
+                turnDown(angle);
+                // Not centered
+                if(((*y + 3) % 6) > 0) {
+                    correction = 6 - (testingEndPoint % 6);
+                    roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                    addToCommandMsgQ(roverCommand);
+                    *y += correction;
+                }
+                else if((*y + 6) <= 33) {
+                    correction = 6;
+                    roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                    addToCommandMsgQ(roverCommand);
+                    *y += correction;
+                }
+                // Then go right
+                turnRight(angle);
+                if((testingEndPoint % 6) < 6) {
+                    correction = 6 - (testingEndPoint % 6);
+                    roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                    addToCommandMsgQ(roverCommand);
+                    *x += correction;
+                }
+                else if((testingEndPoint + 6) <= 36) {
+                    correction = 6;
+                    roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                    addToCommandMsgQ(roverCommand);
+                    *x += correction;
+                }
+            }
+            else if(mainappData.obstacleAversion == bottom) {
+                // First go upward
+                turnUp(angle);
+                if(((*y - 3) % 6) < 6) {
+                    correction = 6 - (testingEndPoint % 6);
+                    roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                    addToCommandMsgQ(roverCommand);
+                    *y -= correction;
+                }
+                else if((*y - 6) >= 3) {
+                    correction = 6;
+                    roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                    addToCommandMsgQ(roverCommand);
+                    *y -= correction;
+                }
+                // Then go right
+                turnRight(angle);
+                if((testingEndPoint % 6) < 6) {
+                    correction = 6 - (testingEndPoint % 6);
+                    roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                    addToCommandMsgQ(roverCommand);
+                    *x += correction;
+                }
+                else if((testingEndPoint + 6) <= 36) {
+                    correction = 6;
+                    roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                    addToCommandMsgQ(roverCommand);
+                    *x += correction;
+                }
+            }
+        }
+        else {
+            // Then go right
+            if((testingEndPoint % 6) > 0) {
+                correction = 6 - (testingEndPoint % 6);
+                roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                addToCommandMsgQ(roverCommand);
+                *x += correction;
+            }
+            else if((testingEndPoint + 6) <= 36) {
+                correction = 6;
+                roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+                addToCommandMsgQ(roverCommand);
+                *x += correction;
+            }
+        }
+    }
+}
+
+void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
+{
+    InternalMessage roverCommand;
+    uint16_t testingEndPoint = *x - (mainappData.rover.length / 2);
+    // The rover is not facing left
+    turnLeft(angle);
     // Getting the rover to move the appropriate distance
     uint16_t correction;
     if(testingEndPoint != 0) {
         // Correction factor in case the center of the rover is not at the center of a grid cell
-        if((testingEndPoint % mainappData.rover.length) != 0) {
-            correction = testingEndPoint % mainappData.rover.length;
+        if((testingEndPoint % 6) != 0) {
+            correction = testingEndPoint % 6;
             roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
             addToCommandMsgQ(roverCommand);
             *x -= correction;
         }
-        else if((testingEndPoint - mainappData.rover.length) >= 0) {
-            correction = mainappData.rover.length;
+        else if((testingEndPoint - 6) >= 0) {
+            correction = 6;
             roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
             addToCommandMsgQ(roverCommand);
             *x -= correction;
@@ -899,12 +1031,52 @@ void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
 
 void moveVerticalUpOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
 {
-    
+    uint16_t testingEndPoint = *y - (mainappData.rover.length / 2);
+    InternalMessage roverCommand;
+    turnUp(angle);
+    // Getting the rover to move the appropriate distance
+    uint16_t correction;
+    if(testingEndPoint != 0) {
+        // Correction factor in case the center of the rover is not at the center of a grid cell
+        if((testingEndPoint % 6) > 0) {
+            correction = 6 - (testingEndPoint % 6);
+            roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+            addToCommandMsgQ(roverCommand);
+            *y -= correction;
+        }
+        else if((testingEndPoint - 6) >= 0) {
+            correction = 6;
+            roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+            addToCommandMsgQ(roverCommand);
+            *y -= correction;
+        }
+    }
 }
 
 void moveVerticalDownOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
 {
-    
+     uint16_t testingEndPoint = *y + (mainappData.rover.length / 2);
+    // The rover is not facing right
+    InternalMessage roverCommand;
+    // The rover is not facing downwards
+    turnDown(angle);
+    // Getting the rover to move the appropriate distance
+    uint16_t correction;
+    if(testingEndPoint != 36) {
+        // Correction factor in case the center of the rover is not at the center of a grid cell
+        if((testingEndPoint % 6) > 0) {
+            correction = 6 - (testingEndPoint % 6);
+            roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+            addToCommandMsgQ(roverCommand);
+            *y += correction;
+        }
+        else if((testingEndPoint + 6) <= 36) {
+            correction = 6;
+            roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
+            addToCommandMsgQ(roverCommand);
+            *y += correction;
+        }
+    }
 }
 
 void moveRightUpAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
@@ -912,12 +1084,11 @@ void moveRightUpAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     int objIterator;
     int objInd;
     BaseType_t blocked = pdFALSE;
-    InternalMessage roverCommand;
     
     // Searching for the obstacle blocking the rover
     for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
         // Finding the obstacle
-        if((*x + mainappData.rover.length) == mainappData.obstacle[objInd].xPos) {
+        if(((*x + 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
             objInd = objIterator;
             blocked = pdTRUE;
         }
@@ -927,7 +1098,7 @@ void moveRightUpAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     if(blocked == pdTRUE) {
         // Need to account for edges
         // We are going under the postulated rule that no obstacle will be adjacent to one another
-        if((*x + (2 * mainappData.rover.length)) <= 36) {
+        if((*x + 12) <= 33) {
             // Make the rover turn Upwards
             moveVerticalUpOnceCorner(x, y, angle);
             // Move over right once to be above the obstacle
@@ -939,36 +1110,7 @@ void moveRightUpAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
             
             // Reorient to help the rover go right (again)
             // The rover is not facing right
-            if(*angle != 90) {
-                // Easier to turn right
-                if(*angle < 90 && *angle >= 0) {
-                    uint16_t angleLeftover = 90 - *angle;
-                    roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-                    *angle = (*angle + angleLeftover + 360) % 360;
-                }
-                else if(*angle <= 359 && *angle >= 270) {
-                    // The 90 degrees is to get to the right quadrant
-                    // The subtraction from 360 degrees is to get the actual leftover angle
-                    uint16_t angleLeftover = 90 + (360 - *angle);
-                    roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-                    *angle = (*angle + angleLeftover + 360) % 360;
-                }
-
-                // Easier to turn left
-                else if(*angle < 270 && *angle >= 180) {
-                    // The 90 degrees is to get to the right quadrant
-                    // The subtraction with 180 degrees is to get the actual leftover angles
-                    uint16_t angleLeftover = 90 + (*angle - 180);
-                    *angle = (*angle - angleLeftover + 360) % 360;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                else if(*angle < 180 && *angle > 90) {
-                    uint16_t angleLeftover = *angle - 90;
-                    *angle = (*angle - angleLeftover + 360) % 360;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                addToCommandMsgQ(roverCommand);
-            }
+            turnRight(angle);
         }
         // At the right edge of the map
         else {
@@ -986,12 +1128,11 @@ void moveRightDownAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     int objIterator;
     int objInd;
     BaseType_t blocked = pdFALSE;
-    InternalMessage roverCommand;
     
     // Searching for the obstacle blocking the rover
     for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
         // Finding the obstacle
-        if((*x + mainappData.rover.length) == mainappData.obstacle[objInd].xPos) {
+        if(((*x + 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
             objInd = objIterator;
             blocked = pdTRUE;
         }
@@ -1001,7 +1142,7 @@ void moveRightDownAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     if(blocked == pdTRUE) {
         // Need to account for edges
         // We are going under the postulated rule that no obstacle will be adjacent to one another
-        if((*x + (2 * mainappData.rover.length)) <= 36) {
+        if((*x + 12) <= 33) {
             // Make the rover turn Upwards
             moveVerticalDownOnceCorner(x, y, angle);
             // Move over right once to be above the obstacle
@@ -1013,36 +1154,7 @@ void moveRightDownAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
             
             // Reorient to help the rover go right (again)
             // The rover is not facing right
-            if(*angle != 90) {
-                // Easier to turn right
-                if(*angle < 90 && *angle >= 0) {
-                    uint16_t angleLeftover = 90 - *angle;
-                    roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-                    *angle = (*angle + angleLeftover + 360) % 360;
-                }
-                else if(*angle <= 359 && *angle >= 270) {
-                    // The 90 degrees is to get to the right quadrant
-                    // The subtraction from 360 degrees is to get the actual leftover angle
-                    uint16_t angleLeftover = 90 + (360 - *angle);
-                    roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-                    *angle = (*angle + angleLeftover + 360) % 360;
-                }
-
-                // Easier to turn left
-                else if(*angle < 270 && *angle >= 180) {
-                    // The 90 degrees is to get to the right quadrant
-                    // The subtraction with 180 degrees is to get the actual leftover angles
-                    uint16_t angleLeftover = 90 + (*angle - 180);
-                    *angle = (*angle - angleLeftover + 360) % 360;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                else if(*angle < 180 && *angle > 90) {
-                    uint16_t angleLeftover = *angle - 90;
-                    *angle = (*angle - angleLeftover + 360) % 360;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                addToCommandMsgQ(roverCommand);
-            }
+            turnRight(angle);
         }
         // At the right edge of the map
         else {
@@ -1060,63 +1172,43 @@ void moveLeftUpAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     int objIterator;
     int objInd;
     BaseType_t blocked = pdFALSE;
-    InternalMessage roverCommand;
     
-    // Searching for the obstacle blocking the rover
-    for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
-        // Finding the obstacle
-        if((*x - mainappData.rover.length) == mainappData.obstacle[objInd].xPos) {
-            objInd = objIterator;
-            blocked = pdTRUE;
-        }
-    }
-    
-    // The obstacle was found
-    if(blocked == pdTRUE) {
-        // Need to account for edges
-        // We are going under the postulated rule that no obstacle will be adjacent to one another
-        if((*x + (2 * mainappData.rover.length)) >= 0) {
-            // Make the rover turn Upwards
-            moveVerticalUpOnceCorner(x, y, angle);
-            // Move over right once to be above the obstacle
-            moveHorizontalLeftOnceCorner(x, y, angle);
-            // Move right once more to get past the obstacle
-            moveHorizontalLeftOnceCorner(x, y, angle);
-            // Begin moving back to where you need to be
-            moveVerticalDownOnceCorner(x, y, angle);
-            
-            // Reorient to help the rover go left (again)
-            // The rover is not facing left
-            if(*angle != 270) {
-                // Easier to turn right
-                if(*angle < 270 && *angle >= 90) {
-                    uint16_t angleLeftover = 270 - *angle;
-                    *angle = *angle + angleLeftover;
-                    roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-                }
-
-                // Easier to turn left
-                else if(*angle <= 359 && *angle > 270) {
-                    uint16_t angleLeftover = *angle - 270;
-                    *angle = *angle - angleLeftover;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                else if(*angle >= 0 && *angle < 90) {
-                    // The 90 degrees is to get to the right quadrant
-                    uint16_t angleLeftover = *angle + 90;
-                    *angle = (*angle - angleLeftover - 180) % 360;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                addToCommandMsgQ(roverCommand);
+    if((*x - 6) >= 3) {
+        // Searching for the obstacle blocking the rover
+        for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+            // Finding the obstacle
+            if(((*x - 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
+                objInd = objIterator;
+                blocked = pdTRUE;
             }
         }
-        // At the right edge of the map
-        else {
-            // Move up one space
-            moveVerticalUpOnceCorner(x, y, angle);
-            // Move over to be above the obstacle
-            // Already reoriented right
-            moveHorizontalLeftOnceCorner(x, y, angle);
+
+        // The obstacle was found
+        if(blocked == pdTRUE) {
+            // Need to account for edges
+            // We are going under the postulated rule that no obstacle will be adjacent to one another
+            if((*x - 12) >= 3) {
+                // Make the rover turn Upwards
+                moveVerticalUpOnceCorner(x, y, angle);
+                // Move over right once to be above the obstacle
+                moveHorizontalLeftOnceCorner(x, y, angle);
+                // Move right once more to get past the obstacle
+                moveHorizontalLeftOnceCorner(x, y, angle);
+                // Begin moving back to where you need to be
+                moveVerticalDownOnceCorner(x, y, angle);
+
+                // Reorient to help the rover go left (again)
+                // The rover is not facing left
+                turnLeft(angle);
+            }
+            // At the right edge of the map
+            else {
+                // Move up one space
+                moveVerticalUpOnceCorner(x, y, angle);
+                // Move over to be above the obstacle
+                // Already reoriented right
+                moveHorizontalLeftOnceCorner(x, y, angle);
+            }
         }
     }
 }
@@ -1126,12 +1218,11 @@ void moveLeftDownAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     int objIterator;
     int objInd;
     BaseType_t blocked = pdFALSE;
-    InternalMessage roverCommand;
     
     // Searching for the obstacle blocking the rover
     for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
         // Finding the obstacle
-        if((*x - mainappData.rover.length) == mainappData.obstacle[objInd].xPos) {
+        if(((*x - 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
             objInd = objIterator;
             blocked = pdTRUE;
         }
@@ -1141,7 +1232,7 @@ void moveLeftDownAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     if(blocked == pdTRUE) {
         // Need to account for edges
         // We are going under the postulated rule that no obstacle will be adjacent to one another
-        if((*x - (2 * mainappData.rover.length)) >= 0) {
+        if((*x - 12) >= 3) {
             // Make the rover turn Upwards
             moveVerticalDownOnceCorner(x, y, angle);
             // Move over right once to be above the obstacle
@@ -1153,28 +1244,7 @@ void moveLeftDownAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
             
             // Reorient to help the rover go right (again)
             // The rover is not facing left
-            if(*angle != 270) {
-                // Easier to turn right
-                if(*angle < 270 && *angle >= 90) {
-                    uint16_t angleLeftover = 270 - *angle;
-                    *angle = *angle + angleLeftover;
-                    roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-                }
-
-                // Easier to turn left
-                else if(*angle <= 359 && *angle > 270) {
-                    uint16_t angleLeftover = *angle - 270;
-                    *angle = *angle - angleLeftover;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                else if(*angle >= 0 && *angle < 90) {
-                    // The 90 degrees is to get to the right quadrant
-                    uint16_t angleLeftover = *angle + 90;
-                    *angle = (*angle - angleLeftover - 180) % 360;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                addToCommandMsgQ(roverCommand);
-            }
+            turnLeft(angle);
         }
         // At the right edge of the map
         else {
@@ -1192,12 +1262,11 @@ void moveUpRightAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     int objIterator;
     int objInd;
     BaseType_t blocked = pdFALSE;
-    InternalMessage roverCommand;
     
     // Searching for the obstacle blocking the rover
     for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
         // Finding the obstacle
-        if((*x + mainappData.rover.length) == mainappData.obstacle[objInd].xPos) {
+        if(((*y - 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
             objInd = objIterator;
             blocked = pdTRUE;
         }
@@ -1207,93 +1276,415 @@ void moveUpRightAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
     if(blocked == pdTRUE) {
         // Need to account for edges
         // We are going under the postulated rule that no obstacle will be adjacent to one another
-        if((*y + (2 * mainappData.rover.length)) >= 0) {
-            // Make the rover turn right
+        if((*y - 12) >= 3) {
+            // Make the rover turn Upwards
             moveHorizontalRightOnceCorner(x, y, angle);
-            // Move up once to be beside the obstacle
+            // Move over right once to be above the obstacle
             moveVerticalUpOnceCorner(x, y, angle);
-            // Move up once more to get past the obstacle
+            // Move right once more to get past the obstacle
             moveVerticalUpOnceCorner(x, y, angle);
             // Begin moving back to where you need to be
             moveHorizontalLeftOnceCorner(x, y, angle);
             
-            // V need to fix this to face up
             // Reorient to help the rover go right (again)
             // The rover is not facing right
-            if(*angle != 90) {
-                // Easier to turn right
-                if(*angle < 90 && *angle >= 0) {
-                    uint16_t angleLeftover = 90 - *angle;
-                    roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-                    *angle = (*angle + angleLeftover + 360) % 360;
-                }
-                else if(*angle <= 359 && *angle >= 270) {
-                    // The 90 degrees is to get to the right quadrant
-                    // The subtraction from 360 degrees is to get the actual leftover angle
-                    uint16_t angleLeftover = 90 + (360 - *angle);
-                    roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-                    *angle = (*angle + angleLeftover + 360) % 360;
-                }
-
-                // Easier to turn left
-                else if(*angle < 270 && *angle >= 180) {
-                    // The 90 degrees is to get to the right quadrant
-                    // The subtraction with 180 degrees is to get the actual leftover angles
-                    uint16_t angleLeftover = 90 + (*angle - 180);
-                    *angle = (*angle - angleLeftover + 360) % 360;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                else if(*angle < 180 && *angle > 90) {
-                    uint16_t angleLeftover = *angle - 90;
-                    *angle = (*angle - angleLeftover + 360) % 360;
-                    roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
-                }
-                addToCommandMsgQ(roverCommand);
-            }
+            turnUp(angle);
         }
-        // At the top edge of the map
+        // At the right edge of the map
         else {
-            // Move right one space
+            // Move up one space
             moveHorizontalRightOnceCorner(x, y, angle);
-            // Move up one space to be right next to the obstacle
+            // Move over to be above the obstacle
             // Already reoriented right
             moveVerticalUpOnceCorner(x, y, angle);
+            mainappData.dontSkip = pdTRUE;
         }
     }
 }
 
 void moveUpLeftAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
 {
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
     
+    // Searching for the obstacle blocking the rover
+    for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+        // Finding the obstacle
+        if(((*y - 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+            objInd = objIterator;
+            blocked = pdTRUE;
+        }
+    }
+    
+    // The obstacle was found
+    if(blocked == pdTRUE) {
+        // Need to account for edges
+        // We are going under the postulated rule that no obstacle will be adjacent to one another
+        if((*y - 12) >= 3) {
+            // Make the rover turn Upwards
+            moveHorizontalLeftOnceCorner(x, y, angle);
+            // Move over right once to be above the obstacle
+            moveVerticalUpOnceCorner(x, y, angle);
+            // Move right once more to get past the obstacle
+            moveVerticalUpOnceCorner(x, y, angle);
+            // Begin moving back to where you need to be
+            moveHorizontalRightOnceCorner(x, y, angle);
+            
+            // Reorient to help the rover go right (again)
+            // The rover is not facing right
+            turnUp(angle);
+        }
+        // At the right edge of the map
+        else {
+            // Move up one space
+            moveHorizontalLeftOnceCorner(x, y, angle);
+            // Move over to be above the obstacle
+            // Already reoriented right
+            moveVerticalUpOnceCorner(x, y, angle);
+        }
+    }
 }
 
 void moveDownRightAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
 {
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
     
+    // Searching for the obstacle blocking the rover
+    for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+        // Finding the obstacle
+        if(((*y + 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+            objInd = objIterator;
+            blocked = pdTRUE;
+        }
+    }
+    
+    // The obstacle was found
+    if(blocked == pdTRUE) {
+        // Need to account for edges
+        // We are going under the postulated rule that no obstacle will be adjacent to one another
+        if((*y + 12) <= 33) {
+            // Make the rover turn Upwards
+            moveHorizontalRightOnceCorner(x, y, angle);
+            // Move over right once to be above the obstacle
+            moveVerticalDownOnceCorner(x, y, angle);
+            // Move right once more to get past the obstacle
+            moveVerticalDownOnceCorner(x, y, angle);
+            // Begin moving back to where you need to be
+            moveHorizontalLeftOnceCorner(x, y, angle);
+            
+            // Reorient to help the rover go right (again)
+            // The rover is not facing right
+            turnDown(angle);
+        }
+        // At the right edge of the map
+        else {
+            // Move up one space
+            moveHorizontalRightOnceCorner(x, y, angle);
+            // Move over to be above the obstacle
+            // Already reoriented right
+            moveVerticalDownOnceCorner(x, y, angle);
+            mainappData.dontSkip = pdTRUE;
+        }
+    }
 }
 void moveDownLeftAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
 {
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
     
+    // Searching for the obstacle blocking the rover
+    for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+        // Finding the obstacle
+        if(((*y + 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+            objInd = objIterator;
+            blocked = pdTRUE;
+        }
+    }
+    
+    // The obstacle was found
+    if(blocked == pdTRUE) {
+        // Need to account for edges
+        // We are going under the postulated rule that no obstacle will be adjacent to one another
+        if((*y + 12) <= 33) {
+            // Make the rover turn Upwards
+            moveHorizontalLeftOnceCorner(x, y, angle);
+            // Move over right once to be above the obstacle
+            moveVerticalDownOnceCorner(x, y, angle);
+            // Move right once more to get past the obstacle
+            moveVerticalDownOnceCorner(x, y, angle);
+            // Begin moving back to where you need to be
+            moveHorizontalRightOnceCorner(x, y, angle);
+            
+            // Reorient to help the rover go right (again)
+            // The rover is not facing right
+            turnDown(angle);
+        }
+        // At the right edge of the map
+        else {
+            // Move up one space
+            moveHorizontalLeftOnceCorner(x, y, angle);
+            // Move over to be above the obstacle
+            // Already reoriented right
+            moveVerticalDownOnceCorner(x, y, angle);
+        }
+    }
+}
+
+void moveToRightEdge(uint16_t* x, uint16_t* y, uint16_t* angle)
+{
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
+    // Ensures the rover will be facing right
+    turnRight(angle);
+    while(*x != 33 && blocked == pdFALSE) {
+        
+        // Searching for the obstacle blocking the rover
+        for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+            // Finding the obstacle
+            if(((*x + 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
+                objInd = objIterator;
+                blocked = pdTRUE;
+                setDebugBool(blocked);
+            }
+        }
+        
+        // Keep moving if no object was blocking the rover
+        if(blocked == pdFALSE) {
+            moveHorizontalRightOnceCorner(x, y, angle);
+        }
+    }
+}
+
+void moveToLeftEdge(uint16_t* x, uint16_t* y, uint16_t* angle)
+{
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
+    
+    while(*x != 3 && blocked == pdFALSE) {
+        // Searching for the obstacle blocking the rover
+        for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+            // Finding the obstacle
+            if(((*x - 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
+                objInd = objIterator;
+                blocked = pdTRUE;
+            }
+        }
+        
+        // Keep moving if no object was blocking the rover
+        if(blocked == pdFALSE) {
+            moveHorizontalLeftOnceCorner(x, y, angle);
+        }
+    }
+}
+
+void moveToTopEdge(uint16_t* x, uint16_t* y, uint16_t* angle)
+{
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
+    
+    while(*y != 3 && blocked == pdFALSE) {
+        // Searching for the obstacle blocking the rover
+        for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+            // Finding the obstacle
+            if(((*y - 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+                objInd = objIterator;
+                blocked = pdTRUE;
+            }
+        }
+        
+        // Keep moving if no object was blocking the rover
+        if(blocked == pdFALSE) {
+            moveVerticalUpOnceCorner(x, y, angle);
+        }
+    }
+}
+
+void moveToBottomEdge(uint16_t* x, uint16_t* y, uint16_t* angle)
+{
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
+    
+    while(*y != 33 && blocked == pdFALSE) {
+        // Searching for the obstacle blocking the rover
+        for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+            // Finding the obstacle
+            if(((*y + 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+                objInd = objIterator;
+                blocked = pdTRUE;
+            }
+        }
+        
+        // Keep moving if no object was blocking the rover
+        if(blocked == pdFALSE) {
+            moveVerticalDownOnceCorner(x, y, angle);
+        }
+    }
 }
 
 void topToBottomCorners(uint16_t* x, uint16_t* y, uint16_t* angle)
 {
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
+    InternalMessage roverCommand;
     
+    // The rover is not facing downwards
+    turnDown(angle);
+    // The rover is facing downwards
+    // Have the rover move downwards
+    // Accounts for the center location of the rover along with the front of the rover
+    while(*y != 33) {
+        // Getting the rover to move the appropriate distance
+        // Searching for the obstacle blocking the rover
+        for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+            // Finding the obstacle
+            if(((*y + 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+                objInd = objIterator;
+                blocked = pdTRUE;
+            }
+        }
+
+        // Keep moving if no object was blocking the rover
+        if(blocked == pdFALSE) {
+            moveVerticalDownOnceCorner(x, y, angle);
+        }
+        // Moving around the obstacle
+        else {
+            moveDownRightAroundObstacle(x, y, angle);
+            blocked = pdFALSE;
+        }
+    }
 }
 
 void bottomToTopCorners(uint16_t* x, uint16_t* y, uint16_t* angle)
 {
+    int objIterator;
+    int objInd;
+    BaseType_t blocked = pdFALSE;
+    InternalMessage roverCommand;
     
+    // The rover is not facing upwards
+    turnUp(angle);
+    // The rover is facing downwards
+    // Have the rover move downwards
+    // Accounts for the center location of the rover along with the front of the rover
+    while(*y != 3) {
+        // Getting the rover to move the appropriate distance
+        // Searching for the obstacle blocking the rover
+        for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
+            // Finding the obstacle
+            if(((*y - 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+                objInd = objIterator;
+                blocked = pdTRUE;
+            }
+        }
+
+        // Keep moving if no object was blocking the rover
+        if(blocked == pdFALSE) {
+            moveVerticalUpOnceCorner(x, y, angle);
+        }
+        // Moving around the obstacle
+        else {
+            if(*x != 33) {
+                moveUpRightAroundObstacle(x, y, angle);
+            }
+            else {
+                moveUpLeftAroundObstacle(x, y, angle);
+            }
+            blocked = pdFALSE;
+        }
+    }
 }
 
 void upperLeftCornerTraverse(void)
 {
+    // Using these temporary values to pretend to have the rover move while I send the commands to the command queue
+    uint16_t testX = mainappData.rover.xPos;
+    uint16_t testY = mainappData.rover.yPos;
+    uint16_t testAngle = mainappData.rover.angle;
+    // Upper left
+    // Fixing the position to go to the corner
+    while(testX != 3) {
+        moveToLeftEdge(&testX, &testY, &testAngle);
+        moveLeftUpAroundObstacle(&testX, &testY, &testAngle);
+    }
+    while(testY != 3) {
+        moveToTopEdge(&testX, &testY, &testAngle);
+        moveUpRightAroundObstacle(&testX, &testY, &testAngle);
+    }
     
+    // Loop to complete the traversal
+    while(testX != 33) {
+        // Need to go downwards
+        if(testY >= 3) {
+            topToBottomCorners(&testX, &testY, &testAngle);
+            mainappData.obstacleAversion = bottom;
+
+            if(mainappData.dontSkip == pdFALSE) {
+                moveHorizontalRightOnceCorner(&testX, &testY, &testAngle);
+            }
+            else {
+                mainappData.dontSkip = pdFALSE;
+            }
+        }
+        // Need to go upwards
+        if(testY <= 33) { // <- why is this an if and not an else if but works properly?
+            bottomToTopCorners(&testX, &testY, &testAngle);
+            mainappData.obstacleAversion = top;
+
+            if(mainappData.dontSkip == pdFALSE) {
+                moveHorizontalRightOnceCorner(&testX, &testY, &testAngle);
+            }
+            else {
+                mainappData.dontSkip = pdFALSE;
+            }
+        }
+    }
+    // Last step to go backwards to get all the blank spaces
+    bottomToTopEmptyCorners(&testY, &testAngle);
 }
 
 void lowerLeftCornerTraverse(void)
 {
-    
+    // Using these temporary values to pretend to have the rover move while I send the commands to the command queue
+    uint16_t testX = mainappData.rover.xPos;
+    uint16_t testY = mainappData.rover.yPos;
+    uint16_t testAngle = mainappData.rover.angle;
+    // Upper left
+    while(testX != 3 && testY != 33) {
+        moveToLeftEdge(&testX, &testY, &testAngle);
+        moveLeftDownAroundObstacle(&testX, &testY, &testAngle);
+        
+        moveToBottomEdge(&testX, &testY, &testAngle);
+        moveDownRightAroundObstacle(&testX, &testY, &testAngle);
+    }
+
+    // Loop to complete the traversal
+    while((testX + (mainappData.rover.length / 2)) < 36) {
+        if((testY - (mainappData.rover.length / 2)) == 0) {
+           topToBottomCorners(&testX, &testY, &testAngle);
+           moveDownRightAroundObstacle(&testX, &testY, &testAngle);
+           
+           moveHorizontalRightOnceCorner(&testX, &testY, &testAngle);
+           moveRightUpAroundObstacle(&testX, &testY, &testAngle);
+        }
+        else if((testY + (mainappData.rover.length / 2)) == 36) {
+            bottomToTopCorners(&testX, &testY, &testAngle);
+            moveUpRightAroundObstacle(&testX, &testY, &testAngle);
+            
+            moveHorizontalRightOnceCorner(&testX, &testY, &testAngle);
+            moveRightDownAroundObstacle(&testX, &testY, &testAngle);
+        }
+    }
+    bottomToTopEmptyCorners(&testY, &testAngle);
 }
 
 void upperRightCornerTraverse(void)
@@ -1313,7 +1704,46 @@ void centerAndSpreadOut(void)
 
 void upperLeftCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle)
 {
+    // Upper left
+    // Fixing the position to go to the corner
+    while(*x != 3) {
+        moveToLeftEdge(x, y, angle);
+        moveLeftUpAroundObstacle(x, y, angle);
+    }
+    while(*y != 3) {
+        moveToTopEdge(x, y, angle);
+        moveUpRightAroundObstacle(x, y, angle);
+    }
     
+    // Loop to complete the traversal
+    while(*x != 33) {
+        // Need to go downwards
+        if(*y >= 3) {
+            topToBottomCorners(x, y, angle);
+            mainappData.obstacleAversion = bottom;
+
+            if(mainappData.dontSkip == pdFALSE) {
+                moveHorizontalRightOnceCorner(x, y, angle);
+            }
+            else {
+                mainappData.dontSkip = pdFALSE;
+            }
+        }
+        // Need to go upwards
+        if(*y <= 33) { // <- why is this an if and not an else if but works properly?
+            bottomToTopCorners(x, y, angle);
+            mainappData.obstacleAversion = top;
+
+            if(mainappData.dontSkip == pdFALSE) {
+                moveHorizontalRightOnceCorner(x, y, angle);
+            }
+            else {
+                mainappData.dontSkip = pdFALSE;
+            }
+        }
+    }
+    // Last step to go backwards to get all the blank spaces
+    bottomToTopEmptyCorners(y, angle);
 }
 
 void lowerLeftCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle)
@@ -1357,6 +1787,34 @@ void sendRoverLocation(void)
     roverPosition.msg[10] = mainappData.rover.width & 0x00FF;
     
     addToUartTXQ(roverPosition);
+}
+
+/*
+ Function to send back a message of the rover's location as determined by the PICs
+ */
+void sendTokenUpdate(void)
+{
+    InternalMessage token;
+    token.type = TOKEN_FOUND;
+    token.size = 11;
+    token.msg[0] = ROVER;
+    // MSB then LSB
+    token.msg[1] = 0x00;
+    token.msg[2] = 0x00;
+    
+    token.msg[3] = 0x00;
+    token.msg[4] = 0x00;
+    
+    token.msg[5] = 0x00;
+    token.msg[6] = 0x00;
+    
+    token.msg[7] = (mainappData.tokenCount & 0xFF00) >> 8;
+    token.msg[8] = mainappData.tokenCount & 0x00FF;
+    
+    token.msg[9] = 0x00;
+    token.msg[10] = 0x00;
+    
+    addToUartTXQ(token);
 }
 
 void sendObstacleLocations(void)
@@ -1438,16 +1896,18 @@ void MAINAPP_Initialize ( void )
     // Making the message sequence number 0
     mainappData.messageNumber = 0;
     
-    int i, j, k, l;
+    int i, j;
     // Making the grid cells initially blank
     for(i = 0; i < 6; i++) {
         for(j = 0; j < 6; j++) {
-            for(k = 0; k < 6; k++) {
-                for(l = 0; l < 6; l++) {
-                    mainappData.macroGrid[i][j].microGrid[k][l] = blank;
-                }
-            }
+            mainappData.macroGrid[i][j] = blank;
         }
+    }
+    
+    int a;
+    for(a = 0; a < 4; a++) {
+        mainappData.token[a].xPos = -30;
+        mainappData.token[a].yPos = -30;
     }
     
     // Initialize the rover position at a ridiculous unavailable location
@@ -1463,6 +1923,18 @@ void MAINAPP_Initialize ( void )
     
     // The current position of the obstacles
     mainappData.obstacleCur = 0;
+    
+    // The counter for the number of tokens
+    mainappData.tokenCount = -1;
+    
+    // The current position of the tokens
+    mainappData.tokenCur = 0;
+    
+    // Traversal algorithm type is initially unknown
+    mainappData.obstacleAversion = unknown;
+    
+    // No obstacle is currently at the end of a y-axis side
+    mainappData.dontSkip = pdFALSE;
 }
 
 
@@ -1492,40 +1964,86 @@ void MAINAPP_Tasks ( void )
                 setDebugVal((mainappData.object.type & 0xff) == ROVER);
                 */
                 if((mainappData.object.type & 0xff) == ROVER) {
-                    /*
-                     Working code to send out the location of the rover as stored by the PIC
-                    setDebugVal(0x73);
-                    addToUartTXQ(makeLocationMessage(mainappData.rover));
-                    */
+                    
+                    // Initializing the rover location and also creating the algorithm for path traversal
                     if(mainappData.rover.xPos == 50 && mainappData.rover.yPos == 50) {
                         mainappData.rover = mainappData.object;
                     
-                        // Test command
-                        // Testing the ability of the rover to go to the ends of the map
-                        //topToBottomEmpty();
-                        //bottomToTopEmpty();
-                        //rightToLeftEmpty();
-                        //leftToRightEmpty();
+                        /////////////////////////////////////////////////////////////////////
+                        //
+                        //
+                        //  Empty Map
+                        //
+                        //
+                        /////////////////////////////////////////////////////////////////////
                         
-                        // Testing the ability of the rover to take one command
-                        //moveHorizontalLeftOnceEmpty();
-                        //moveHorizontalRightOnceEmpty();
+                        /*Testing the ability of the rover to go to the ends of the map
+                        topToBottomEmpty();
+                        bottomToTopEmpty();
+                        rightToLeftEmpty();
+                        leftToRightEmpty();
                         
-                        // Testing the ability of the rover to traverse an empty map
+                         Testing the ability of the rover to take one command
+                        moveHorizontalLeftOnceEmpty();
+                        moveHorizontalRightOnceEmpty();
+                        
+                         Testing the ability of the rover to traverse an empty map
                         upperLeftCornerTraverseEmpty();
-                        //lowerLeftCornerTraverseEmpty();
-                        //upperRightCornerTraverseEmpty();
-                        //lowerRightCornerTraverseEmpty();
-                        //centerAndSpreadOutEmpty();
+                        lowerLeftCornerTraverseEmpty();
+                        upperRightCornerTraverseEmpty();
+                        lowerRightCornerTraverseEmpty();
+                        centerAndSpreadOutEmpty();*/
+                        
+                        /////////////////////////////////////////////////////////////////////
+                        //
+                        //
+                        //  Map with Obstacles
+                        //
+                        //
+                        /////////////////////////////////////////////////////////////////////
+                        
+                        /*Testing for obstacles
+                        moveHorizontalRightOnceCorner(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveHorizontalLeftOnceCorner(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveVerticalUpOnceCorner(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveVerticalDownOnceCorner(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        
+                        moveRightUpAroundObstacle(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveRightDownAroundObstacle(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveLeftUpAroundObstacle(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveLeftDownAroundObstacle(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        
+                        moveUpRightAroundObstacle(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveUpLeftAroundObstacle(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveDownRightAroundObstacle(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveDownLeftAroundObstacle(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        
+                        moveToRightEdge(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveToLeftEdge(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveToTopEdge(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        moveToBottomEdge(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);*/
+                        
+                        //upperLeftCornerTraverse();
+                        upperLeftCornerTraverseParam(&mainappData.rover.xPos, &mainappData.rover.yPos, &mainappData.rover.angle);
+                        
+                        // Send the initial command
+                        InternalMessage command;
+                        if(xQueueReceive(mainappData.mainAppCommandMsgQ, &command, portMAX_DELAY)) {
+                            addToUartTXQ(command);
+                        }
+                    }
+                    // Update the current location of the rover
+                    else {
+                        mainappData.rover = mainappData.object;
                     }
                     
-                    // Send the next available rover command
-                    InternalMessage command;
-                    if(xQueueReceive(mainappData.mainAppCommandMsgQ, &command, portMAX_DELAY)) {
-                        addToUartTXQ(command);
-                    }
-                    /* Debugging for sending back the rover location*/
-                     //sendRoverLocation();
+                    /* Adding a previous rover location to the macro/micro grid */
+                    int16_t xGrid = mainappData.rover.xPos / 6;
+                    int16_t yGrid = mainappData.rover.yPos / 6;
+                    mainappData.macroGrid[xGrid][yGrid] = lead_rover;
+                    
+                    /* Debugging for sending back the rover location */
+                    sendRoverLocation();
                     
                 }
                 // Object is an obstacle
@@ -1544,7 +2062,46 @@ void MAINAPP_Tasks ( void )
                     if(mainappData.obstacleCur == mainappData.obstacleCount) {
                         sendObstacleLocations();
                     }
-                    
+                }
+                // Lead rover finished moving so I can now send the next command
+                else if((mainappData.object.type & 0xff) == LEAD_ROVER_UPDATE) {
+                    // To check that no more traveling must be done
+                    if(mainappData.object.xPos == 0 && mainappData.object.yPos == 0 && mainappData.object.angle == 0) {
+                        InternalMessage command;
+                        if(xQueueReceive(mainappData.mainAppCommandMsgQ, &command, portMAX_DELAY)) {
+                            addToUartTXQ(command);
+                        }
+                    }
+                }
+                // Token positions as obtained by the sensor so I can get a count of the number of tokens
+                else if((mainappData.object.type & 0xff) == TOKEN) {
+                    // Simply extracting the number of tokens (not the actual locations)
+                    mainappData.tokenCount = mainappData.object.angle;
+                    sendTokenUpdate();
+                }
+            }
+            // Message for a token being found by the rover
+            else if(inMessage.type == TOKEN_FOUND) {
+                // No need to convert the message since it depends on the new location of the rover
+                sendTokenUpdate();
+                int tokenIterator;
+                BaseType_t oldToken = pdFALSE;
+                
+                // Checking to see if the token was already found previously
+                for(tokenIterator = 0; tokenIterator < mainappData.tokenCount; tokenIterator++) {
+                    // If a token was already found previously, do nothing
+                    if((mainappData.token[tokenIterator].xPos == mainappData.rover.xPos) && (mainappData.token[tokenIterator].yPos == mainappData.rover.yPos)) {
+                        oldToken = pdTRUE;
+                    }
+                }
+                // Newly found token
+                if(oldToken == pdFALSE) {
+                    // Adding the new token location to the array
+                    mainappData.token[mainappData.tokenCur].xPos = mainappData.rover.xPos;
+                    mainappData.token[mainappData.tokenCur].yPos = mainappData.rover.yPos;
+
+                    // Increment the counter
+                    mainappData.tokenCur++;
                 }
             }
         }

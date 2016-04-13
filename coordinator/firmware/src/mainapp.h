@@ -108,20 +108,13 @@ typedef enum
     token = 4        
 } CELL_TYPES;
 
-// Struct for the microGrid
-typedef struct
-{
-    CELL_TYPES microGrid[6][6];
-} GRID_CONVERSION;
-
+// Enumerated type for the the types of traversal algorithms available
 typedef enum
 {
-    north = 0,
-    south = 1,
-    east = 2,
-    west = 3,
-    defaultSetting = 4,
-} ROVER_ORIENTATION;
+    top = 0,
+    bottom = 1,
+    unknown = 2
+} TRAVERSAL_ALGORITHM;
 
 // *****************************************************************************
 /* Application Data
@@ -141,7 +134,8 @@ typedef struct
     /* The application's current state */
     MAINAPP_STATES state;
 
-    /* TODO: Define any additional data used by the application. */
+    // Type of process being used to traverse the map
+    TRAVERSAL_ALGORITHM obstacleAversion;
 
     // Queue for the message handling
     QueueHandle_t mainAppMsgQ;
@@ -150,27 +144,48 @@ typedef struct
     char messageNumber;
     
     // Grid containing the whole playing field 6x6 (6" x 6")
-    GRID_CONVERSION macroGrid[6][6];
+    CELL_TYPES macroGrid[6][6];
     
     // Rover position
     OBJECT_STRUCTURE rover;
     
     OBJECT_STRUCTURE object;
     
-    // Rover Orientation
-    ROVER_ORIENTATION direction;
-    
     // Obstacle positions
     OBJECT_STRUCTURE obstacle[4];
+    
+    // Token positions
+    OBJECT_STRUCTURE token[4];
+    
+    // Counter for the number of tokens
+    int tokenCount;
+    
+    // Counter to increment to the total number of tokens
+    int tokenCur;
     
     // Counter for the number of obstacles
     int obstacleCount;
     
     // Counter to increment to the total number of obstacles
     int obstacleCur;
+    
+    // Target X Position
+    uint16_t targetX[100];
+    
+    // Target Y Position
+    uint16_t targetY[100];
+    
+    // Target Angle Position
+    uint16_t targetAngle[100];
+    
+    // Index of the target x and y
+    int targetIndex;
 
     // Queue for sending commands to the rover
     QueueHandle_t mainAppCommandMsgQ;
+    
+    /* Boolean for traversal for when an obstacle is blocking a y axis side and this is used to prevent skipping one vertical line */
+    BaseType_t dontSkip;
 } MAINAPP_DATA;
 
 
@@ -232,10 +247,25 @@ void lowerRightCornerTraverseEmptyParam(uint16_t* x, uint16_t* y, uint16_t* angl
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 // Moving around only once to make pass by reference
+// Turning to a direction
+void turnRight(uint16_t* angle);
+void turnLeft(uint16_t* angle);
+void turnUp(uint16_t* angle);
+void turnDown(uint16_t* angle);
+
+// Moving one single grid cell
 void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
 void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
 void moveVerticalUpOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
 void moveVerticalDownOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
+
+// Moving to the different edges
+void moveToRightEdge(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveToLeftEdge(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveToTopEdge(uint16_t* x, uint16_t* y, uint16_t* angle);
+void moveToBottomEdge(uint16_t* x, uint16_t* y, uint16_t* angle);
+
+// Moving up and and down
 void topToBottomCorners(uint16_t* x, uint16_t* y, uint16_t* angle);
 void bottomToTopCorners(uint16_t* x, uint16_t* y, uint16_t* angle);
 
@@ -269,8 +299,15 @@ void lowerLeftCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle);
 void upperRightCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle);
 void lowerRightCornerTraverseParam(uint16_t* x, uint16_t* y, uint16_t* angle);
 
+// Accounting for correction factor
+void correctionDistance(uint16_t* x, uint16_t* y, uint16_t* angle);
+void correctionAngle(uint16_t* x, uint16_t* y, uint16_t* angle);
+
 // Method to send back the rover location to the simulation for debugging
 void sendRoverLocation(void);
+
+// Method to send back the token found message
+void sendTokenUpdate(void);
 
 // Method to send back the obstacle locations to the simulation for debugging
 void sendObstacleLocations(void);
