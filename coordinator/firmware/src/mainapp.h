@@ -169,14 +169,18 @@ typedef struct
     // Counter to increment to the total number of obstacles
     int obstacleCur;
     
+    /* Target command positions to do corrections while traveling to a new location */
     // Target X Position
-    uint16_t targetX[100];
+    uint16_t targetX[150];
     
     // Target Y Position
-    uint16_t targetY[100];
+    uint16_t targetY[150];
     
     // Target Angle Position
-    uint16_t targetAngle[100];
+    uint16_t targetAngle[150];
+    
+    // Total commands
+    int targetTotal;
     
     // Index of the target x and y
     int targetIndex;

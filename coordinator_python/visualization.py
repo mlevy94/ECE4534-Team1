@@ -2,6 +2,7 @@
 import threading
 from listener import Listener
 from configs import *
+from queue import Empty
 from math import cos, sin, radians
 
 #import basic pygame modules
@@ -88,7 +89,16 @@ class rover:
 Extracted from the pygame.org Wiki example
 Rotates the image while keeping its center
 """
-def rotate(image, rect, angle):
+def rotate(image, angle):
+        orig_rect = image.get_rect()
+        rot_image = pygame.transform.rotate(image, angle)
+        rot_rect = orig_rect.copy()
+        rot_rect.center = rot_image.get_rect().center
+        rot_image = rot_image.subsurface(rot_rect).copy()
+        return rot_image
+
+def rot_center(image, rect, angle):
+        """rotate an image while keeping its center"""
         rot_image = pygame.transform.rotate(image, angle)
         rot_rect = rot_image.get_rect(center=rect.center)
         return rot_image,rot_rect
@@ -100,14 +110,16 @@ def load_image(name):
 
 def main():
     # Building the listener object
-    #listener = Listener()
-    #listener.start()
+    listener = Listener()
+    listener.start()
 
     pygame.init()
 
     # Screen of 720 pix x 720 pix
     screen = pygame.display.set_mode((720, 720))
-    roverImage = load_image('C:/Windows_Serial_Simulation/rover.jpg')
+
+    # Image is 150 pix x 150 pix, rectangle is 94 pix x 114 pix
+    roverImage = load_image('C:/Windows_Serial_Simulation/rover7.png')
 
     # Fill background
     background = pygame.Surface(screen.get_size())
@@ -117,7 +129,9 @@ def main():
 
     # Displaying a rectangle as the rover
     roverObject = rover(roverImage, 100, 100, 0, 40, 100)
-    #pygame.draw.circle(background, GREEN, (650, 650), 60, 0)
+    pygame.draw.circle(screen, GREEN, (650, 650), 60, 0)
+
+    time = pygame.time.Clock()
 
     angle = 0
 
@@ -127,33 +141,64 @@ def main():
     pygame.display.flip()
 
     while 1:
+        # Checking for the exit button being pressed
         for event in pygame.event.get():
             if event.type == QUIT:
                 return
 
-        background.fill(WHITE)
+        screen.fill(WHITE)
+
+        # Attempting to get a new message to update the system
+        """try:
+            msg = listener.queue.get()
+
+            # Ensuring initialization occurs properly
+            if msg.msgtype == CLIENT_ROLE:
+                print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
+
+            # Update on the position of the rover
+            elif msg.msgtype == OBJECT_POS:
+                print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
+
+            # Update on the commands by the coordinator
+            elif msg.msgtype == ROVER_MOVE:
+                print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
+        except Empty:
+            pass"""
+
+        #background.fill(WHITE)
         # Displaying a rectangle as the rover
-        token1 = pygame.draw.circle(background, GREEN, (650, 650), 60, 0)
-        curCircleCenter = token1.center
+        pygame.draw.circle(screen, GREEN, (650, 650), 60, 0)
 
         #screen.blit(background, roverObject.rectangle)
         #screen.blit(roverObject.rectangle, (200,200))
 
-        rotatedImage, rotatedRect = rotate(roverObject.rectangle, roverObject.rectangle.get_rect(), angle)
-        roverObject.rectangle = rotatedImage
+        #rotatedImage, rotatedRect = rotate(roverObject.rectangle, roverObject.rectangle.get_rect(), angle)
+        #roverObject.rectangle = rotatedImage
+        """rotatedImage = pygame.transform.rotate(roverObject.rectangle, angle)
+        rotatedRect = rotatedImage.get_rect()
+        screen.fill(WHITE)
+        screen.blit(rotatedImage, rotatedRect)"""
         #roverObject.rectangle = rotatedImage.get_rect(center=roverObject.rectangle.center)
         #roverObject.rectangle.center = curCenter
         #token1 = rotatedImage.get_rect(center=token1.center)
         #token1.center = curCircleCenter
 
-        screen.blit(rotatedImage, rotatedRect)
+        #screen.blit(rotatedImage, rotatedRect)
         angle += 5
-        if angle > 360:
+        if angle >= 360:
             angle = 0
+
+        rotatedImage = rotate(roverObject.rectangle, angle)
+        #rotatedRect = rotatedImage.get_rect()
+        screen.blit(rotatedImage, (roverObject.xPos, roverObject.yPos))
+        #pygame.draw.circle(background, GREEN, (650, 650), 60, 0)
 
         #screen.blit(background, roverObject.rectangle)
         #screen.blit(background, (0, 0))
         pygame.display.flip()
+        time.tick(60)
+    #listener.close()
 
 if __name__ == '__main__':
     main()
