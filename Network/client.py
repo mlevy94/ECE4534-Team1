@@ -19,7 +19,7 @@ class ClientWorker:
     self.queue = queue
     self.thread = None
     self.address = address
-    self.rcvmsgcount = 0
+    self.recvmsgcount = 0
     self.sentmsgcount = 0
     self.clientConnected = False
     self.lock = threading.Lock()
@@ -39,14 +39,14 @@ class ClientWorker:
         serialstream += self.readfunc(4096)
         while len(serialstream) > HEADER_SIZE:
           startbyte = serialstream.find(STARTBYTE)
-          if startbyte < 0 or len(serialstream) < HEADER_SIZE:
+          if startbyte < 0 or len(serialstream[startbyte:]) < HEADER_SIZE:
             # keep looking for start byte or wait for more data
             break
           else:
             # trim extra bytes in beginning
             serialstream = serialstream[startbyte:]
           # get header values
-          (startbyte, source, count, msgtype, msgsize), serialstream = (serialstream[:HEADER_SIZE], serialstream[HEADER_SIZE:])
+          ((startbyte, source, count, msgtype, msgsize), serialstream) = (serialstream[:HEADER_SIZE], serialstream[HEADER_SIZE:])
           # get message
           msg, serialstream = serialstream[:msgsize], serialstream[msgsize:]
           netmsg = NetMessage(
@@ -64,10 +64,11 @@ class ClientWorker:
           msg = netmsg.getMessage()
           if netmsg.msgtype == CLIENT_ROLE:
             msg.target = self
-          #print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+          if DEBUG_ON:
+            print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
           self._put(msg)
-          self.rcvmsgcount += 1
-    except ConnectionResetError:
+          self.recvmsgcount += 1
+    except ConnectionError:
       pass
 
   def _put(self, msg):

@@ -157,13 +157,13 @@ void IntHandlerDrvUsartInstance0(void)
 void IntHandlerDrvUsartInstance1(void)
 {
     char sendbyte;
-    sendDebugMessage("UART INT\0");
+    setDebugBool(pdTRUE);
     setDebugVal(0xCC);
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_TRANSMIT)){
         setDebugVal(0xCD);
         while(!PLIB_USART_TransmitterBufferIsFull(USART_ID_2)) {
             if(readFromNFCtxQFromISR(&sendbyte)) {
-               addToUartTXQ(makeMessageChar(DEBUG_MSG, sendbyte));
+               addToUartTXQFromISR(makeMessageChar(DEBUG_MSG, sendbyte));
                PLIB_USART_TransmitterByteSend(USART_ID_2, sendbyte);
             }
             else {
@@ -175,18 +175,20 @@ void IntHandlerDrvUsartInstance1(void)
     }
     setDebugVal(0xCE);
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE)){
+        setDebugVal(0xCF);
         // while there are characters to read
         while(PLIB_USART_ReceiverDataIsAvailable(USART_ID_2)){
+            setDebugVal(0xC1);
             // read a character
-            sendbyte = PLIB_USART_ReceiverByteReceive(USART_ID_2);
-            addToNFCrxQFromISR(sendbyte);
+            setDebugVal(0xC2);
+            addToNFCrxQFromISR(PLIB_USART_ReceiverByteReceive(USART_ID_2));
+            setDebugVal(0xC3);
         }
     }
-    
+    setDebugBool(pdFALSE);
     if(PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_ERROR)){
         //not sure what we are doing yet
     }
-
     /* Clear pending interrupt */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_TRANSMIT);
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);

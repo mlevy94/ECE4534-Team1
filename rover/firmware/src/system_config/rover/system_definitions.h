@@ -67,10 +67,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "driver/oc/drv_oc_static.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "motorapp.h"
+#include "nfc_app.h"
 #include "uart_tx_app.h"
 #include "uart_rx_app.h"
-#include "nfc_app.h"
+#include "motorapp.h"
 
 
 // DOM-IGNORE-BEGIN

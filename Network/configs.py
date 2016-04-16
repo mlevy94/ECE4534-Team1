@@ -2,6 +2,7 @@
 from socket import gethostbyname, gethostname
 from collections import OrderedDict
 
+DEBUG_ON = False
 
 def getIPAddr():
   return gethostbyname(gethostname())
@@ -27,7 +28,7 @@ ROUTER         = 0x12
 # value to role conversion
 VAL_TO_ROLE = OrderedDict((
   (CLIENT, "CLIENT"),
-  (LEAD_ROVER, "LEAD_ROVER"),
+  (LEAD_ROVER, "LEAD ROVER"),
   (FOLLOWER, "FOLLOWER"),
   (SENSOR, "SENSOR"),
   (COORDINATOR, "COORDINATOR"),
@@ -38,7 +39,7 @@ VAL_TO_ROLE = OrderedDict((
 # role to value conversion
 ROLE_TO_VAL = OrderedDict((
   ("CLIENT", CLIENT),
-  ("LEAD_ROVER", LEAD_ROVER),
+  ("LEAD ROVER", LEAD_ROVER),
   ("FOLLOWER", FOLLOWER),
   ("SENSOR", SENSOR),
   ("COORDINATOR", COORDINATOR),
@@ -91,6 +92,14 @@ VAL_TO_MSG = OrderedDict((
   (SCAN_LEAD_FND, "Scan Lead Found"),
   (SCAN_OBJ_FND, "Scan Object Found"),
   (TOKEN_FOUND, "Token Found"),
+))
+
+ROLE_MSG_RECV = OrderedDict((
+  (LEAD_ROVER, [ROVER_MOVE, ]),
+  (FOLLOWER, []),
+  (SENSOR, []),
+  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, ]),
+  (MONITOR, [DEBUG_MSG, OBJECT_POS, ]),
 ))
 
 ########## ROVER MOVE DEFINES #############

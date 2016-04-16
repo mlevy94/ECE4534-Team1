@@ -24,15 +24,17 @@ class OutboundWorker:
       msg = self.queue.get()
       # check for predefined target
       if msg.target:
+        # CLIENT_ROLE messages handled here
         if msg.msgtype == CLIENT_ROLE:
           if msg.msg[0] != CLIENT:
             self.clientList.remove(msg.target)
-          self.clientDict[msg.msg[0]] = msg.target
-          print("Role Assigned: {} - {}".format(VAL_TO_ROLE[msg.msg[0]], msg.target.address))
+            self.clientDict[msg.msg[0]] = msg.target
+            print("Role Assigned: {} - {}".format(VAL_TO_ROLE[msg.msg[0]], msg.target.address))
         else:
           for client in msg.target:
             if client.send(msg):
-              print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+              if DEBUG_ON:
+                print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
             else:
               self.clientDisconnect(client)
         self.queue.task_done()
@@ -41,10 +43,23 @@ class OutboundWorker:
       for client in self.clientList:
         try:
           if client.send(msg):
-            print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+            if DEBUG_ON:
+              print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
           else:
             self.clientDisconnect(client)
-        except (ConnectionResetError, BrokenPipeError):
+        except ConnectionError:
+          self.clientDisconnect(client)
+      # send to client roles
+      for role, client in self.clientDict.items():
+        # Check if client is connected for that role
+        if client is None:
+          continue
+        try:
+          if msg.msgtype in ROLE_MSG_RECV[role] or (DEBUG_ON and msg.msgtype == DEBUG_MSG):
+            if client.send(msg):
+              if DEBUG_ON:
+                print("Sent {}: {} - {}".format(VAL_TO_ROLE[role], VAL_TO_MSG[msg.msgtype], msg.msg))
+        except ConnectionError:
           self.clientDisconnect(client)
 
       self.queue.task_done()
@@ -55,5 +70,10 @@ class OutboundWorker:
       client.client.close()
     except:
       pass
-    self.clientList.remove(client)
+    try:
+      self.clientList.remove(client)
+    except ValueError:
+      for role, roleclient in self.clientDict.items():
+        if client is roleclient:
+          self.clientDict[role] = None
     print("Client Disconnected: {}".format(client.address))

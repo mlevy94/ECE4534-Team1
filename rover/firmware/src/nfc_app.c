@@ -265,9 +265,9 @@ InternalMessage tokenFound() {
 
 void NFC_APP_Initialize ( void )
 {
-    nfc_appData.inQ = xQueueCreate(10, sizeof(char));
+    nfc_appData.inQ = xQueueCreate(8, sizeof(char));
     vQueueAddToRegistry(nfc_appData.inQ, nfc_receive_q);
-    nfc_appData.rxQ = xQueueCreate(30, sizeof(char));
+    nfc_appData.rxQ = xQueueCreate(32, sizeof(char));
     vQueueAddToRegistry(nfc_appData.rxQ, nfc_uart_rx_q);
     nfc_appData.txBufferQ = xQueueCreate(TX_BUF_SIZE, sizeof(char));
     vQueueAddToRegistry(nfc_appData.txBufferQ, nfc_uart_tx_q);
@@ -287,8 +287,8 @@ void NFC_APP_Tasks ( void )
     char inChar;
     while(1) {
         sendDebugMessage("READ NFC\0");
-        checkNFC();
         while(!xQueueReceive(nfc_appData.inQ, &inChar, portMAX_DELAY));
+        checkNFC();
         sendDebugMessage("CHECK NFC\0");
         while (!getACK()) {
             sendDebugMessage("SEND NACK\0");
