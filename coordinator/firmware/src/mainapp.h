@@ -116,6 +116,21 @@ typedef enum
     unknown = 2
 } TRAVERSAL_ALGORITHM;
 
+/*
+  Enumerated type for the available movements / directions that the
+  rover might be taking in order to reach where it is or to correct itself
+ */
+typedef enum
+{
+    movingUp = 1,
+    movingDown = 2,
+    movingLeft = 3,
+    movingRight = 4,
+    turningLeft = 5,
+    turningRight = 6,
+    noMotion = 7
+} CORRECTIONS;
+
 // *****************************************************************************
 /* Application Data
 
@@ -171,19 +186,25 @@ typedef struct
     
     /* Target command positions to do corrections while traveling to a new location */
     // Target X Position
-    uint16_t targetX[150];
+    uint16_t targetX[300];
     
     // Target Y Position
-    uint16_t targetY[150];
+    uint16_t targetY[300];
     
     // Target Angle Position
-    uint16_t targetAngle[150];
+    uint16_t targetAngle[300];
+    
+    // Target commands to know the appropriate response for correction <- command type
+    char targetCommand[300];
     
     // Total commands
     int targetTotal;
     
     // Index of the target x and y
     int targetIndex;
+    
+    // Used to check whether or not the rover is still moving and if it is in the right position
+    CORRECTIONS roverMotion;
 
     // Queue for sending commands to the rover
     QueueHandle_t mainAppCommandMsgQ;

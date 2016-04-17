@@ -804,14 +804,28 @@ void turnRight(uint16_t* angle)
         if(*angle < 90 && *angle >= 0) {
             uint16_t angleLeftover = 90 - *angle;
             roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-            *angle = 90;
+            
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle + angleLeftover;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
+            mainappData.targetTotal++;
+            *angle = *angle + angleLeftover;
         }
         else if(*angle <= 359 && *angle >= 270) {
             // The 90 degrees is to get to the right quadrant
             // The subtraction from 360 degrees is to get the actual leftover angle
             uint16_t angleLeftover = 90 + (360 - *angle);
             roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
-            *angle = 90;
+            
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = (*angle + angleLeftover) % 360;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
+            mainappData.targetTotal++;
+            *angle = (*angle + angleLeftover) % 360;
         }
         
         // Easier to turn left
@@ -819,20 +833,27 @@ void turnRight(uint16_t* angle)
             // The 90 degrees is to get to the right quadrant
             // The subtraction with 180 degrees is to get the actual leftover angles
             uint16_t angleLeftover = 90 + (*angle - 180);
-            *angle = 90;
             roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+            
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle - angleLeftover;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
+            mainappData.targetTotal++;
+            *angle = *angle - angleLeftover;
         }
         else if(*angle < 180 && *angle > 90) {
             uint16_t angleLeftover = *angle - 90;
-            *angle = 90;
             roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
             
-            // Adding to the next target location / angle
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle - angleLeftover;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = 90;
-            mainappData.targetIndex++;
+            *angle = *angle - angleLeftover;
         }
         addToCommandMsgQ(roverCommand);
     }
@@ -846,42 +867,42 @@ void turnLeft(uint16_t* angle)
         // Easier to turn right
         if(*angle < 270 && *angle >= 90) {
             uint16_t angleLeftover = 270 - *angle;
-            *angle = *angle + angleLeftover;
             roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
             
-            // Adding to the next target location / angle
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle + angleLeftover;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle + angleLeftover;
-            mainappData.targetIndex++;
+            *angle = *angle + angleLeftover;
         }
 
         // Easier to turn left
         else if(*angle <= 359 && *angle > 270) {
             uint16_t angleLeftover = *angle - 270;
-            *angle = *angle - angleLeftover;
             roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
             
-            // Adding to the next target location / angle
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle - angleLeftover;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle - angleLeftover;
-            mainappData.targetIndex++;
+            *angle = *angle - angleLeftover;
         }
         else if(*angle >= 0 && *angle < 90) {
             // The 90 degrees is to get to the right quadrant
             uint16_t angleLeftover = *angle + 90;
-            *angle = angleLeftover + 180 - *angle;
             roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
             
-            // Adding to the next target location / angle
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = angleLeftover + 180 - *angle;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = angleLeftover + 180 - *angle;
-            mainappData.targetIndex++;
+            *angle = angleLeftover + 180 - *angle;
         }
         addToCommandMsgQ(roverCommand);
     }
@@ -895,15 +916,15 @@ void turnUp(uint16_t* angle)
         // Easier to turn right
         if(*angle <= 359 && *angle > 180) {
             uint16_t angleLeftover = 360 - *angle;
-            *angle = (*angle + angleLeftover) % 360;
             roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
             
-            // Adding to the next target location / angle
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = (*angle + angleLeftover) % 360;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = (*angle + angleLeftover) % 360;
-            mainappData.targetIndex++;
+            *angle = (*angle + angleLeftover) % 360;
         }
         // Easier to turn left
         else {
@@ -911,12 +932,13 @@ void turnUp(uint16_t* angle)
             roverCommand = makeRoverMove(ROVER_LEFT, *angle & 0x00FF);
             *angle = (*angle - *angle);
             
-            // Adding to the next target location / angle
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTOtal] = *angle - *angle;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle - *angle;
-            mainappData.targetIndex++;
+            *angle = (*angle - *angle);
         }
         addToCommandMsgQ(roverCommand);
     }
@@ -930,28 +952,28 @@ void turnDown(uint16_t* angle)
         // Easier to turn left
         if(*angle <= 359 && *angle > 180) {
             uint16_t angleLeftover = *angle - 180;
-            *angle = (*angle - angleLeftover);
             roverCommand = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
             
-            // Adding to the next target location / angle
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle - angleLeftover;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle - angleLeftover;
-            mainappData.targetIndex++;
+            *angle = *angle - angleLeftover;
         }
         // Easier to turn right
         else {
             uint16_t angleLeftover = 180 - *angle;
-            *angle = *angle + angleLeftover;
             roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
             
-            // Adding to the next target location / angle
+            // Adding to the next target location / angle / command type
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle + angleLeftover;
+            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle + angleLeftover;
-            mainappData.targetIndex++;
+            *angle = *angle + angleLeftover;
         }
         addToCommandMsgQ(roverCommand);
     }
@@ -979,7 +1001,9 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 blocked = pdTRUE;
             }
         }
+        // Blocked and must move around
         if(blocked == pdTRUE) {
+            // Need to move downwards to go around
             if(mainappData.obstacleAversion == top) {
                 // First go downward
                 turnDown(angle);
@@ -991,12 +1015,12 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     roverCommand = makeRoverMove(ROVER_FORWARD, correction & 0x00FF);
                     addToCommandMsgQ(roverCommand);
                     
-                    // Adding to the next target location / angle
+                    // Adding to the next target location / angle / command type
+                    mainappData.targetX[mainappData.targetTotal] = *x;
+                    mainappData.targetY[mainappData.targetTotal] = *y + correction;
+                    mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                    mainappData.targetCommand[mainappData.targetTotal] = DOWN;
                     mainappData.targetTotal++;
-                    mainappData.targetX[mainappData.targetIndex] = *x;
-                    mainappData.targetY[mainappData.targetIndex] = *y + correction;
-                    mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                    mainappData.targetIndex++;
                     
                     *y += correction;
                 }
@@ -1008,11 +1032,11 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     addToCommandMsgQ(roverCommand);
                     
                     // Adding to the next target location / angle
+                    mainappData.targetX[mainappData.targetTotal] = *x;
+                    mainappData.targetY[mainappData.targetTotal] = *y + correction;
+                    mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                    mainappData.targetCommand[mainappData.targetTotal] = DOWN;
                     mainappData.targetTotal++;
-                    mainappData.targetX[mainappData.targetIndex] = *x;
-                    mainappData.targetY[mainappData.targetIndex] = *y + correction;
-                    mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                    mainappData.targetIndex++;
                     
                     *y += correction;
                 }
@@ -1026,10 +1050,10 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     addToCommandMsgQ(roverCommand);
                     
                     // Adding to the next target location / angle
-                    mainappData.targetTotal++;
-                    mainappData.targetX[mainappData.targetIndex] = *x + correction;
-                    mainappData.targetY[mainappData.targetIndex] = *y;
-                    mainappData.targetAngle[mainappData.targetIndex] = *angle;
+                    mainappData.targetX[mainappData.targetTotal] = *x + correction;
+                    mainappData.targetY[mainappData.targetTotal] = *y;
+                    mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                    mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
                     mainappData.targetIndex++;
                     
                     *x += correction;
@@ -1042,11 +1066,11 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     addToCommandMsgQ(roverCommand);
                     
                     // Adding to the next target location / angle
+                    mainappData.targetX[mainappData.targetTotal] = *x + correction;
+                    mainappData.targetY[mainappData.targetTotal] = *y;
+                    mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                    mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
                     mainappData.targetTotal++;
-                    mainappData.targetX[mainappData.targetIndex] = *x + correction;
-                    mainappData.targetY[mainappData.targetIndex] = *y;
-                    mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                    mainappData.targetIndex++;
                     
                     *x += correction;
                 }
@@ -1062,11 +1086,11 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     addToCommandMsgQ(roverCommand);
                     
                     // Adding to the next target location / angle
+                    mainappData.targetX[mainappData.targetTotal] = *x;
+                    mainappData.targetY[mainappData.targetTotal] = *y - correction;
+                    mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                    mainappData.targetCommand[mainappData.targetTotal] = UP;
                     mainappData.targetTotal++;
-                    mainappData.targetX[mainappData.targetIndex] = *x;
-                    mainappData.targetY[mainappData.targetIndex] = *y - correction;
-                    mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                    mainappData.targetIndex++;
                     
                     *y -= correction;
                 }
@@ -1078,11 +1102,11 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     addToCommandMsgQ(roverCommand);
                     
                     // Adding to the next target location / angle
+                    mainappData.targetX[mainappData.targetTotal] = *x;
+                    mainappData.targetY[mainappData.targetTotal] = *y - correction;
+                    mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                    mainappData.targetCommand[mainappData.targetTotal] = UP;
                     mainappData.targetTotal++;
-                    mainappData.targetX[mainappData.targetIndex] = *x;
-                    mainappData.targetY[mainappData.targetIndex] = *y - correction;
-                    mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                    mainappData.targetIndex++;
                     
                     *y -= correction;
                 }
@@ -1096,11 +1120,11 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     addToCommandMsgQ(roverCommand);
                     
                     // Adding to the next target location / angle
+                    mainappData.targetX[mainappData.targetTotal] = *x + correction;
+                    mainappData.targetY[mainappData.targetTotal] = *y;
+                    mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                    mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
                     mainappData.targetTotal++;
-                    mainappData.targetX[mainappData.targetIndex] = *x + correction;
-                    mainappData.targetY[mainappData.targetIndex] = *y;
-                    mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                    mainappData.targetIndex++;
                     
                     *x += correction;
                 }
@@ -1112,18 +1136,18 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     addToCommandMsgQ(roverCommand);
                     
                     // Adding to the next target location / angle
+                    mainappData.targetX[mainappData.targetTotal] = *x + correction;
+                    mainappData.targetY[mainappData.targetTotal] = *y;
+                    mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                    mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
                     mainappData.targetTotal++;
-                    mainappData.targetX[mainappData.targetIndex] = *x + correction;
-                    mainappData.targetY[mainappData.targetIndex] = *y;
-                    mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                    mainappData.targetIndex++;
                     
                     *x += correction;
                 }
             }
         }
+        // Simply go right
         else {
-            // Then go right
             if((testingEndPoint % 6) > 0) {
                 correction = 6 - (testingEndPoint % 6);
                 
@@ -1132,11 +1156,11 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 addToCommandMsgQ(roverCommand);
                 
                 // Adding to the next target location / angle
+                mainappData.targetX[mainappData.targetTotal] = *x + correction;
+                mainappData.targetY[mainappData.targetTotal] = *y;
+                mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
                 mainappData.targetTotal++;
-                mainappData.targetX[mainappData.targetIndex] = *x + correction;
-                mainappData.targetY[mainappData.targetIndex] = *y;
-                mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                mainappData.targetIndex++;
                 
                 *x += correction;
             }
@@ -1148,11 +1172,11 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 addToCommandMsgQ(roverCommand);
                 
                 // Adding to the next target location / angle
+                mainappData.targetX[mainappData.targetTotal] = *x + correction;
+                mainappData.targetY[mainappData.targetTotal] = *y;
+                mainappData.targetAngle[mainappData.targetTotal] = *angle;
+                mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
                 mainappData.targetTotal++;
-                mainappData.targetX[mainappData.targetIndex] = *x + correction;
-                mainappData.targetY[mainappData.targetIndex] = *y;
-                mainappData.targetAngle[mainappData.targetIndex] = *angle;
-                mainappData.targetIndex++;
                 
                 *x += correction;
             }
@@ -1178,11 +1202,11 @@ void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             addToCommandMsgQ(roverCommand);
             
             // Adding to the next target location / angle
+            mainappData.targetX[mainappData.targetTotal] = *x - correction;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle;
+            mainappData.targetCommand[mainappData.targetTotal] = LEFT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x - correction;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle;
-            mainappData.targetIndex++;
             
             *x -= correction;
         }
@@ -1194,11 +1218,11 @@ void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             addToCommandMsgQ(roverCommand);
             
             // Adding to the next target location / angle
+            mainappData.targetX[mainappData.targetTotal] = *x - correction;
+            mainappData.targetY[mainappData.targetTotal] = *y;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle;
+            mainappData.targetCommand[mainappData.targetTotal] = LEFT;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x - correction;
-            mainappData.targetY[mainappData.targetIndex] = *y;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle;
-            mainappData.targetIndex++;
             
             *x -= correction;
         }
@@ -1222,11 +1246,11 @@ void moveVerticalUpOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             addToCommandMsgQ(roverCommand);
             
             // Adding to the next target location / angle
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y - correction;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle;
+            mainappData.targetCommand[mainappData.targetTotal] = UP;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y - correction;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle;
-            mainappData.targetIndex++;
             
             *y -= correction;
         }
@@ -1238,11 +1262,11 @@ void moveVerticalUpOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             addToCommandMsgQ(roverCommand);
             
             // Adding to the next target location / angle
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y - correction;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle;
+            mainappData.targetCommand[mainappData.targetTotal] = UP;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y - correction;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle;
-            mainappData.targetIndex++;
             
             *y -= correction;
         }
@@ -1268,11 +1292,11 @@ void moveVerticalDownOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             addToCommandMsgQ(roverCommand);
             
             // Adding to the next target location / angle
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y + correction;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle;
+            mainappData.targetCommand[mainappData.targetTotal] = DOWN;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y + correction;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle;
-            mainappData.targetIndex++;
             
             *y += correction;
         }
@@ -1284,11 +1308,11 @@ void moveVerticalDownOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             addToCommandMsgQ(roverCommand);
             
             // Adding to the next target location / angle
+            mainappData.targetX[mainappData.targetTotal] = *x;
+            mainappData.targetY[mainappData.targetTotal] = *y + correction;
+            mainappData.targetAngle[mainappData.targetTotal] = *angle;
+            mainappData.targetCommand[mainappData.targetTotal] = DOWN;
             mainappData.targetTotal++;
-            mainappData.targetX[mainappData.targetIndex] = *x;
-            mainappData.targetY[mainappData.targetIndex] = *y + correction;
-            mainappData.targetAngle[mainappData.targetIndex] = *angle;
-            mainappData.targetIndex++;
             
             *y += correction;
         }
@@ -2124,16 +2148,17 @@ void MAINAPP_Initialize ( void )
     // Cleaning the token locations for defaults
     int a;
     for(a = 0; a < 4; a++) {
-        mainappData.token[a].xPos = -30;
-        mainappData.token[a].yPos = -30;
+        mainappData.token[a].xPos = 500;
+        mainappData.token[a].yPos = 500;
     }
     
-    // Cleaning the target command positions and angle
+    // Cleaning the target command positions and angle and commands
     int b;
     for(b = 0; b < 150; b++) {
-        mainappData.targetX[b] = -1;
-        mainappData.targetY[b] = -1;
-        mainappData.targetAngle[b] = -1;
+        mainappData.targetX[b] = 500;
+        mainappData.targetY[b] = 500;
+        mainappData.targetAngle[b] = 500;
+        mainappData.targetCommand[b] = 500;
     }
     
     // Initialize the rover position at a ridiculous unavailable location
@@ -2164,6 +2189,9 @@ void MAINAPP_Initialize ( void )
     
     // Traversal algorithm type is initially unknown
     mainappData.obstacleAversion = unknown;
+    
+    // The rover is initially not moving
+    mainappData.roverMotion = noMotion;
     
     // No obstacle is currently at the end of a y-axis side
     mainappData.dontSkip = pdFALSE;
@@ -2267,6 +2295,113 @@ void MAINAPP_Tasks ( void )
                     // Update the current location of the rover
                     else {
                         mainappData.rover = mainappData.object;
+                        
+                        // Checking if the rover has reached it's next ideal location
+                        if((mainappData.rover.xPos == mainappData.targetX[mainappData.targetIndex]) &&
+                           (mainappData.rover.yPos == mainappData.targetY[mainappData.targetIndex]) &&
+                           (mainappData.rover.angle == mainappData.targetAngle[mainappData.targetAngle])) {
+                            // Increment for the next command target location
+                            mainappData.targetIndex++;
+                        }
+                        // Dealing with corrections to get to the next location
+                        /* Need to immediately add to the queue rather than at the next location */
+                        else {
+                            // Figuring out where the rover is intending to go in order to do corrections
+                            // Turning left
+                            if(mainappData.targetCommand[mainappData.targetIndex] == ROVER_LEFT) {
+                                mainappData.roverMotion = turningLeft;
+                            }
+                            // Turn right
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == ROVER_RIGHT) {
+                                mainappData.roverMotion = turningRight;
+                            }
+                            // Moving up
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == UP) {
+                                mainappData.roverMotion = movingUp;
+                            }
+                            // Moving down
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == DOWN) {
+                                mainappData.roverMotion = movingDown;
+                            }
+                            // Moving right
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == RIGHT) {
+                                mainappData.roverMotion = movingRight;
+                            }
+                            // Moving left
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == LEFT) {
+                                mainappData.roverMotion = movingLeft;
+                            }
+                            else {
+                                mainappData.roverMotion = noMotion;
+                            }
+                            
+                            // See where the rover is moving and if it is going the right way
+                            if(mainappData.roverMotion == movingUp) {
+                                // Checking if it is facing in an angle that is not within margin of error
+                                // Rover is in the wrong place
+                                if(mainappData.rover.angle == 0) {
+                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                }
+                                // Rover is not turning right
+                                else {
+                                    uint16_t testAngle;
+                                }
+                            }
+                            else if(mainappData.roverMotion == movingDown) {
+                                // Checking if it is facing an angle that is not within margin of error
+                                if(mainappData.rover.angle == 180) {
+                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                }
+                                else {
+                                    uint16_t testAngle;
+                                }
+                            }
+                            else if(mainappData.roverMotion == movingLeft) {
+                                // Checking if it is facing an angle that is not within margin of error
+                                if(mainappData.rover.angle == 270) {
+                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                }
+                                else {
+                                    uint16_t testAngle;
+                                }
+                            }
+                            else if(mainappData.roverMotion == movingRight) {
+                                // Checking if it is facing an angle that is not within margin of error
+                                if(mainappData.rover.angle == 90) {
+                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                }
+                                else {
+                                    uint16_t testAngle;
+                                }
+                            }
+                            // Checking if it is turning to an angle within margin of error
+                            else if(mainappData.roverMotion == turningLeft) {
+                                // The rover did not go far enough
+                                if(mainappData.rover.angle > mainappData.targetAngle[mainappData.targetIndex]) {
+                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetX[mainappData.targetIndex];
+                                }
+                                // The rover went too far left
+                                else if(mainappData.rover.angle < mainappData.targetAngle[mainappData.targetIndex]) {
+                                    uint16_t testAngle;
+                                }
+                            }
+                            else if(mainappData.roverMotion == turningRight) {
+                                // The rover went too far right
+                                if(mainappData.rover.angle > mainappData.targetAngle[mainappData.targetIndex]) {
+                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                }
+                                // The rover did not go far enough
+                                else if(mainappData.rover.angle < mainappData.targetAngle[mainappData.targetIndex]) {
+                                    uint16_t testAngle;
+                                }
+                            }
+                        }
                     }
                     
                     /* Adding a previous rover location to the macro/micro grid */

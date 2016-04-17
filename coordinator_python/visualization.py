@@ -30,6 +30,7 @@ class rover:
         self.yPos = y
         self.distanceSpeed =  move_speed
         self.angleSpeed = turn_speed
+        self.position = image.get_rect().move(x, y)
         self.angle = angle
         self.color = AQUA
         self.rectangle = image # <- initial location with size of 6" x 6"
@@ -71,6 +72,7 @@ class rover:
         threading.Timer(MEASUREMENT_PERIOD, self.turnRight, angle).start()
 
     def move(self, distance):
+        """
         global CURRENT_DISTANCE
         global ROVER_ANGLE
 
@@ -83,7 +85,20 @@ class rover:
 
         self.position = self.position.move((self.speed * cos(radians(self.angle - 90))) * MEASUREMENT_PERIOD,
                                            (self.speed * sin(radians(self.angle - 90))) * MEASUREMENT_PERIOD)
-        threading.Timer(MEASUREMENT_PERIOD, self.move, distance).start()
+        threading.Timer(MEASUREMENT_PERIOD, self.move, CURRENT_DISTANCE).start()
+        """
+        self.position = self.position.move(self.distanceSpeed * cos(radians(self.angle + 90)) * MEASUREMENT_PERIOD,
+                                           self.distanceSpeed * sin(radians(self.angle + 90)) * MEASUREMENT_PERIOD)
+        # For now this is boundary protection <- will need to be removed later
+        #                                        because it should never go past the boundaries
+        if self.position.right > 720:
+            self.position.left = 0
+        elif self.position.bottom > 720:
+            self.position.top = 0
+        elif self.position.left < 0:
+            self.position.right = 720
+        elif self.position.top < 0:
+            self.position.bottom = 720
 
 """
 Extracted from the pygame.org Wiki example
@@ -97,12 +112,19 @@ def rotate(image, angle):
         rot_image = rot_image.subsurface(rot_rect).copy()
         return rot_image
 
+"""
+Extracted from the pygame.org Wiki example
+Rotates the image while keeping its center
+"""
 def rot_center(image, rect, angle):
         """rotate an image while keeping its center"""
         rot_image = pygame.transform.rotate(image, angle)
         rot_rect = rot_image.get_rect(center=rect.center)
         return rot_image,rot_rect
 
+"""
+Extracted from the moveit.py example from PyGame
+"""
 #quick function to load an image
 def load_image(name):
     path = os.path.join(main_dir, 'data', name)
@@ -113,23 +135,44 @@ def main():
     listener = Listener()
     listener.start()
 
+    try:
+        msg = listener.queue.get()
+
+        # Ensuring initialization occurs properly
+        if msg.msgtype == CLIENT_ROLE:
+            print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
+
+        # Update on the position of the rover
+        elif msg.msgtype == OBJECT_POS:
+            print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
+
+        # Update on the commands by the coordinator
+        elif msg.msgtype == ROVER_MOVE:
+            print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
+    except Empty:
+        pass
+
+    # Initializes the PyGame usage
     pygame.init()
 
     # Screen of 720 pix x 720 pix
     screen = pygame.display.set_mode((720, 720))
-
     # Image is 150 pix x 150 pix, rectangle is 94 pix x 114 pix
     roverImage = load_image('C:/Windows_Serial_Simulation/rover7.png')
 
-    # Fill background
+    #0 Fill background
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     background.fill(WHITE)
     background.set_colorkey((255,0,0))
 
     # Displaying a rectangle as the rover
-    roverObject = rover(roverImage, 100, 100, 0, 40, 100)
-    pygame.draw.circle(screen, GREEN, (650, 650), 60, 0)
+    roverObject = rover(roverImage, 100, 100, 0, 20, 100)
+    # Tokens
+    pygame.draw.circle(screen, GREEN, (60,60), 60, 0)
+    pygame.draw.circle(screen, GREEN, (660, 660), 60, 0)
+    # Obstacles
+    pygame.draw.rect(screen, RED, (0, 120, 120, 120), 0)
 
     time = pygame.time.Clock()
 
@@ -167,8 +210,11 @@ def main():
             pass"""
 
         #background.fill(WHITE)
-        # Displaying a rectangle as the rover
-        pygame.draw.circle(screen, GREEN, (650, 650), 60, 0)
+        # Tokens
+        pygame.draw.circle(screen, GREEN, (660, 660), 60, 0)
+        pygame.draw.circle(screen, GREEN, (60,60), 60, 0)
+        # Obstacles
+        pygame.draw.rect(screen, RED, (0, 120, 120, 120), 0)
 
         #screen.blit(background, roverObject.rectangle)
         #screen.blit(roverObject.rectangle, (200,200))
@@ -189,9 +235,13 @@ def main():
         if angle >= 360:
             angle = 0
 
-        rotatedImage = rotate(roverObject.rectangle, angle)
+        #rotatedImage = rotate(roverObject.rectangle, angle)
+        #screen.blit(rotatedImage, (roverObject.xPos, roverObject.yPos))
+
+        roverObject.move(6)
+        screen.blit(roverObject.rectangle, roverObject.position)
+
         #rotatedRect = rotatedImage.get_rect()
-        screen.blit(rotatedImage, (roverObject.xPos, roverObject.yPos))
         #pygame.draw.circle(background, GREEN, (650, 650), 60, 0)
 
         #screen.blit(background, roverObject.rectangle)
