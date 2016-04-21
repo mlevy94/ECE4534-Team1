@@ -24,6 +24,7 @@ SENSOR         = 0x08
 COORDINATOR    = 0x10
 MONITOR        = 0x11
 ROUTER         = 0x12
+GUI            = 0x14
 
 # value to role conversion
 VAL_TO_ROLE = OrderedDict((
@@ -51,55 +52,33 @@ ROLE_TO_VAL = OrderedDict((
 
 # type values
 DEBUG_MSG            = 0x01
-NET_STAT             = 0x02
 CLIENT_ROLE          = 0x04
-FOLLOWER_FWD         = 0x05 # Tells Follower to move forward
-FOLLOWER_BKW         = 0x06 # Tells Follower to move backward
-FOLLOWER_LFT         = 0x07 # Tells Follower to move left
 INITIALIZE           = 0x08
-FOLLOWER_RHT         = 0x09 # Tells Follower to move right
-READY_TO_START       = 0x10
 ROVER_MOVE           = 0x11
-FOLLOWER_TFD         = 0x13 # Follower reports found token
 OBJECT_POS           = 0x14
-SCAN_SERVO           = 0x15 # Scanning Follower Servo
-SCAN_LEAD_FND        = 0x16 # Scan returned Lead Found
-SCAN_OBJ_FND         = 0x17 # Scan returned Object Found
 TOKEN_FOUND          = 0x18
-MOTOR_MOVE           = 0x20
-BLANK                = 0x21
-TOKEN                = 0x22
-LEAD_ROVER_POS       = 0x23
-FOLLOWER_ROVER_POS   = 0x24
-OBSTACLE             = 0x25
-ALG_TIME             = 0x26
+## RESERVED 0x19-0x22
+HEARTBEAT            = 0x70
+END_GAME             = 0x71
+START_GAME           = 0x72
+## RESERVED 0x73-0x79
 
 # value to message conversion
 VAL_TO_MSG = OrderedDict((
   (DEBUG_MSG, "Debug Message"),
-  (NET_STAT, "Network Statistic"),
   (CLIENT_ROLE, "Client Role"),
-  (FOLLOWER_FWD, "Follower Forward"),
-  (FOLLOWER_BKW, "Follower Backward"),
-  (FOLLOWER_LFT, "Follower Left"),
   (INITIALIZE, "Initialize"),
-  (FOLLOWER_RHT, "Follower Right"),
-  (READY_TO_START, "Ready to Start"),
   (ROVER_MOVE, "Rover Move"),
-  (FOLLOWER_TFD, "Follower Token Found"),
   (OBJECT_POS, "Object Position"),
-  (SCAN_SERVO, "Scanning Follower Servo"),
-  (SCAN_LEAD_FND, "Scan Lead Found"),
-  (SCAN_OBJ_FND, "Scan Object Found"),
   (TOKEN_FOUND, "Token Found"),
 ))
 
 ROLE_MSG_RECV = OrderedDict((
-  (LEAD_ROVER, [ROVER_MOVE, ]),
+  (LEAD_ROVER, [ROVER_MOVE, HEARTBEAT, ]),
   (FOLLOWER, []),
-  (SENSOR, []),
-  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, ]),
-  (MONITOR, [DEBUG_MSG, OBJECT_POS, ]),
+  (SENSOR, [HEARTBEAT, ]),
+  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, HEARTBEAT, ]),
+  (MONITOR, [DEBUG_MSG, OBJECT_POS, ROVER_MOVE, TOKEN_FOUND, HEARTBEAT, START_GAME, END_GAME]),
 ))
 
 ########## ROVER MOVE DEFINES #############

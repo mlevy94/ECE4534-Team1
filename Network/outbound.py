@@ -52,7 +52,7 @@ class OutboundWorker:
       # send to client roles
       for role, client in self.clientDict.items():
         # Check if client is connected for that role
-        if client is None:
+        if client is None or role == msg.client:
           continue
         try:
           if msg.msgtype in ROLE_MSG_RECV[role] or (DEBUG_ON and msg.msgtype == DEBUG_MSG):

@@ -35,6 +35,17 @@ void sendDebugMessage(char* msg) {
     addToUartTXQ(newMsg);
 }
 
+void sendDebugMessageFromISR(char* msg) {
+    InternalMessage newMsg;
+    newMsg.type = DEBUG_MSG;
+    int i;
+    for (i = 0; msg[i] != '\0' && i < INTERNAL_MSG_SIZE; i++) {
+        newMsg.msg[i] = msg[i];
+    }
+    newMsg.size = i;
+    addToUartTXQFromISR(newMsg);
+}
+
 InternalMessage makeMessageChar(char msgType, char val) {
     InternalMessage newMsg;
     newMsg.size = 1;

@@ -174,12 +174,12 @@ void motorMove(char direction, char distance) {
                 case(ROVER_STOP):
                     motorData.moveStop = 0;
                     motorStop();
-                    //addToUartTXQ(roverStopped());
+                    addToUartTXQ(roverStopped());
                     break;
                 default:
                     motorData.moveStop = 0;
                     motorStop();
-                    //addToUartTXQ(roverStopped());
+                    addToUartTXQ(roverStopped());
                     sendDebugMessage("MOTOR FAULT\0");
                     break;
                     
@@ -197,17 +197,18 @@ void incRightEn() {
 }
 
 void incMoveCount() {
-    if (motorData.moveStop == 0) {
-        return;
-    }
-    else if (motorData.moveCounter == motorData.moveStop) {
+//    if (motorData.moveStop == 0) {
+//        sendDebugMessageFromISR("CONT MOVE\0");
+//        return;
+//    }
+    if (motorData.moveCounter >= motorData.moveStop && motorData.moveStop != 0) {
         if (xQueueSendFromISR(motorData.stopQ, &motorData.moveStop, 0)) {
             motorData.moveCounter = 0;
             motorData.moveStop = 0;
             addToUartTXQFromISR(roverStopped());
         }
     }
-    else {
+    else if (motorData.moveStop != 0) {
         motorData.moveCounter++;
     }
 }
@@ -268,7 +269,7 @@ void initMotor(Motor* motor, int16_t pwm, int16_t targetPWM, int16_t targetEncod
 
 void MOTORAPP_Initialize ( void )
 {
-    motorData.stopQ = xQueueCreate(1, sizeof(int16_t)); 
+    motorData.stopQ = xQueueCreate(10, sizeof(int16_t)); 
     vQueueAddToRegistry(motorData.stopQ, motor_stop_q);
     motorData.motorQ = xQueueCreate(20, sizeof(InternalMessage));
     vQueueAddToRegistry(motorData.motorQ, motor_q);
@@ -311,16 +312,12 @@ void MOTORAPP_Tasks ( void )
     while(1) {
         if(xQueueReceive(motorData.motorQ, &motorData.moveCMD, portMAX_DELAY)) {
             motorMove(motorData.moveCMD.msg[0], motorData.moveCMD.msg[1]);
-            setDebugBool(pdTRUE);
-            setDebugVal(motorData.moveCMD.msg[0]);
-            setDebugVal(motorData.moveCMD.msg[1]);
-            setDebugBool(pdFALSE);
             // wait until done with move to get next.
             setDebugVal(motorData.moveCMD.msg[1]);
             if ( motorData.moveCMD.msg[1] > 0) {
                 while (!xQueueReceive(motorData.stopQ, &go, portMAX_DELAY));
                 motorStop();
-                addToNFCQ(1);
+                //addToNFCQ(1);
                 PLIB_OC_PulseWidth16BitSet(OC_LEFT, motorData.leftMotor->pwm);
                 PLIB_OC_PulseWidth16BitSet(OC_RIGHT, motorData.rightMotor->pwm);
             }

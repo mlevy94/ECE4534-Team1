@@ -27,7 +27,7 @@ class ClientWorker:
   def start(self):
     self.writefunc(bytes([0x50 for _ in range(30)]))
     self.clientConnected = True
-    self.send(InternalMessage(ROUTER, INITIALIZE, b'1', self))
+    self.send(InternalMessage(ROUTER, INITIALIZE, b'111111111111', self))
     self.thread = threading.Thread(target=self._clientRecv, daemon=True)
     self.thread.start()
 
@@ -48,6 +48,8 @@ class ClientWorker:
           # get header values
           ((startbyte, source, count, msgtype, msgsize), serialstream) = (serialstream[:HEADER_SIZE], serialstream[HEADER_SIZE:])
           # get message
+          while len(serialstream) < msgsize + 1:
+            serialstream += self.readfunc(4096)
           msg, serialstream = serialstream[:msgsize], serialstream[msgsize:]
           netmsg = NetMessage(
             source= source,
@@ -56,7 +58,11 @@ class ClientWorker:
             msgsize = msgsize,
             msg=msg,
           )
-          endbyte, serialstream = serialstream[0], serialstream[1:]
+          if len(serialstream) > 1:
+            endbyte, serialstream = serialstream[0], serialstream[1:]
+          else:
+            endbyte = serialstream[0]
+            serialstream = b''
           if endbyte != ENDBYTE[0]:
             print("Bad End Byte: {}".format(self.address))
             continue
@@ -68,7 +74,7 @@ class ClientWorker:
             print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
           self._put(msg)
           self.recvmsgcount += 1
-    except ConnectionError:
+    except (ConnectionError, TimeoutError):
       pass
 
   def _put(self, msg):
