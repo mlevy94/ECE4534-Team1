@@ -22,14 +22,19 @@ class OutboundWorker:
   def _commThread(self):
     while 1:
       msg = self.queue.get()
+      if msg.client == MONITOR:
+        print("Monitor Message: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
       # check for predefined target
       if msg.target:
         # CLIENT_ROLE messages handled here
         if msg.msgtype == CLIENT_ROLE:
-          if msg.msg[0] != CLIENT:
-            self.clientList.remove(msg.target)
-            self.clientDict[msg.msg[0]] = msg.target
-            print("Role Assigned: {} - {}".format(VAL_TO_ROLE[msg.msg[0]], msg.target.address))
+          try:
+            if msg.msg[0] != CLIENT:
+              self.clientList.remove(msg.target)
+              self.clientDict[msg.msg[0]] = msg.target
+              print("Role Assigned: {} - {}".format(VAL_TO_ROLE[msg.msg[0]], msg.target.address))
+          except ValueError:
+            print("Bad Role Declaration.")
         else:
           for client in msg.target:
             if client.send(msg):

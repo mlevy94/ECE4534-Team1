@@ -22,6 +22,14 @@ def cmdInput(listener):
           print("  {}: {}".format(VAL_TO_ROLE[role].title(), client.address))
       else:
         print("  None")
+    elif msgstring == "start":
+      try:
+        testcase = int(input("Select Test Case:"))
+        assert testcase in range(1, 8)
+      except (TypeError, AssertionError):
+        print("Test case does not exist")
+        continue
+      listener.queue.put(InternalMessage(ROUTER, START_GAME, bytes([testcase])))
     else:
       msgstring = msgstring.encode()
       while msgstring:

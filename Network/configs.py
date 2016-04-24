@@ -71,13 +71,15 @@ VAL_TO_MSG = OrderedDict((
   (ROVER_MOVE, "Rover Move"),
   (OBJECT_POS, "Object Position"),
   (TOKEN_FOUND, "Token Found"),
+  (START_GAME, "Start Game"),
+  (END_GAME, "End Game"),
 ))
 
 ROLE_MSG_RECV = OrderedDict((
   (LEAD_ROVER, [ROVER_MOVE, HEARTBEAT, ]),
   (FOLLOWER, []),
   (SENSOR, [HEARTBEAT, ]),
-  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, HEARTBEAT, ]),
+  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, HEARTBEAT, START_GAME]),
   (MONITOR, [DEBUG_MSG, OBJECT_POS, ROVER_MOVE, TOKEN_FOUND, HEARTBEAT, START_GAME, END_GAME]),
 ))
 
@@ -108,7 +110,9 @@ NET_MSG_SIZE = HEADER_SIZE + TAIL_SIZE + INTERNAL_MSG_SIZE
 ########## MESSAGE STRUCTURES #############
 class InternalMessage:
 
-  def __init__(self, client, msgtype, msg, target=[]):
+  def __init__(self, client, msgtype, msg, target=None):
+    if target is None:
+      target = []
     self.client = bytetoval(client)
     self.msgtype = bytetoval(msgtype)
     self.msg = msg
@@ -116,6 +120,14 @@ class InternalMessage:
       self.target = [target]
     else:
       self.target = target
+
+  def __repr__(self):
+    if self.msgtype == ROVER_MOVE:
+      return "<{}, {}: {}, {}>".format(VAL_TO_MSG[self.msgtype], VAL_TO_ROLE[self.client], VAL_TO_ROV[self.msg[0]], self.msg[1])
+    elif self.msgtype == OBJECT_POS:
+      return "<{}, {} - Object: {} xPos: {}, yPos: {}, angle: {}, length: {}, width: {}>".format(VAL_TO_MSG[self.msgtype], VAL_TO_ROLE[self.client], *decipherMessage(self.msg))
+    else:
+      return "<{}, {}: {}>".format(VAL_TO_MSG[self.msgtype], VAL_TO_ROLE[self.client], self.msg)
 
 
 class NetMessage:
@@ -156,5 +168,15 @@ def makeObjPosMsg(objectType, x, y, orientation):
   str += bytes([orientation])
   return InternalMessage(CLIENT, OBJECT_POS, str)
 
-def roverMove(direction, distance):
-  return InternalMessage(CLIENT, ROVER_MOVE, bytes([direction, distance]))
+def roverMove(direction, distance, client=CLIENT):
+  return InternalMessage(client, ROVER_MOVE, bytes([direction, distance]))
+
+def decipherMessage(message):
+  objectType = message[0]
+  xPosition = ((message[1] << 8) | message[2]) / 10.0
+  yPosition = ((message[3] << 8) | message[4]) / 10.0
+  angle = (message[5] << 8) | message[6]
+  length = ((message[7] << 8) | message[8]) / 10.0
+  width = ((message[9] << 8) | message[10]) / 10.0
+
+  return objectType, xPosition, yPosition, angle, length, width

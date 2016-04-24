@@ -78,7 +78,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define LEFT_ERROR_INT      4
 #define RIGHT_ERROR         1
 #define RIGHT_ERROR_INT     4
-#define INCH_TO_EN        196
+#define INCH_TO_EN         20
 #define DEG_TO_EN          35
 
 // *****************************************************************************
