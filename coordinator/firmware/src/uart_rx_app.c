@@ -135,8 +135,8 @@ void sortMessage(InternalMessage msg) {
             returnMessage.msg[0] = 0x02;
             addToInitTXQ(msg.msg[0]);
             addToUartTXQ(returnMessage);
-            */
             addToInitTXQ(msg.msg[0]);
+            */
             break;
         case DEBUG_MSG:
             for (i = 0; msg.msg[i] != '\0'; i++) {
@@ -144,6 +144,9 @@ void sortMessage(InternalMessage msg) {
             }
             break;
         case OBJECT_POS:
+            addToMainAppQ(msg);
+            break;
+        case TOKEN_FOUND:
             addToMainAppQ(msg);
             break;
         default:
@@ -187,7 +190,7 @@ void UART_RX_APP_Tasks ( void )
 {
     char inChar;
     int i = 0;
-    while(i < 20) {
+    /*while(i < 20) {
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
             if (inChar == 0x50) {
                 i++;
@@ -196,7 +199,7 @@ void UART_RX_APP_Tasks ( void )
                 i = 0;
             }
         }
-    }
+    }*/
     InternalMessage processedMsg;
     while(1) {
 #ifdef DEBUG_ON

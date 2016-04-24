@@ -273,10 +273,10 @@ void lowerRightCornerTraverseEmptyParam(uint16_t* x, uint16_t* y, uint16_t* angl
 
 // Moving around only once to make pass by reference
 // Turning to a direction
-void turnRight(uint16_t* angle);
-void turnLeft(uint16_t* angle);
-void turnUp(uint16_t* angle);
-void turnDown(uint16_t* angle);
+void turnRight(uint16_t* x, uint16_t* y, uint16_t* angle);
+void turnLeft(uint16_t* x, uint16_t* y, uint16_t* angle);
+void turnUp(uint16_t* x, uint16_t* y, uint16_t* angle);
+void turnDown(uint16_t* x, uint16_t* y, uint16_t* angle);
 
 // Moving one single grid cell
 void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle);
@@ -332,7 +332,7 @@ void correctionAngle(uint16_t* x, uint16_t* y, uint16_t* angle);
 void sendRoverLocation(void);
 
 // Method to send back the token found message
-void sendTokenUpdate(void);
+void sendTokenUpdate(uint16_t x, uint16_t y, uint16_t length, uint16_t width);
 
 // Method to send back the obstacle locations to the simulation for debugging
 void sendObstacleLocations(void);
