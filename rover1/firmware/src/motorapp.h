@@ -143,6 +143,7 @@ typedef struct
     Motor* rightMotor;
     int16_t moveCounter;
     int16_t moveStop;
+    bool intEN;
 
 } MOTORAPP_DATA;
 

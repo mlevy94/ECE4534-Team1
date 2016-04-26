@@ -63,7 +63,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <xc.h>
 #include <sys/attribs.h>
 #include "motorapp.h"
-#include "nfc_app.h"
 #include "uart_tx_app.h"
 #include "uart_rx_app.h"
 #include "system_definitions.h"
@@ -73,8 +72,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "uart_rx_app_public.h"
 #include "uart_tx_app_public.h"
 #include "motorapp_public.h"
-#include "nfc_app_public.h"
-
 
 // *****************************************************************************
 // *****************************************************************************
@@ -97,12 +94,22 @@ void IntHandlerExternalInterruptInstance1(void)
     
 }
 
+void IntHandlerExternalInterruptInstance2(void)
+{           
+    sendDebugMessageFromISR("TOKEN FOUND\0");
+    addToUartTXQFromISR(tokenFoundMsg());
+    resetToken();
+    SYS_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
+    PLIB_INT_SourceDisable(INT_ID_0, INT_SOURCE_EXTERNAL_3);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_EXTERNAL_3);
+}
+
 
 void IntHandlerDrvTmrInstance0(void)
 
 {
     PLIB_TMR_Counter16BitClear(TMR_ID_2);
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_TIMER_2);
 
 }
  

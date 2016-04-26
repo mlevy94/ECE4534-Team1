@@ -165,12 +165,8 @@
       <Template>
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>62DC5B2DE2E3B44F6F8679844270E37A</Checksum>
+        <Checksum>79BD8D7015C0A0046F901B2C88B1EC2F</Checksum>
         <ProjectFileChecksum>FAD8378D836B368BC93979E6D7B08BE1</ProjectFileChecksum>
-      </Template>
-      <Template>
-        <Name>nfc_app.h</Name>
-        <Path>Header Files/app</Path>
       </Template>
       <Template>
         <Name>drv_oc_static.h</Name>
@@ -180,16 +176,12 @@
       <Template>
         <Name>sys_ports_static.c</Name>
         <Path>Source Files/app/system_config/rover/framework/system/ports/src</Path>
-        <Checksum>DAD83841B052F3779FBAA88134F858D5</Checksum>
-      </Template>
-      <Template>
-        <Name>nfc_app.c</Name>
-        <Path>Source Files/app</Path>
+        <Checksum>50D50C4B7EFDA362CBADA585A747D2B4</Checksum>
       </Template>
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>C90FF8F23F063114FDDBD89A92615A41</Checksum>
+        <Checksum>76F3CE9889AF1A04C39671BE40FDD5BD</Checksum>
       </Template>
       <Template>
         <Name>motorapp.h</Name>
@@ -229,7 +221,7 @@
       <Template>
         <Name>system_interrupt.c</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>055B67A779093E43D7C0B702BD186164</Checksum>
+        <Checksum>C185B67A8CBE8F0106384897499DAA4A</Checksum>
         <ProjectFileChecksum>DC0F189E4FFEF720AAF1E8771DC9EE75</ProjectFileChecksum>
       </Template>
       <Template>
@@ -245,7 +237,7 @@
       <Template>
         <Name>system_interrupt_a.S</Name>
         <Path>Source Files/app/system_config/rover</Path>
-        <Checksum>038BA52CECDC3D12BD271C2E8EA6EBC6</Checksum>
+        <Checksum>35F2EF2AC38B795EF9FBEE98904EF1AE</Checksum>
       </Template>
       <Template>
         <Name>drv_usart_static.c</Name>
@@ -255,12 +247,12 @@
       <Template>
         <Name>system_definitions.h</Name>
         <Path>Header Files/app/system_config/rover</Path>
-        <Checksum>2B63CB05182F437A5055097E356D7C35</Checksum>
+        <Checksum>33E4B84B90D8F6560D9C2BDA85B43190</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/rover</Path>
-        <Checksum>CE521BA9200AE551DB7B414CD4188C46</Checksum>
+        <Checksum>B5957526AAC2C39205DBE72543E4C08F</Checksum>
       </Template>
       <Template>
         <Name>sys_clk_static.h</Name>

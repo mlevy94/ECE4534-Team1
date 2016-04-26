@@ -116,6 +116,41 @@ _IntHandlerExternalInterruptInstance1:
     .end	_IntHandlerExternalInterruptInstance1
 
 
+/* External Interrupt Instance 2 Interrupt */
+
+   .extern  IntHandlerExternalInterruptInstance2
+
+   .section	.vector_15,code, keep
+   .equ     __vector_dispatch_15, IntVectorExternalInterruptInstance2
+   .global  __vector_dispatch_15
+   .set     nomicromips
+   .set     noreorder
+   .set     nomips16
+   .set     noat
+   .ent  IntVectorExternalInterruptInstance2
+
+IntVectorExternalInterruptInstance2:
+    la    $26,  _IntHandlerExternalInterruptInstance2         
+    jr    $26
+    nop
+	.end	IntVectorExternalInterruptInstance2
+
+   .section	.ExternalInterruptInstance2_vector_text, code, keep
+   .set     nomicromips
+   .set     noreorder
+   .set     nomips16
+   .set     noat
+   .ent  _IntHandlerExternalInterruptInstance2
+
+_IntHandlerExternalInterruptInstance2:
+    portSAVE_CONTEXT
+    la    s6,  IntHandlerExternalInterruptInstance2
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end	_IntHandlerExternalInterruptInstance2
+
+
 
 /* TMR Instance 0 Interrupt */
 

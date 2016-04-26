@@ -17,6 +17,7 @@ extern "C" {
 void incLeftEn();
 void incRightEn();
 void incMoveCount();
+void resetToken();
 BaseType_t addToMotorQ(InternalMessage* msg);
 BaseType_t addToMotorQFromISR(InternalMessage* msg);
 

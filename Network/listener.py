@@ -5,7 +5,8 @@ from threading import Thread
 from client import ClientWorker
 from configs import *  # too many variables to import explicitly
 
-
+TARGET_IP = getIPAddr()
+TARGET_PORT = getPort()
 
 class Listener:
 
@@ -33,9 +34,9 @@ class Listener:
     if self.listener is None:
       self.listener = socket()
     try:
-      self.listener.bind((getIPAddr(), getPort()))
+      self.listener.bind((TARGET_IP, TARGET_PORT))
       self.listener.listen(0)
-      print("Listening on {}:{}".format(getIPAddr(), getPort()))
+      print("Listening on {}:{}".format(TARGET_IP, TARGET_PORT))
       while 1:
         newSocket, addr = self.listener.accept()
         newClient = ClientWorker(newSocket, self.queue, addr)

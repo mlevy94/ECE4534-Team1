@@ -1,174 +1,170 @@
-from listener import Listener
 from configs import *
 from threading import Thread
 from queue import Empty
+from testclient import Client
 
+MY_ROLE = COORDINATOR
+TARGET_IP = getIPAddr()
+TARGET_PORT = getPort()
 
-def roverMove(direction, distance):
-  return InternalMessage(CLIENT, ROVER_MOVE, bytes([direction, distance]))
-
-def sendMsg(msg, clientList):
-  if msg is not None:
-    for client in clientList:
-      try:
-        client.send(msg)
-        print("Message Sent {}: {} - {}, {}".format(client.address, VAL_TO_MSG[msg.msgtype], VAL_TO_ROV[msg.msg[0]], msg.msg[1]))
-      except (ConnectionResetError, BrokenPipeError):
-        clientList.remove(client)
-        print("Client Disconnected: {}".format(client.address))
-        continue
+def sendMsg(msg, client):
+  client.send(msg)
+  if msg.msgtype == ROVER_MOVE:
+    print("Message Sent: {} - {}, {}".format(VAL_TO_MSG[msg.msgtype], VAL_TO_ROV[msg.msg[0]], msg.msg[1]))
+  else:
+    print("Message Sent: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
 
 ####### BASIC TESTS ######
 
 # move forward one square
-def basicMoveTest1(clientList):
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
+def basicMoveTest1(client):
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
 
 # move forward 4 squares
-def basicMoveTest2(clientList):
+def basicMoveTest2(client):
   for _ in range(4):
-    sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
+    sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
 
 # move backward 1 square
-def basicMoveTest3(clientList):
-  sendMsg(roverMove(ROVER_BACKWARD, 6), clientList)
+def basicMoveTest3(client):
+  sendMsg(roverMove(ROVER_BACKWARD, 60, MY_ROLE), client)
 
 # move backward 4 square
-def basicMoveTest4(clientList):
+def basicMoveTest4(client):
   for _ in range(4):
-    sendMsg(roverMove(ROVER_BACKWARD, 6), clientList)
+    sendMsg(roverMove(ROVER_BACKWARD, 60, MY_ROLE), client)
 
 # move forward 1 square, then backward 1 square
-def basicMoveTest5(clientList):
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_BACKWARD, 6), clientList)
+def basicMoveTest5(client):
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_BACKWARD, 60, MY_ROLE), client)
 
 # move forward 4 suqares, then backward 4 squares
-def basicMoveTest6(clientList):
+def basicMoveTest6(client):
   for _ in range(4):
-    sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
+    sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
   for _ in range(4):
-    sendMsg(roverMove(ROVER_BACKWARD, 6), clientList)
+    sendMsg(roverMove(ROVER_BACKWARD, 60, MY_ROLE), client)
 
 # move forward 1 square, then backward 1 square 4 times
-def basicMoveTest7(clientList):
+def basicMoveTest7(client):
   for _ in range(4):
-    sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-    sendMsg(roverMove(ROVER_BACKWARD, 6), clientList)
+    sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+    sendMsg(roverMove(ROVER_BACKWARD, 60, MY_ROLE), client)
 
 
 
 # turn left 90 degrees
-def basicTurnTest1(clientList):
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
+def basicTurnTest1(client):
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
 
 # turn left 45 degrees
-def basicTurnTest2(clientList):
-  sendMsg(roverMove(ROVER_LEFT, 45), clientList)
+def basicTurnTest2(client):
+  sendMsg(roverMove(ROVER_LEFT, 45, MY_ROLE), client)
 
 # turn right 90 degrees
-def basicTurnTest3(clientList):
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
+def basicTurnTest3(client):
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
 
 # turn right 45 degrees
-def basicTurnTest4(clientList):
-  sendMsg(roverMove(ROVER_RIGHT, 45), clientList)
+def basicTurnTest4(client):
+  sendMsg(roverMove(ROVER_RIGHT, 45, MY_ROLE), client)
 
 # turn left 90 degrees then right 90 degrees
-def basicTurnTest5(clientList):
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
+def basicTurnTest5(client):
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
 
 # turn right 90 degrees then left 90 degrees
-def basicTurnTest6(clientList):
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
+def basicTurnTest6(client):
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
 
 # turn left 90 degrees, then right 90 degrees 4 times
-def basicTurnTest7(clientList):
+def basicTurnTest7(client):
   for _ in range(4):
-    sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-    sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
+    sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+    sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
 
 # turn left a full circle
-def basicTurnTest8(clientList):
+def basicTurnTest8(client):
   for _ in range(4):
-    sendMsg(roverMove(ROVER_LEFT, 90), clientList)
+    sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
 
 # turn right a full circle
-def basicTurnTest9(clientList):
+def basicTurnTest9(client):
   for _ in range(4):
-    sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
+    sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
 
 # turn left half a circle, then right half a circle
-def basicTurnTest10(clientList):
+def basicTurnTest10(client):
   for _ in range(2):
-    sendMsg(roverMove(ROVER_LEFT, 90), clientList)
+    sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
   for _ in range(2):
-    sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
+    sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
 
 ###### COMPLEX TESTS #######
 
 # forward then left 4 times in a square
-def complexTest1(clientList):
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
+def complexTest1(client):
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
 
 # forward then right 4 times in a square
-def complexTest2(clientList):
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
+def complexTest2(client):
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
 
 # move in a figure 8 to the left
-def complexTest3(clientList):
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
+def complexTest3(client):
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
 
 # obstacle placed 2 squares in front of rover. move around it.
-def complexTest4(clientList):
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
-  sendMsg(roverMove(ROVER_LEFT, 90), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
+def complexTest4(client):
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_RIGHT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_LEFT, 90, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
 
 # adjustment test. place rover at bottom right corner of square
-def complexTest5(clientList):
-  sendMsg(roverMove(ROVER_LEFT, 45), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 2), clientList)
-  sendMsg(roverMove(ROVER_RIGHT, 45), clientList)
-  sendMsg(roverMove(ROVER_FORWARD, 6), clientList)
+def complexTest5(client):
+  sendMsg(roverMove(ROVER_LEFT, 45, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 2), client)
+  sendMsg(roverMove(ROVER_RIGHT, 45, MY_ROLE), client)
+  sendMsg(roverMove(ROVER_FORWARD, 60, MY_ROLE), client)
 
 ###### END COMPLEX TESTS ######
 
@@ -214,7 +210,7 @@ COMPLEX_MENU = """
 5 - Adjust To Center, Go Forward. Start at Bottom Right Corner
 """
 
-def cmdInput(clientList):
+def cmdInput(client):
   try:
     keyin = ""
     msg = None
@@ -235,95 +231,96 @@ def cmdInput(clientList):
               if keyin == "0":
                 break
               elif keyin == "1":
-                basicMoveTest1(clientList)
+                basicMoveTest1(client)
               elif keyin == "2":
-                basicMoveTest2(clientList)
+                basicMoveTest2(client)
               elif keyin == "3":
-                basicMoveTest3(clientList)
+                basicMoveTest3(client)
               elif keyin == "4":
-                basicMoveTest4(clientList)
+                basicMoveTest4(client)
               elif keyin == "5":
-                basicMoveTest5(clientList)
+                basicMoveTest5(client)
               elif keyin == "6":
-                basicMoveTest6(clientList)
+                basicMoveTest6(client)
               elif keyin == "7":
-                basicMoveTest7(clientList)
+                basicMoveTest7(client)
           elif keyin == "2":
             while keyin != "back":
               keyin = input(BASIC_TURN_MENU).lower()
               if keyin == "0":
                 break
               elif keyin == "1":
-                basicTurnTest1(clientList)
+                basicTurnTest1(client)
               elif keyin == "2":
-                basicTurnTest2(clientList)
+                basicTurnTest2(client)
               elif keyin == "3":
-                basicTurnTest3(clientList)
+                basicTurnTest3(client)
               elif keyin == "4":
-                basicTurnTest4(clientList)
+                basicTurnTest4(client)
               elif keyin == "5":
-                basicTurnTest5(clientList)
+                basicTurnTest5(client)
               elif keyin == "6":
-                basicTurnTest6(clientList)
+                basicTurnTest6(client)
               elif keyin == "7":
-                basicTurnTest7(clientList)
+                basicTurnTest7(client)
               elif keyin == "8":
-                basicTurnTest8(clientList)
+                basicTurnTest8(client)
               elif keyin == "9":
-                basicTurnTest9(clientList)
+                basicTurnTest9(client)
               elif keyin == "10":
-                basicTurnTest10(clientList)
+                basicTurnTest10(client)
           elif keyin == "3":
             while keyin != "back":
               keyin = input(COMPLEX_MENU).lower()
               if keyin == "0":
                 break
               elif keyin == "1":
-                complexTest1(clientList)
+                complexTest1(client)
               elif keyin == "2":
-                complexTest2(clientList)
+                complexTest2(client)
               elif keyin == "3":
-                complexTest3(clientList)
+                complexTest3(client)
               elif keyin == "4":
-                complexTest4(clientList)
+                complexTest4(client)
               elif keyin == "5":
-                complexTest5(clientList)
+                complexTest5(client)
       elif keyin[0] == "f":
         try:
-          msg = roverMove(ROVER_FORWARD, int(keyin[1:]))
+          msg = roverMove(ROVER_FORWARD, int(keyin[1:]), MY_ROLE)
         except (ValueError, IndexError):
-          msg = roverMove(ROVER_FORWARD, 0)
+          msg = roverMove(ROVER_FORWARD, 0, MY_ROLE)
       elif keyin[0] == "b":
         try:
-          msg = roverMove(ROVER_BACKWARD, int(keyin[1:]))
+          msg = roverMove(ROVER_BACKWARD, int(keyin[1:]), MY_ROLE)
         except (ValueError, IndexError):
-          msg = roverMove(ROVER_BACKWARD, 0)
+          msg = roverMove(ROVER_BACKWARD, 0, MY_ROLE)
       elif keyin[0] == "l":
         try:
-          msg = roverMove(ROVER_LEFT, int(keyin[1:]))
+          msg = roverMove(ROVER_LEFT, int(keyin[1:]), MY_ROLE)
         except (ValueError, IndexError):
-          msg = roverMove(ROVER_LEFT, 0)
+          msg = roverMove(ROVER_LEFT, 0, MY_ROLE)
       elif keyin[0] == "r":
         try:
-          msg = roverMove(ROVER_RIGHT, int(keyin[1:]))
+          msg = roverMove(ROVER_RIGHT, int(keyin[1:]), MY_ROLE)
         except (ValueError, IndexError):
-          msg = roverMove(ROVER_RIGHT, 0)
+          msg = roverMove(ROVER_RIGHT, 0, MY_ROLE)
       elif keyin == "s":
-        msg = roverMove(ROVER_STOP, 0)
+        msg = roverMove(ROVER_STOP, 0, MY_ROLE)
       else:
-        msg = None
-      sendMsg(msg, clientList)
+        msg = InternalMessage(MY_ROLE, DEBUG_MSG, keyin.encode())
+      if msg is not None:
+        sendMsg(msg, client)
   except KeyboardInterrupt:
     pass
 
 if __name__ == "__main__":
-  listener = Listener()
-  cmdThread = Thread(target=cmdInput, args=[listener.clientList], daemon=True)
-  listener.start()
+  client = Client(TARGET_IP, TARGET_PORT, MY_ROLE)
+  client.connect()
+  cmdThread = Thread(target=cmdInput, args=[client], daemon=True)
   cmdThread.start()
   while cmdThread.is_alive():
     try:
-      msg = listener.queue.get(timeout=1)
+      msg = client.queue.get(timeout=1)
       if msg.msgtype == CLIENT_ROLE:
         print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], VAL_TO_ROLE[msg.msg[0]]))
       elif msg.msgtype == ROVER_MOVE:
@@ -332,4 +329,3 @@ if __name__ == "__main__":
         print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
     except Empty:
       pass
-  listener.close()

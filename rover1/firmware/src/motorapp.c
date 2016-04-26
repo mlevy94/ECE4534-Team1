@@ -68,9 +68,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define OC_RIGHT OC_ID_1
 // Values for motor adjustment algorithm
 #define TARGET_MOVE_LEFT  250
-#define TARGET_MOVE_RIGHT 245
-#define TARGET_TURN_LEFT  100
-#define TARGET_TURN_RIGHT 110
+#define TARGET_MOVE_RIGHT 247
+#define TARGET_TURN_LEFT  110
+#define TARGET_TURN_RIGHT 103
 #define PWM_MAX_VAL     10000
 #define PWM_START_MAX    9600
 #define PWM_START_HALF   7000
@@ -78,8 +78,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define LEFT_ERROR_INT      4
 #define RIGHT_ERROR         1
 #define RIGHT_ERROR_INT     4
-#define INCH_TO_EN         20
-#define DEG_TO_EN          35
+#define INCH_TO_EN         19
+#define DEG_TO_EN          39
 
 // *****************************************************************************
 /* Application Data
@@ -141,6 +141,12 @@ void motorStartHalf() {
 }
 
 void motorStop() {
+    if (motorData.intEN) {
+        sendDebugMessage("SEARCHING\0");
+        PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_EXTERNAL_3);
+        PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_EXTERNAL_3);
+        motorData.intEN = pdFALSE;
+    }
     motorData.leftMotor = &motorData.stopMotor;
     motorData.rightMotor = &motorData.stopMotor;
 }
@@ -150,6 +156,9 @@ void motorMove(char direction, char distance) {
                 case(ROVER_FORWARD):
                     setLeftForward(pdTRUE);
                     setRightForward(pdTRUE);
+                    if (distance >= 60) {
+                        motorData.intEN = pdTRUE;
+                    }
                     motorData.moveStop = distance * INCH_TO_EN;
                     motorStartMax();
                     break;
@@ -188,6 +197,10 @@ void motorMove(char direction, char distance) {
     PLIB_OC_PulseWidth16BitSet(OC_RIGHT, motorData.rightMotor->pwm);
 }
 
+void resetToken() {
+    motorData.intEN = pdFALSE;
+}
+
 void incLeftEn() {
     motorData.leftMotor->encoder++;
 }
@@ -197,18 +210,17 @@ void incRightEn() {
 }
 
 void incMoveCount() {
-//    if (motorData.moveStop == 0) {
-//        sendDebugMessageFromISR("CONT MOVE\0");
-//        return;
-//    }
-    if (motorData.moveCounter >= motorData.moveStop && motorData.moveStop != 0) {
+    if (motorData.moveStop == 0) {
+        return;
+    }
+    else if (motorData.moveCounter >= motorData.moveStop) {
         if (xQueueSendFromISR(motorData.stopQ, &motorData.moveStop, 0)) {
             motorData.moveCounter = 0;
             motorData.moveStop = 0;
             addToUartTXQFromISR(roverStopped());
         }
     }
-    else if (motorData.moveStop != 0) {
+    else {
         motorData.moveCounter++;
     }
 }
@@ -280,6 +292,7 @@ void MOTORAPP_Initialize ( void )
     initMotor(&motorData.stopMotor, 0, 0, 0, 0);
     motorData.moveCounter = 0;
     motorData.moveStop = 0;
+    motorData.intEN = pdFALSE;
     motorStop();
     motorData.motorAdjTimer = xTimerCreate("motor adjust timer",
                                               // Sets a timer frequency to 50 Hz
@@ -307,17 +320,16 @@ void MOTORAPP_Tasks ( void )
     PLIB_TMR_Start(TMR_ID_4);
     setLeftForward(pdTRUE);
     setRightForward(pdTRUE);
-    motorStop();
     int16_t go;
     while(1) {
         if(xQueueReceive(motorData.motorQ, &motorData.moveCMD, portMAX_DELAY)) {
             motorMove(motorData.moveCMD.msg[0], motorData.moveCMD.msg[1]);
+            // clear token LED on next move
+            SYS_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_A, PORTS_BIT_POS_3);
             // wait until done with move to get next.
-            setDebugVal(motorData.moveCMD.msg[1]);
             if ( motorData.moveCMD.msg[1] > 0) {
                 while (!xQueueReceive(motorData.stopQ, &go, portMAX_DELAY));
                 motorStop();
-                //addToNFCQ(1);
                 PLIB_OC_PulseWidth16BitSet(OC_LEFT, motorData.leftMotor->pwm);
                 PLIB_OC_PulseWidth16BitSet(OC_RIGHT, motorData.rightMotor->pwm);
             }

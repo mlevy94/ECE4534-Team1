@@ -109,6 +109,7 @@ void sendDebugMessage(char* msg);
 
 InternalMessage makeRoverMove(char direction, char distance);
 InternalMessage roverStopped();
+InternalMessage tokenFoundMsg();
 
 #ifdef	__cplusplus
 }

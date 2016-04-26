@@ -210,7 +210,6 @@ void SYS_Initialize ( void* data )
     setDebugVal(SYS_INIT_SYS);
 #endif
 
-	
     /*Setup the INT_SOURCE_EXTERNAL_2 and Enable it*/
     SYS_INT_VectorPrioritySet(INT_VECTOR_INT2, INT_PRIORITY_LEVEL3);
     SYS_INT_VectorSubprioritySet(INT_VECTOR_INT2, INT_SUBPRIORITY_LEVEL0);
@@ -223,6 +222,11 @@ void SYS_Initialize ( void* data )
     SYS_INT_ExternalInterruptTriggerSet(INT_EXTERNAL_INT_SOURCE1,INT_EDGE_TRIGGER_RISING);
     SYS_INT_SourceEnable(INT_SOURCE_EXTERNAL_1);
 
+    /*Setup the INT_SOURCE_EXTERNAL_3 and Enable it*/
+    SYS_INT_VectorPrioritySet(INT_VECTOR_INT3, INT_PRIORITY_LEVEL3);
+    SYS_INT_VectorSubprioritySet(INT_VECTOR_INT3, INT_SUBPRIORITY_LEVEL0);
+    SYS_INT_ExternalInterruptTriggerSet(INT_EXTERNAL_INT_SOURCE3,INT_EDGE_TRIGGER_RISING);
+    SYS_INT_SourceEnable(INT_SOURCE_EXTERNAL_3);
 
 
 
@@ -234,8 +238,6 @@ void SYS_Initialize ( void* data )
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_APP);
 #endif
-    NFC_APP_Initialize();
-
     UART_TX_APP_Initialize();
 #ifdef DEBUG_ON
     setDebugVal(SYS_INIT_UART_TX_APP);

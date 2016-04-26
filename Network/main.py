@@ -1,14 +1,15 @@
-
-
 from listener import Listener
 from outbound import OutboundWorker
 from configs import *  # too many variables to import explicitly
 
+
 def cmdInput(listener):
   while 1:
     msgstring = input().lower()
+
     if msgstring == "shutdown":
       break
+
     elif msgstring == "clients":
       print("Connected Clients:")
       if listener.clientList:
@@ -22,6 +23,7 @@ def cmdInput(listener):
           print("  {}: {}".format(VAL_TO_ROLE[role].title(), client.address))
       else:
         print("  None")
+
     elif msgstring == "start":
       try:
         testcase = int(input("Select Test Case:"))
@@ -30,6 +32,10 @@ def cmdInput(listener):
         print("Test case does not exist")
         continue
       listener.queue.put(InternalMessage(ROUTER, START_GAME, bytes([testcase])))
+
+    elif msgstring == "end":
+      listener.queue.put(InternalMessage(ROUTER, END_GAME, bytes([0])))
+
     else:
       msgstring = msgstring.encode()
       while msgstring:

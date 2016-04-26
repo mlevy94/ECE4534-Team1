@@ -34,7 +34,7 @@ class Client:
     else:
       self.sentmsgcount = 0
     netmsg = NetMessage(
-        source= intmsg.client,
+        source= self.role,
         count= self.sentmsgcount,
         msgtype= intmsg.msgtype,
         msgsize= len(intmsg.msg),

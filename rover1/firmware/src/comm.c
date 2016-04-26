@@ -77,3 +77,11 @@ InternalMessage makeRoverMove(char direction, char distance) {
 InternalMessage roverStopped() {
     return makeRoverMove(ROVER_STOP, 0);
 }
+
+InternalMessage tokenFoundMsg() {
+    InternalMessage newMsg;
+    newMsg.type = TOKEN_FOUND;
+    newMsg.size = 1;
+    newMsg.msg[0] = MY_ROLE;
+    return newMsg;
+}
