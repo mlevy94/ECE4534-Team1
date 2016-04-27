@@ -40,7 +40,7 @@ class Rover:
     self.yposlist.clear()
     self.anglelist.clear()
 
-  def adjust(self):
+  def adjust(self, nextDir=None):
     adjlist = []
     # get useful values then clear them
     x = self.xposlist.most_common()[0][0]
@@ -49,17 +49,17 @@ class Rover:
     self.clearPos()
 
     # get adjustment values
-    xadj = round((self.xSq / 2) - (x % self.xSq), 1)
-    yadj = round((self.ySq / 2) - (y % self.ySq), 1)
+    xadj = int(round((self.xSq / 2) - (x % self.xSq), 1) * 10)
+    yadj = int(round((self.ySq / 2) - (y % self.ySq), 1) * 10)
     roverFace = round(a / 90) * 90
-    aadj = round((roverFace - a / 5)) * 5
-
+    aadj = int(round(((roverFace - a) / 5)) * 5)
     # large angle adjust
     if abs(aadj) >= self.angle_buff:
       if aadj < 0:
         adjlist.append(roverMove(ROVER_LEFT, abs(aadj)))
       else:
         adjlist.append(roverMove(ROVER_RIGHT, aadj))
+
 
     if roverFace == 0 or roverFace == 360:
       # y adjust
@@ -69,31 +69,50 @@ class Rover:
         else:
           adjlist.append(roverMove(ROVER_BACKWARD, yadj))
       # x adjust
-      if abs(xadj) > self.dist_buff:
-        if xadj < 0:
+      if nextDir == ROVER_RIGHT:
+        adjlist.append(roverMove(ROVER_RIGHT, 90))
+        if abs(xadj) > self.dist_buff:
+          if xadj > 0:
+            adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
+          else:
+            adjlist.append(roverMove(ROVER_BACKWARD, abs(xadj)))
+      else:
+        if abs(xadj) > self.dist_buff:
           adjlist.append(roverMove(ROVER_LEFT, 90))
-          adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
-          adjlist.append(roverMove(ROVER_RIGHT, 90))
-        else:
-          adjlist.append(roverMove(ROVER_RIGHT, 90))
-          adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
+          if xadj < 0:
+            adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
+          else:
+            adjlist.append(roverMove(ROVER_BACKWARD, abs(xadj)))
+          if nextDir != ROVER_LEFT:
+            adjlist.append(roverMove(ROVER_RIGHT, 90))
+        elif nextDir == ROVER_LEFT:
           adjlist.append(roverMove(ROVER_LEFT, 90))
+
     elif roverFace == 90:
       # x adjust
       if abs(xadj) > self.dist_buff:
         if xadj < 0:
           adjlist.append(roverMove(ROVER_BACKWARD, abs(xadj)))
         else:
-          adjlist.append(roverMove(ROVER_FORWARD, xadj))
+          adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
       # y adjust
-      if abs(yadj) > self.dist_buff:
-        if yadj < 0:
+      if nextDir == ROVER_RIGHT:
+        adjlist.append(roverMove(ROVER_RIGHT, 90))
+        if abs(yadj) > self.dist_buff:
+          if yadj > 0:
+            adjlist.append(roverMove(ROVER_FORWARD, abs(yadj)))
+          else:
+            adjlist.append(roverMove(ROVER_BACKWARD, abs(yadj)))
+      else:
+        if abs(yadj) > self.dist_buff:
           adjlist.append(roverMove(ROVER_LEFT, 90))
-          adjlist.append(roverMove(ROVER_FORWARD, abs(yadj)))
-          adjlist.append(roverMove(ROVER_RIGHT, 90))
-        else:
-          adjlist.append(roverMove(ROVER_RIGHT, 90))
-          adjlist.append(roverMove(ROVER_FORWARD, yadj))
+          if yadj < 0:
+            adjlist.append(roverMove(ROVER_FORWARD, abs(yadj)))
+          else:
+            adjlist.append(roverMove(ROVER_BACKWARD, abs(yadj)))
+          if nextDir != ROVER_LEFT:
+            adjlist.append(roverMove(ROVER_RIGHT, 90))
+        elif nextDir == ROVER_LEFT:
           adjlist.append(roverMove(ROVER_LEFT, 90))
     elif roverFace == 180:
       # y adjust
@@ -101,34 +120,52 @@ class Rover:
         if yadj < 0:
           adjlist.append(roverMove(ROVER_BACKWARD, abs(yadj)))
         else:
-          adjlist.append(roverMove(ROVER_FORWARD, yadj))
+          adjlist.append(roverMove(ROVER_FORWARD, abs(yadj)))
       # x adjust
-      if abs(xadj) > self.dist_buff:
-        if xadj < 0:
-          adjlist.append(roverMove(ROVER_RIGHT, 90))
-          adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
+      if nextDir == ROVER_RIGHT:
+        adjlist.append(roverMove(ROVER_RIGHT, 90))
+        if abs(xadj) > self.dist_buff:
+          if xadj > 0:
+            adjlist.append(roverMove(ROVER_BACKWARD, abs(xadj)))
+          else:
+            adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
+      else:
+        if abs(xadj) > self.dist_buff:
           adjlist.append(roverMove(ROVER_LEFT, 90))
-        else:
+          if xadj < 0:
+            adjlist.append(roverMove(ROVER_BACKWARD, abs(xadj)))
+          else:
+            adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
+          if nextDir != ROVER_LEFT:
+            adjlist.append(roverMove(ROVER_RIGHT, 90))
+        elif nextDir == ROVER_LEFT:
           adjlist.append(roverMove(ROVER_LEFT, 90))
-          adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
-          adjlist.append(roverMove(ROVER_RIGHT, 90))
     elif roverFace == 270:
       # x adjust
       if abs(xadj) > self.dist_buff:
         if xadj < 0:
           adjlist.append(roverMove(ROVER_FORWARD, abs(xadj)))
         else:
-          adjlist.append(roverMove(ROVER_BACKWARD, xadj))
+          adjlist.append(roverMove(ROVER_BACKWARD, abs(xadj)))
       # y adjust
-      if abs(yadj) > self.dist_buff:
-        if yadj < 0:
-          adjlist.append(roverMove(ROVER_RIGHT, 90))
-          adjlist.append(roverMove(ROVER_FORWARD, abs(yadj)))
+      if nextDir == ROVER_RIGHT:
+        adjlist.append(roverMove(ROVER_RIGHT, 90))
+        if abs(yadj) > self.dist_buff:
+          if yadj > 0:
+            adjlist.append(roverMove(ROVER_BACKWARD, abs(yadj)))
+          else:
+            adjlist.append(roverMove(ROVER_FORWARD, abs(yadj)))
+      else:
+        if abs(yadj) > self.dist_buff:
           adjlist.append(roverMove(ROVER_LEFT, 90))
-        else:
-          adjlist.append(roverMove(ROVER_LEFT, 90))
-          adjlist.append(roverMove(ROVER_FORWARD, yadj))
-          adjlist.append(roverMove(ROVER_RIGHT, 90))
+          if yadj < 0:
+            adjlist.append(roverMove(ROVER_BACKWARD, abs(yadj)))
+          else:
+            adjlist.append(roverMove(ROVER_FORWARD, abs(yadj)))
+          if nextDir != ROVER_LEFT:
+            adjlist.append(roverMove(ROVER_RIGHT, 90))
+        elif nextDir == ROVER_LEFT:
+          adjlist.append((roverMove(ROVER_LEFT, 90)))
 
 
     return adjlist
@@ -149,19 +186,31 @@ class Rover:
     except Empty:
       pass
     # process moves
-    for move in self.sequence:
+    iterator = peekIter(self.sequence)
+    generator = iterator.generate()
+    for move in generator:
       if not self.running:
-        break
+        self.client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'TEST ABORTED'))
+        return
       self.client.send(move)
       self.queue.get()
       self.clearPos()
       sleep(1)
       self.queue.task_done()
-      continue
-      if bytetoval(move.msg[2]) == ROVER_FORWARD:
-        adjlist = self.adjust()
+      if bytetoval(move.msg[0]) == ROVER_FORWARD:
+        nextMove = iterator.peek()
+        if nextMove is not None:
+          nextDir = nextMove.msg[0]
+          if nextDir == ROVER_LEFT or nextDir == ROVER_RIGHT:
+            next(generator) # discard next move
+        else:
+          nextDir = None
+        adjlist = self.adjust(nextDir)
         # make adjustments
         for adj in adjlist:
+          if not self.running:
+            self.client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'TEST ABORTED'))
+            return
           self.client.send(adj)
           self.queue.get()
           self.queue.task_done()
@@ -182,8 +231,12 @@ if __name__ == "__main__":
     if msg.msgtype == OBJECT_POS:
       obj = decipherMessage(msg.msg)
       if obj[0] == 163:
-        print("Message Received: {} - Object: {} xPos: {}, yPos: {}, angle: {}, length: {}, width: {}".format(VAL_TO_MSG[msg.msgtype], *obj))
+        # print("Message Received: {} - Object: {} xPos: {}, yPos: {}, angle: {}, length: {}, width: {}".format(VAL_TO_MSG[msg.msgtype], *obj))
         rover.addPos(obj[1], obj[2], obj[3])
+
+    elif msg.msgtype == PING:
+      client.send(InternalMessage(MY_ROLE, PONG, b'1'))
+      print("Pinged")
 
     elif msg.msgtype == ROVER_MOVE:
       if msg.msg[0] == ROVER_STOP:
@@ -192,19 +245,19 @@ if __name__ == "__main__":
     elif msg.msgtype == START_GAME:
       client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'TEST START'))
       testcase = int(msg.msg[0])
+      testseq = 0
       try:
         testseq = eval("test{}()".format(testcase))
         rover.start(testseq)
       except NameError:
         client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'BAD TEST'))
-        print("Received bad test!")
+        print("Received bad test {}!".format(testseq))
       except AssertionError:
         client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'CANT RUN'))
         print("Test already running!")
 
     elif msg.msgtype == END_GAME:
       rover.running = False
-      client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'TEST ABORTED'))
       print("Test aborted!")
 
     else:

@@ -57,8 +57,12 @@ INITIALIZE           = 0x08
 ROVER_MOVE           = 0x11
 OBJECT_POS           = 0x14
 TOKEN_FOUND          = 0x18
+
+SENSOR_MODE          = 0x61
+CALIBRATE_ROVER      = 0x62
 ## RESERVED 0x19-0x22
-HEARTBEAT            = 0x70
+PONG                 = 0x69
+PING                 = 0x70
 END_GAME             = 0x71
 START_GAME           = 0x72
 ## RESERVED 0x73-0x79
@@ -73,14 +77,18 @@ VAL_TO_MSG = OrderedDict((
   (TOKEN_FOUND, "Token Found"),
   (START_GAME, "Start Game"),
   (END_GAME, "End Game"),
+  (SENSOR_MODE, "Sensor Mode"),
+  (CALIBRATE_ROVER, "Calibrate Rover"),
+  (PING, "Ping"),
+  (PONG, "Pong"),
 ))
 
 ROLE_MSG_RECV = OrderedDict((
-  (LEAD_ROVER, [ROVER_MOVE, HEARTBEAT, ]),
+  (LEAD_ROVER, [ROVER_MOVE, PING, ]),
   (FOLLOWER, []),
-  (SENSOR, [HEARTBEAT, ]),
-  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, HEARTBEAT, START_GAME, TOKEN_FOUND, ]),
-  (MONITOR, [DEBUG_MSG, OBJECT_POS, ROVER_MOVE, TOKEN_FOUND, HEARTBEAT, START_GAME, END_GAME, ]),
+  (SENSOR, [PING, ]),
+  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, PING, START_GAME, TOKEN_FOUND, ]),
+  (MONITOR, [DEBUG_MSG, OBJECT_POS, ROVER_MOVE, TOKEN_FOUND, PONG, START_GAME, END_GAME, ]),
 ))
 
 ########## ROVER MOVE DEFINES #############
@@ -180,3 +188,22 @@ def decipherMessage(message):
   width = ((message[9] << 8) | message[10]) / 10.0
 
   return objectType, xPosition, yPosition, angle, length, width
+
+class peekIter:
+
+  def __init__(self, oglist):
+    self.oglist = oglist
+    self.idx = 0
+
+  def generate(self):
+    self.idx = 0
+    for ele in self.oglist:
+      self.idx += 1
+      yield ele
+    raise StopIteration
+
+  def peek(self):
+    try:
+      return self.oglist[self.idx]
+    except IndexError:
+      return None

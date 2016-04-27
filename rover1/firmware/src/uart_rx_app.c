@@ -127,6 +127,8 @@ void sortMessage(InternalMessage msg) {
             break;
         case ROVER_MOVE:
             while(!addToMotorQ(&msg));
+        case PING:
+            while(!addToUartTXQ(makeMessageChar(PONG, '\x01')));
         case DEBUG_MSG:
             for (i = 0; msg.msg[i] != '\0'; i++) {
                 setDebugVal(msg.msg[i]);
