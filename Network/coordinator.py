@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
     elif msg.msgtype == PING:
       client.send(InternalMessage(MY_ROLE, PONG, b'1'))
-      print("Pinged")
+      # print("Pinged")
 
     elif msg.msgtype == ROVER_MOVE:
       if msg.msg[0] == ROVER_STOP:

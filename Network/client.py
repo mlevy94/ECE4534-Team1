@@ -80,7 +80,7 @@ class ClientWorker:
   def _put(self, msg):
     self.queue.put(msg)
 
-  def send(self, intmsg):
+  def send(self, intmsg, role=None):
     with self.lock:
       if not self.clientConnected:
         return False
@@ -88,9 +88,13 @@ class ClientWorker:
         self.sentmsgcount += 1
       else:
         self.sentmsgcount = 0
+      if role is None:
+        msgcount = self.sentmsgcount
+      else:
+        msgcount = role.recvmsgcount
       netmsg = NetMessage(
         source= intmsg.client,
-        count= self.sentmsgcount,
+        count= msgcount,
         msgtype= intmsg.msgtype,
         msgsize= len(intmsg.msg),
         msg= intmsg.msg,
