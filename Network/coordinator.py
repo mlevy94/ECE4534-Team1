@@ -4,7 +4,7 @@ from collections import Counter
 from threading import Thread
 from queue import Queue, Empty
 from time import sleep
-from integrationtests import test1, test2, test3, test4, test5, test6, test7 # do not delete
+from integrationtests import calibrationTest, test1, test2, test3, test4, test5, test6, test7 # do not delete
 
 
 TARGET_IP = getIPAddr()
@@ -14,10 +14,13 @@ MY_ROLE = COORDINATOR
 
 
 class Rover:
-  angle_buff = 15
-  dist_buff = 0.5
+  angle_buff = 10
+  angle_cutoff = 45
+  dist_buff = 3
   xSq = 6
   ySq = 6
+  bot_bind = 0
+  top_bind = 36
 
   def __init__(self, client):
     self.client = client
@@ -28,8 +31,17 @@ class Rover:
     self.queue = Queue()
     self.runThread = None
     self.running = False
+    self.angle = 0
 
   def addPos(self, xpos, ypos, angle):
+    if xpos > self.top_bind:
+      xpos = self.top_bind
+    elif xpos < self.bot_bind:
+      xpos = self.bot_bind
+    if ypos > self.top_bind:
+      ypos = self.top_bind
+    elif ypos < self.bot_bind:
+      ypos = self.bot_bind
     self.xposlist[xpos] += 1
     self.yposlist[ypos] += 1
     self.anglelist[angle] += 1
@@ -40,12 +52,24 @@ class Rover:
     self.yposlist.clear()
     self.anglelist.clear()
 
+  def changeAngle(self, adjAngle):
+    self.angle += adjAngle
+    if self.angle < 0:
+      self.angle += 360
+    elif self.angle > 360:
+      self.angle -= 360
+    print("angle: {}".format(self.angle))
+
   def adjust(self, nextDir=None):
     adjlist = []
+    # make sure enough samples have been collected
+    while sum(self.xposlist.values()) < 10:
+      sleep(0.1)
     # get useful values then clear them
     x = self.xposlist.most_common()[0][0]
     y = self.yposlist.most_common()[0][0]
     a = self.anglelist.most_common()[0][0]
+    print("Adj Vals: X:{} Y:{} A:{}".format(self.xposlist.most_common(), self.yposlist.most_common(), self.anglelist.most_common()))
     self.clearPos()
 
     # get adjustment values
@@ -170,14 +194,16 @@ class Rover:
 
     return adjlist
 
-  def start(self, sequence):
+  def start(self, orientation, sequence, adjust=True):
     assert not self.running
     self.running = True
+    self.angle = orientation
     self.sequence = sequence
-    self.runThread = Thread(target=self.runGame, daemon=True)
+    self.runThread = Thread(target=self.runGame, args= [adjust], daemon=True)
+    print("Starting Test")
     self.runThread.start()
 
-  def runGame(self):
+  def runGame(self, adjustbool=True):
     # clear queue just in case
     try:
       while True:
@@ -190,14 +216,23 @@ class Rover:
     generator = iterator.generate()
     for move in generator:
       if not self.running:
+        print("Test Aborted!")
         self.client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'TEST ABORTED'))
         return
       self.client.send(move)
       self.queue.get()
+      if bytetoval(move.msg[1]) == 90 and bytetoval(msg.msg[0]) == ROVER_LEFT:
+        self.changeAngle(-90)
+      elif bytetoval(move.msg[1]) == 90 and bytetoval(msg.msg[0]) == ROVER_RIGHT:
+        self.changeAngle(90)
       self.clearPos()
       sleep(1)
       self.queue.task_done()
-      if bytetoval(move.msg[0]) == ROVER_FORWARD:
+      if not self.running:
+        print("Test Aborted!")
+        self.client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'TEST ABORTED'))
+        return
+      if adjustbool and bytetoval(move.msg[0]) == ROVER_FORWARD:
         nextMove = iterator.peek()
         if nextMove is not None:
           nextDir = nextMove.msg[0]
@@ -209,12 +244,18 @@ class Rover:
         # make adjustments
         for adj in adjlist:
           if not self.running:
+            print("Test Aborted")
             self.client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'TEST ABORTED'))
             return
           self.client.send(adj)
           self.queue.get()
+          if bytetoval(adj.msg[1]) == 90 and bytetoval(adj.msg[0]) == ROVER_LEFT:
+            self.changeAngle(-90)
+          elif bytetoval(adj.msg[1]) == 90 and bytetoval(adj.msg[0]) == ROVER_RIGHT:
+            self.changeAngle(90)
           self.queue.task_done()
     # game over
+    print("Test Ended")
     self.client.send(InternalMessage(MY_ROLE, END_GAME, b'0'))
     self.client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'TEST END'))
     self.running = False
@@ -236,7 +277,6 @@ if __name__ == "__main__":
 
     elif msg.msgtype == PING:
       client.send(InternalMessage(MY_ROLE, PONG, b'1'))
-      # print("Pinged")
 
     elif msg.msgtype == ROVER_MOVE:
       if msg.msg[0] == ROVER_STOP:
@@ -247,8 +287,8 @@ if __name__ == "__main__":
       testcase = int(msg.msg[0])
       testseq = 0
       try:
-        testseq = eval("test{}()".format(testcase))
-        rover.start(testseq)
+        orientation, testseq = eval("test{}()".format(testcase))
+        rover.start(orientation, testseq)
       except NameError:
         client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'BAD TEST'))
         print("Received bad test {}!".format(testseq))
@@ -258,7 +298,14 @@ if __name__ == "__main__":
 
     elif msg.msgtype == END_GAME:
       rover.running = False
-      print("Test aborted!")
+
+    elif msg.msgtype == CALIBRATE_ROVER:
+      try:
+        print("Starting Calibration")
+        rover.start(*calibrationTest(), False)
+        client.send(InternalMessage(MY_ROLE, DEBUG_MSG, b'ROV CALIB'))
+      except AssertionError:
+        print("Test currently running!")
 
     else:
       print("Message Received: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))

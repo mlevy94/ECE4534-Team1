@@ -86,8 +86,8 @@ VAL_TO_MSG = OrderedDict((
 ROLE_MSG_RECV = OrderedDict((
   (LEAD_ROVER, [ROVER_MOVE, PING, ]),
   (FOLLOWER, []),
-  (SENSOR, [PING, ]),
-  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, PING, START_GAME, TOKEN_FOUND, ]),
+  (SENSOR, [PING, SENSOR_MODE, ]),
+  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, PING, START_GAME, END_GAME, TOKEN_FOUND, CALIBRATE_ROVER, ]),
   (MONITOR, [DEBUG_MSG, OBJECT_POS, ROVER_MOVE, TOKEN_FOUND, PONG, START_GAME, END_GAME, ]),
 ))
 
@@ -118,12 +118,13 @@ NET_MSG_SIZE = HEADER_SIZE + TAIL_SIZE + INTERNAL_MSG_SIZE
 ########## MESSAGE STRUCTURES #############
 class InternalMessage:
 
-  def __init__(self, client, msgtype, msg, target=None):
+  def __init__(self, client, msgtype, msg, target=None, count=None):
     if target is None:
       target = []
     self.client = bytetoval(client)
     self.msgtype = bytetoval(msgtype)
     self.msg = msg
+    self.count = count
     if not isinstance(target, (list, tuple)):
       self.target = [target]
     else:
@@ -149,7 +150,7 @@ class NetMessage:
     self.msg = msg
 
   def getMessage(self):
-    return InternalMessage(self.source, self.msgtype, self.msg)
+    return InternalMessage(self.source, self.msgtype, self.msg, count=self.count)
 
   def serialize(self):
     # convert back to bytes

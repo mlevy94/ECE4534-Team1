@@ -73,14 +73,17 @@ class ClientWorker:
           if DEBUG_ON:
             print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
           self._put(msg)
-          self.recvmsgcount += 1
+          if self.recvmsgcount < MAX_MSG_COUNT:
+            self.recvmsgcount += 1
+          else:
+            self.recvmsgcount = 0
     except (ConnectionError, TimeoutError):
       pass
 
   def _put(self, msg):
     self.queue.put(msg)
 
-  def send(self, intmsg, role=None):
+  def send(self, intmsg):
     with self.lock:
       if not self.clientConnected:
         return False
@@ -88,10 +91,10 @@ class ClientWorker:
         self.sentmsgcount += 1
       else:
         self.sentmsgcount = 0
-      if role is None:
-        msgcount = self.sentmsgcount
+      if intmsg.count is not None:
+        msgcount = intmsg.count
       else:
-        msgcount = role.recvmsgcount
+        msgcount = self.sentmsgcount
       netmsg = NetMessage(
         source= intmsg.client,
         count= msgcount,

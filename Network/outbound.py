@@ -22,11 +22,7 @@ class OutboundWorker:
   def _commThread(self):
     while 1:
       msg = self.queue.get()
-      try:
-        role = self.clientDict[msg.source]
-      except KeyError:
-        role = None
-      if msg.client == MONITOR:
+      if msg.client == MONITOR and msg.msgtype != PING:
         print("Monitor Message: {} - {}".format(VAL_TO_MSG[msg.msgtype], msg.msg))
       # check for predefined target
       if msg.target:
@@ -41,7 +37,7 @@ class OutboundWorker:
             print("Bad Role Declaration.")
         else:
           for client in msg.target:
-            if client.send(msg, role):
+            if client.send(msg):
               if DEBUG_ON:
                 print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
             else:
@@ -51,7 +47,7 @@ class OutboundWorker:
       # send to client list
       for client in self.clientList:
         try:
-          if client.send(msg, role):
+          if client.send(msg):
             if DEBUG_ON:
               print("Sent {}: {} - {}".format(client.address, VAL_TO_MSG[msg.msgtype], msg.msg))
           else:

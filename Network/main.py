@@ -20,7 +20,8 @@ def cmdInput(listener):
       print("Connected Roles:")
       if listener.clientDict:
         for role, client in listener.clientDict.items():
-          print("  {}: {}".format(VAL_TO_ROLE[role].title(), client.address))
+          if client is not None:
+            print("  {}: {}".format(VAL_TO_ROLE[role].title(), client.address))
       else:
         print("  None")
 
