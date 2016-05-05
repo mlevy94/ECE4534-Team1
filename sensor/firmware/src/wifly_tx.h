@@ -5,7 +5,7 @@
     Microchip Technology Inc.
 
   File Name:
-    mainapp.h
+    wifly_tx.h
 
   Summary:
     This header file provides prototypes and definitions for the application.
@@ -43,8 +43,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
  *******************************************************************************/
 //DOM-IGNORE-END
 
-#ifndef _MAINAPP_H
-#define _MAINAPP_H
+#ifndef _WIFLY_TX_H
+#define _WIFLY_TX_H
 
 // *****************************************************************************
 // *****************************************************************************
@@ -58,7 +58,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
-
+#include <queue.h>
+#include "debug.h"
+#include "comm.h"
+#include "public.h"
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -87,11 +90,11 @@ extern "C" {
 typedef enum
 {
 	/* Application's state machine's initial state. */
-	MAINAPP_STATE_INIT=0,
+	WIFLY_TX_STATE_INIT=0,
 
 	/* TODO: Define states used by the application state machine. */
 
-} MAINAPP_STATES;
+} WIFLY_TX_STATES;
 
 
 // *****************************************************************************
@@ -109,13 +112,14 @@ typedef enum
 
 typedef struct
 {
-    /* The application's current state */
-    MAINAPP_STATES state;
-
     /* TODO: Define any additional data used by the application. */
+    QueueHandle_t txMessageQ;
+    QueueHandle_t initQ;
+    QueueHandle_t txInterruptQ;
+    InternalMessage msg;
+    char msgCount;
 
-
-} MAINAPP_DATA;
+} WIFLY_TX_DATA;
 
 
 // *****************************************************************************
@@ -135,7 +139,7 @@ typedef struct
 
 /*******************************************************************************
   Function:
-    void MAINAPP_Initialize ( void )
+    void WIFLY_TX_Initialize ( void )
 
   Summary:
      MPLAB Harmony application initialization routine.
@@ -157,19 +161,19 @@ typedef struct
 
   Example:
     <code>
-    MAINAPP_Initialize();
+    WIFLY_TX_Initialize();
     </code>
 
   Remarks:
     This routine must be called from the SYS_Initialize function.
 */
 
-void MAINAPP_Initialize ( void );
+void WIFLY_TX_Initialize ( void );
 
 
 /*******************************************************************************
   Function:
-    void MAINAPP_Tasks ( void )
+    void WIFLY_TX_Tasks ( void )
 
   Summary:
     MPLAB Harmony Demo application tasks function
@@ -190,18 +194,19 @@ void MAINAPP_Initialize ( void );
 
   Example:
     <code>
-    MAINAPP_Tasks();
+    WIFLY_TX_Tasks();
     </code>
 
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
 
-void MAINAPP_Tasks( void );
+void WIFLY_TX_Tasks( void );
 
 
-#endif /* _MAINAPP_H */
+#endif /* _WIFLY_TX_H */
 
+void packAndSend(InternalMessage data);
 //DOM-IGNORE-BEGIN
 #ifdef __cplusplus
 }

@@ -5,7 +5,7 @@
     Microchip Technology Inc.
   
   File Name:
-    uart_rx_app.c
+    wifly_rx.c
 
   Summary:
     This file contains the source code for the MPLAB Harmony application.
@@ -53,8 +53,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include "uart_rx_app.h"
-#include "uart_rx_app_public.h"
+#include "wifly_rx.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -77,7 +76,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-UART_RX_APP_DATA uart_rx_appData;
+WIFLY_RX_DATA wifly_rxData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -94,34 +93,44 @@ UART_RX_APP_DATA uart_rx_appData;
 // *****************************************************************************
 // *****************************************************************************
 
+/* TODO:  Add any necessary local functions.
+*/
+
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Application Initialization and State Machine Functions
+// *****************************************************************************
+// *****************************************************************************
+
+/*******************************************************************************
+  Function:
+    void WIFLY_RX_Initialize ( void )
+
+  Remarks:
+    See prototype in wifly_rx.h.
+ */
+
 BaseType_t addToUartRXQ(char msg) {
-    return xQueueSend(uart_rx_appData.rxMessageQ, &msg, portMAX_DELAY);
+    return xQueueSend(wifly_rxData.rxMessageQ, &msg, portMAX_DELAY);
 }
 
 BaseType_t addToUartRXQFromISR(char msg) {
-    return xQueueSendFromISR(uart_rx_appData.rxMessageQ, &msg, 0);
-}
-
-int getChecksum(NetMessage msg) {
-    int i;
-    int checksum = msg.sender + msg.number + msg.type + msg.msgsize;
-    for (i = 0; i < msg.msgsize; i++) {
-        checksum += (msg.msg[i] & 0xff);
-    }
-    return checksum;
+    return xQueueSendFromISR(wifly_rxData.rxMessageQ, &msg, 0);
 }
 
 InternalMessage processMessage(NetMessage msg) {
-    uart_rx_appData.msgCount++;
+    wifly_rxData.msgCount++;
     // terminate message properly. Required for next step.
     if (msg.msgsize < INTERNAL_MSG_SIZE) {
         msg.msg[msg.msgsize] = '\0';
     }
-    return makeMessage(msg.type, msg.msg);
+    return makeMessage(msg.type, msg.msg, msg.msgsize);
 }
 
 void sortMessage(InternalMessage msg) {
     int i;
+    OBJECT_STRUCTURE obj;
     // add message types here. the case should place the messages in Q's for
     // the correct thread to act upon. DEBUG_MSG are just printed to the debug
     // line one byte at a time.
@@ -136,50 +145,38 @@ void sortMessage(InternalMessage msg) {
                 setDebugVal(msg.msg[i]);
             }
             break;
+        case OBJECT_POS:
+            convertMessage(msg, &obj);
+            addToUartTXQ(makeLocationMessage(obj));
+            break;
+        case PING:
+            addToUartTXQ(makeMessageChar(PONG, '\x01'));
         default:
             break;
     }
 }
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: Application Initialization and State Machine Functions
-// *****************************************************************************
-// *****************************************************************************
-
-/*******************************************************************************
-  Function:
-    void UART_RX_APP_Initialize ( void )
-
-  Remarks:
-    See prototype in uart_rx_app.h.
- */
-
-
-
-void UART_RX_APP_Initialize ( void )
+void WIFLY_RX_Initialize ( void )
 {
-    uart_rx_appData.rxMessageQ = xQueueCreate(RX_BUF_SIZE, 8);
-    uart_rx_appData.sentMessageQ = xQueueCreate(SENT_MSG_Q_SIZE, sizeof(SentMessage));
-    uart_rx_appData.msgCount = 0;
+    wifly_rxData.rxMessageQ = xQueueCreate(RX_BUF_SIZE, 8);
+    wifly_rxData.msgCount = 0;
 }
 
 
 /******************************************************************************
   Function:
-    void UART_RX_APP_Tasks ( void )
+    void WIFLY_RX_Tasks ( void )
 
   Remarks:
-    See prototype in uart_rx_app.h.
+    See prototype in wifly_rx.h.
  */
 
-void UART_RX_APP_Tasks ( void )
+void WIFLY_RX_Tasks ( void )
 {
     char inChar;
     int i = 0;
     while(i < 20) {
-        setDebugVal(0x15);
-        if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
+        if (xQueueReceive(wifly_rxData.rxMessageQ, &inChar, portMAX_DELAY)) {
             if (inChar == 0x50) {
                 i++;
             }
@@ -194,29 +191,30 @@ void UART_RX_APP_Tasks ( void )
         setDebugVal(TASK_UART_RX_APP);
 #endif
         setDebugVal(0x20);
-        if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
+        if (xQueueReceive(wifly_rxData.rxMessageQ, &inChar, portMAX_DELAY)) {
             // get start byte
             if ((inChar & 0xff) == START_BYTE) {
                 NetMessage inmsg;
                 // get sender
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
+                while (!xQueueReceive(wifly_rxData.rxMessageQ, &inChar, portMAX_DELAY));
                 inmsg.sender = inChar;
                 // get message number
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
+                while (!xQueueReceive(wifly_rxData.rxMessageQ, &inChar, portMAX_DELAY));
                 inmsg.number = inChar;
                 // get message type
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
+                while (!xQueueReceive(wifly_rxData.rxMessageQ, &inChar, portMAX_DELAY));
                 inmsg.type = inChar;
                 // get message length
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
+                while (!xQueueReceive(wifly_rxData.rxMessageQ, &inChar, portMAX_DELAY));
                 inmsg.msgsize = inChar;
                 // get message
                 for (i = 0; i < inmsg.msgsize; i++ ) {
-                    while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
+                    while (!xQueueReceive(wifly_rxData.rxMessageQ, &inChar, portMAX_DELAY));
                     inmsg.msg[i] = inChar;
+                    setDebugVal(inmsg.msg[i]);
                 }
                 // get end byte
-                while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
+                while (!xQueueReceive(wifly_rxData.rxMessageQ, &inChar, portMAX_DELAY));
                 setDebugVal(0x35);
                 if ((inChar & 0xff) == END_BYTE) {
                     // place in correct Q based on message type
@@ -228,7 +226,6 @@ void UART_RX_APP_Tasks ( void )
         }
     }
 }
- 
 
 /*******************************************************************************
  End of File

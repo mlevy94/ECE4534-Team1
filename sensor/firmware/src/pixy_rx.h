@@ -5,7 +5,7 @@
     Microchip Technology Inc.
 
   File Name:
-    uart_tx_app.h
+    pixy_rx.h
 
   Summary:
     This header file provides prototypes and definitions for the application.
@@ -43,8 +43,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
  *******************************************************************************/
 //DOM-IGNORE-END
 
-#ifndef _UART_TX_APP_H
-#define _UART_TX_APP_H
+#ifndef _PIXY_RX_H
+#define _PIXY_RX_H
 
 // *****************************************************************************
 // *****************************************************************************
@@ -56,14 +56,12 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <math.h>
 #include "system_config.h"
 #include "system_definitions.h"
-
-#include <queue.h>
-#include "debug.h"
-#include "comm.h"
-#include "uart_rx_app_public.h"
-
+#include "queue.h"
+#include "pixyMessage.h"
+#include "public.h"
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -77,6 +75,27 @@ extern "C" {
 // Section: Type Definitions
 // *****************************************************************************
 // *****************************************************************************
+
+// *****************************************************************************
+/* Application states
+
+  Summary:
+    Application states enumeration
+
+  Description:
+    This enumeration defines the valid application states.  These states
+    determine the behavior of the application at various times.
+*/
+
+typedef enum
+{
+	/* Application's state machine's initial state. */
+	PIXY_RX_STATE_INIT=0,
+    COLLECT_DATA=1,
+
+	/* TODO: Define states used by the application state machine. */
+
+} PIXY_RX_STATES;
 
 
 // *****************************************************************************
@@ -94,10 +113,35 @@ extern "C" {
 
 typedef struct
 {
-    QueueHandle_t txMessageQ;
-    QueueHandle_t initQ;
-    char msgCount;
-} UART_TX_APP_DATA;
+    /* The application's current state */
+    PIXY_RX_STATES state;
+
+    /* TODO: Define any additional data used by the application. */
+    QueueHandle_t practice;
+    //QueueHandle_t edgeQ;
+    QueueHandle_t rxMessageQ;
+    solidColor SC_message;
+    //solidColor SC_received;
+    colorCode CC_message;
+    colorCode CC_received;
+    unsigned char val;
+    
+    solidColor corners[2][2];
+    solidColor c[16];
+    grid calibrationGrid[16];
+    int a;
+    int b;
+    int k;
+    float conversion_x;
+    float conversion_y;
+    int calibration_cycle;
+    int originX;
+    int originY;
+    
+    float fx00, fy00, fx10, fy10, fx01, fy01, fx11, fy11;
+    float interpolationConstant_A, interpolationConstant_B;
+    
+} PIXY_RX_DATA;
 
 
 // *****************************************************************************
@@ -117,7 +161,7 @@ typedef struct
 
 /*******************************************************************************
   Function:
-    void UART_TX_APP_Initialize ( void )
+    void PIXY_RX_Initialize ( void )
 
   Summary:
      MPLAB Harmony application initialization routine.
@@ -139,19 +183,19 @@ typedef struct
 
   Example:
     <code>
-    UART_TX_APP_Initialize();
+    PIXY_RX_Initialize();
     </code>
 
   Remarks:
     This routine must be called from the SYS_Initialize function.
 */
 
-void UART_TX_APP_Initialize ( void );
+void PIXY_RX_Initialize ( void );
 
 
 /*******************************************************************************
   Function:
-    void UART_TX_APP_Tasks ( void )
+    void PIXY_RX_Tasks ( void )
 
   Summary:
     MPLAB Harmony Demo application tasks function
@@ -172,17 +216,44 @@ void UART_TX_APP_Initialize ( void );
 
   Example:
     <code>
-    UART_TX_APP_Tasks();
+    PIXY_RX_Tasks();
     </code>
 
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
 
-void UART_TX_APP_Tasks( void );
+void PIXY_RX_Tasks( void );
 
 
-#endif /* _UART_TX_APP_H */
+BaseType_t addToPixyQ(char data);
+void testQueues(void);
+void calibrate(void);
+void dataCollection(void);
+void determineEdge(void);//obstacles, tokens
+//BaseType_t addToEdgeQ(solidColor data);
+void addToSolidColorQ(void);//QueueHandle_t pixyQueue);//obstacles, tokens
+void addToColorCodeQ(void);//QueueHandle_t pixyQueue);//lead rover, follower rover
+void inchesPerPixel(void);//edges
+void SCMessage(solidColor SC_received);//QueueHandle_t SCQueue);//convert obstacle pixels to inches
+void CCMessage(colorCode CC_received);//QueueHandle_t CCQueue);//convert rover pixels to inches, determine orientation
+
+//used for sorting grid calibration points
+void swap (grid a[], int left, int right);
+void quicksort_y(grid a[], int low, int high);
+int partition_y(grid a[], int low, int high);
+void quicksort_x(grid a[], int low, int high);
+int partition_x(grid a[], int low, int high);
+
+//functions for calculating x, y of object
+//BaseType_t checkBlock(float *vertx, float *verty, float testx, float testy);
+BaseType_t checkBlock(int TL, int TR, int BL, int BR, uint16_t x, uint16_t y);
+float y_interpolation(float x, float y);
+float x_interpolation( float x, float y);
+float height_correction(float j_a, float object_height);
+
+//colorCode CC_received);//
+#endif /* _PIXY_RX_H */
 
 //DOM-IGNORE-BEGIN
 #ifdef __cplusplus

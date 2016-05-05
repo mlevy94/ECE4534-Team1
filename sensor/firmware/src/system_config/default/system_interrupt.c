@@ -62,39 +62,53 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include <xc.h>
 #include <sys/attribs.h>
-#include "mainapp.h"
-#include "uart_tx_app.h"
-#include "uart_rx_app.h"
+#include "wifly_rx.h"
+#include "wifly_tx.h"
+#include "pixy_rx.h"
 #include "system_definitions.h"
-
-#include <queue.h>
-#include "comm.h"
-#include "debug.h"
-#include "txbuffer_public.h"
+//#include "debug.h"
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
+/*if (PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
+    {
+        while (!DRV_USART0_ReceiverBufferIsEmpty())
+        {
+            readByte = DRV_USART0_ReadByte();
+            setDebugVal('H');
+        }
+    }*/
 
-QueueHandle_t txbufferQ;
-void initializeTXBufferQ() {
-    txbufferQ = xQueueCreate(TX_BUF_SIZE, 8);
-}
-
-BaseType_t addToTXBufferQ(char msg) {
-    // Turn TX Interrupt on
-    PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
-    return xQueueSend(txbufferQ, &msg, portMAX_DELAY);
-}
-    
-BaseType_t addToTXBufferQFromISR(char msg) {
-    PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
-    return xQueueSendFromISR(txbufferQ, &msg, 0);
-}
-
+uint8_t readByte = 0x00;
 void IntHandlerDrvUsartInstance0(void)
+{
+    setDebugVal(UART_INTERRUPT);
+    /* TODO: Add code to process interrupt here */ 
+    if (PLIB_INT_SourceFlagGet(INT_ID_0, INT_SOURCE_USART_2_RECEIVE))
+    {
+        setDebugVal(RECEIVING);
+        while (!DRV_USART0_ReceiverBufferIsEmpty())
+        {
+            readByte = DRV_USART0_ReadByte();
+            //SixteenBitsetDebugVal(readByte);
+            //SixteenBitsetDebugVal(readByte | 0x0000);
+            //add readByte to queue
+            addToPixyQFromISR(readByte);
+        }
+    }
+    /* Clear pending interrupt */
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_TRANSMIT);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_RECEIVE);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_2_ERROR);
+    
+
+}
+ 
+ 
+void IntHandlerDrvUsartInstance1(void)
 {
 #ifdef DEBUG_ON
     setDebugVal(INT_UART0_START);
@@ -104,8 +118,10 @@ void IntHandlerDrvUsartInstance0(void)
 #ifdef DEBUG_ON
         setDebugVal(INT_UART0_TX);
 #endif
+        setDebugVal(0x64);
         while(!PLIB_USART_TransmitterBufferIsFull(USART_ID_1)) {
-            if(xQueueReceiveFromISR(txbufferQ, &sendbyte, 0)) {
+            setDebugVal(0x65);
+            if(takeFromTXBufferQFromISR(&sendbyte)) {
                PLIB_USART_TransmitterByteSend(USART_ID_1, sendbyte);
             }
             else {
@@ -140,17 +156,7 @@ void IntHandlerDrvUsartInstance0(void)
     setDebugVal(INT_UART0_END);
 #endif
 }
- 
- 
 
- 
- 
-
- 
-
- 
- 
-  
   
 /*******************************************************************************
  End of File

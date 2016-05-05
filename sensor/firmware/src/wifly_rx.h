@@ -1,11 +1,15 @@
 /*******************************************************************************
   MPLAB Harmony Application Header File
+
   Company:
     Microchip Technology Inc.
+
   File Name:
-    app.h
+    wifly_rx.h
+
   Summary:
     This header file provides prototypes and definitions for the application.
+
   Description:
     This header file provides function prototypes and data type definitions for
     the application.  Some of these are required by the system (such as the
@@ -17,12 +21,15 @@
 //DOM-IGNORE-BEGIN
 /*******************************************************************************
 Copyright (c) 2013-2014 released Microchip Technology Inc.  All rights reserved.
+
 Microchip licenses to you the right to use, modify, copy and distribute
 Software only when embedded on a Microchip microcontroller or digital signal
 controller that is integrated into your product or third party product
 (pursuant to the sublicense terms in the accompanying license agreement).
+
 You should refer to the license agreement accompanying this Software for
 additional information regarding your rights and obligations.
+
 SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
 EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF
 MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -36,8 +43,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
  *******************************************************************************/
 //DOM-IGNORE-END
 
-#ifndef _APP_H
-#define _APP_H
+#ifndef _WIFLY_RX_H
+#define _WIFLY_RX_H
 
 // *****************************************************************************
 // *****************************************************************************
@@ -51,16 +58,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
-#include "debug.h"
-//#include "sensor.h"
-#include "app_public.h"
-#include "peripheral/adc/plib_adc.h"
 #include <queue.h>
-
-//// Includes for UART libraries
-//#include "peripheral/usart/plib_usart.h"
-//#include "peripheral/devcon/plib_devcon.h"
-
+#include "comm.h"
+#include "debug.h"
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -77,8 +77,10 @@ extern "C" {
 
 // *****************************************************************************
 /* Application states
+
   Summary:
     Application states enumeration
+
   Description:
     This enumeration defines the valid application states.  These states
     determine the behavior of the application at various times.
@@ -87,32 +89,32 @@ extern "C" {
 typedef enum
 {
 	/* Application's state machine's initial state. */
-	APP_STATE_INIT=0,
+	WIFLY_RX_STATE_INIT=0,
 
 	/* TODO: Define states used by the application state machine. */
 
-} APP_STATES;
+} WIFLY_RX_STATES;
 
 
 // *****************************************************************************
 /* Application Data
+
   Summary:
     Holds application data
+
   Description:
     This structure holds the application's data.
+
   Remarks:
     Application strings and buffers are be defined outside this structure.
  */
 
 typedef struct
 {
-    /* The application's current state */
-    
-    /* TODO: Define any additional data used by the application. */
-    QueueHandle_t msgToAdcQ;
-    char* AdcData;
+    QueueHandle_t rxMessageQ;
+    char msgCount;
 
-} APP_DATA;
+} WIFLY_RX_DATA;
 
 
 // *****************************************************************************
@@ -132,58 +134,72 @@ typedef struct
 
 /*******************************************************************************
   Function:
-    void APP_Initialize ( void )
+    void WIFLY_RX_Initialize ( void )
+
   Summary:
      MPLAB Harmony application initialization routine.
+
   Description:
     This function initializes the Harmony application.  It places the 
     application in its initial state and prepares it to run so that its 
     APP_Tasks function can be called.
+
   Precondition:
     All other system initialization routines should be called before calling
     this routine (in "SYS_Initialize").
+
   Parameters:
     None.
+
   Returns:
     None.
+
   Example:
     <code>
-    APP_Initialize();
+    WIFLY_RX_Initialize();
     </code>
+
   Remarks:
     This routine must be called from the SYS_Initialize function.
 */
 
-void APP_Initialize ( void );
+void WIFLY_RX_Initialize ( void );
 
 
 /*******************************************************************************
   Function:
-    void APP_Tasks ( void )
+    void WIFLY_RX_Tasks ( void )
+
   Summary:
     MPLAB Harmony Demo application tasks function
+
   Description:
     This routine is the Harmony Demo application's tasks function.  It
     defines the application's state machine and core logic.
+
   Precondition:
     The system and application initialization ("SYS_Initialize") should be
     called before calling this.
+
   Parameters:
     None.
+
   Returns:
     None.
+
   Example:
     <code>
-    APP_Tasks();
+    WIFLY_RX_Tasks();
     </code>
+
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
 
-void APP_Tasks( void );
+void WIFLY_RX_Tasks( void );
 
 
-#endif /* _APP_H */
+#endif /* _WIFLY_RX_H */
 
 //DOM-IGNORE-BEGIN
 #ifdef __cplusplus
@@ -194,3 +210,4 @@ void APP_Tasks( void );
 /*******************************************************************************
  End of File
  */
+

@@ -81,8 +81,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 /* Clock System Service Configuration Options
 */
-#define SYS_CLK_FREQ                        80000000ul
-#define SYS_CLK_BUS_PERIPHERAL_1            80000000ul
+#define SYS_CLK_FREQ                        48000000ul
+#define SYS_CLK_BUS_PERIPHERAL_1            48000000ul
 #define SYS_CLK_UPLL_BEFORE_DIV2_FREQ       48000000ul
 #define SYS_CLK_CONFIG_PRIMARY_XTAL         8000000ul
 #define SYS_CLK_CONFIG_SECONDARY_XTAL       0ul
@@ -95,10 +95,38 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define SYS_PORT_CNPUE          0x0
 #define SYS_PORT_CNEN           0x0
 
-#define SYS_PORT_A_TRIS         0x1f
+#define SYS_PORT_A_TRIS         0xc2f7
 #define SYS_PORT_A_LAT          0x0
 #define SYS_PORT_A_ODC          0x0
 
+#define SYS_PORT_B_TRIS         0xc7ff
+#define SYS_PORT_B_LAT          0x0
+#define SYS_PORT_B_ODC          0x0
+
+#define SYS_PORT_D_TRIS         0xfbdf
+#define SYS_PORT_D_LAT          0x0
+#define SYS_PORT_D_ODC          0x0
+
+#define SYS_PORT_E_TRIS         0x300
+#define SYS_PORT_E_LAT          0x0
+#define SYS_PORT_E_ODC          0x0
+
+#define SYS_PORT_F_TRIS         0x313e
+#define SYS_PORT_F_LAT          0x0
+#define SYS_PORT_F_ODC          0x0
+
+#define SYS_PORT_G_TRIS         0xf24f
+#define SYS_PORT_G_LAT          0x0
+#define SYS_PORT_G_ODC          0x0
+#define SYS_CONSOLE_DEVICE_MAX_INSTANCES        1
+#define SYS_CONSOLE_INSTANCES_NUMBER            1
+
+
+/*** Debug System Service Configuration ***/
+#define SYS_DEBUG_ENABLE
+#define DEBUG_PRINT_BUFFER_SIZE       1024
+#define SYS_DEBUG_BUFFER_DMA_READY
+#define SYS_DEBUG_USE_CONSOLE
 
 // *****************************************************************************
 // *****************************************************************************

@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=sensor.X
+PROJECTNAME=sensor_ADC.X
 
 # Active Configuration
 DEFAULTCONF=default

@@ -5,7 +5,7 @@
     Microchip Technology Inc.
   
   File Name:
-    uart_tx_app.c
+    wifly_tx.c
 
   Summary:
     This file contains the source code for the MPLAB Harmony application.
@@ -53,8 +53,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include "uart_tx_app.h"
-#include "uart_tx_app_public.h"
+#include "wifly_tx.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -77,7 +76,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-UART_TX_APP_DATA uart_tx_appData;
+static WIFLY_TX_DATA wifly_txData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -94,49 +93,8 @@ UART_TX_APP_DATA uart_tx_appData;
 // *****************************************************************************
 // *****************************************************************************
 
-BaseType_t addToInitTXQ(char msg) {
-    return xQueueSend(uart_tx_appData.initQ, &msg, portMAX_DELAY);
-}
-
-BaseType_t addToUartTXQ(InternalMessage msg) {
-    return xQueueSend(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY);
-}
-
-BaseType_t addToUartTXQFromISR(InternalMessage msg) {
-    return xQueueSendFromISR(uart_tx_appData.txMessageQ, &msg, 0);
-}
-
-BaseType_t priorityAddToUartTXQ(InternalMessage msg) {
-    return xQueueSendToFront(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY);
-}
-
-BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg) {
-    return xQueueSendToFrontFromISR(uart_tx_appData.txMessageQ, &msg, 0);
-}
-
-void packAndSend(InternalMessage msg) {
-    int i = 0;
-    int msgSize = 0;
-    // get size of message
-    for (msgSize = 0; msg.msg[msgSize] != '\0' && msgSize <= INTERNAL_MSG_SIZE; msgSize++);
-    addToTXBufferQ(START_BYTE);
-    addToTXBufferQ(MY_ROLE);
-    addToTXBufferQ(uart_tx_appData.msgCount);
-    addToTXBufferQ(msg.type);
-    addToTXBufferQ(msgSize);
-    // sent message
-    for (i = 0; i < msgSize; i++) {
-        addToTXBufferQ(msg.msg[i]);
-    }
-    addToTXBufferQ(END_BYTE);
-    // update message count
-    if (uart_tx_appData.msgCount < MAX_MSG_COUNT) {
-        uart_tx_appData.msgCount++;
-    }
-    else {
-        uart_tx_appData.msgCount = 0;
-    }
-}
+/* TODO:  Add any necessary local functions.
+*/
 
 
 // *****************************************************************************
@@ -147,53 +105,120 @@ void packAndSend(InternalMessage msg) {
 
 /*******************************************************************************
   Function:
-    void UART_TX_APP_Initialize ( void )
+    void WIFLY_TX_Initialize ( void )
 
   Remarks:
-    See prototype in uart_tx_app.h.
+    See prototype in wifly_tx.h.
  */
 
-void UART_TX_APP_Initialize ( void )
-{
-    uart_tx_appData.initQ = xQueueCreate(1, 8);
-    uart_tx_appData.txMessageQ = xQueueCreate(16, sizeof(InternalMessage));
-    uart_tx_appData.msgCount = 0;
+BaseType_t addToInitTXQ(char msg) {
+    return xQueueSend(wifly_txData.initQ, &msg, portMAX_DELAY);
 }
 
+BaseType_t addToUartTXQ(InternalMessage msg) {
+    return xQueueSend(wifly_txData.txMessageQ, &msg, portMAX_DELAY);
+}
+
+BaseType_t addToUartTXQFromISR(InternalMessage msg) {
+    return xQueueSendFromISR(wifly_txData.txMessageQ, &msg, 0);
+}
+
+BaseType_t priorityAddToUartTXQ(InternalMessage msg) {
+    return xQueueSendToFront(wifly_txData.txMessageQ, &msg, portMAX_DELAY);
+}
+
+BaseType_t priorityAddToUartTXQFromISR(InternalMessage msg) {
+    return xQueueSendToFrontFromISR(wifly_txData.txMessageQ, &msg, 0);
+}
+
+BaseType_t addToTXBufferQ(char msg) {
+    // Turn TX Interrupt on
+    PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
+    return xQueueSend(wifly_txData.txInterruptQ, &msg, portMAX_DELAY);
+}
+    
+BaseType_t addToTXBufferQFromISR(char msg) {
+    PLIB_INT_SourceEnable(USART_ID_1, INT_SOURCE_USART_1_TRANSMIT);
+    return xQueueSendFromISR(wifly_txData.txInterruptQ, &msg, 0);
+}
+
+BaseType_t takeFromTXBufferQ(char* msg) {
+    xQueueReceive(wifly_txData.txInterruptQ, msg, portMAX_DELAY);
+}
+
+BaseType_t takeFromTXBufferQFromISR(char* msg) {
+    xQueueReceiveFromISR(wifly_txData.txInterruptQ, msg, 0);
+}
+void packAndSend(InternalMessage msg) {
+    int i = 0;
+    setDebugVal(0x70);
+    addToTXBufferQ(START_BYTE);
+    setDebugVal(0x71);
+    addToTXBufferQ(MY_ROLE);
+    setDebugVal(0x72);
+    addToTXBufferQ(wifly_txData.msgCount);
+    setDebugVal(0x73);
+    addToTXBufferQ(msg.type);
+    setDebugVal(0x74);
+    addToTXBufferQ(msg.size);
+    setDebugVal(0x75);
+    // sent message
+    for (i = 0; i < msg.size; i++) {
+        addToTXBufferQ(msg.msg[i]);
+    }
+    setDebugVal(0x76);
+    addToTXBufferQ(END_BYTE);
+    setDebugVal(0x77);
+    // update message count
+    if (wifly_txData.msgCount < MAX_MSG_COUNT) {
+        wifly_txData.msgCount++;
+    }
+    else {
+        wifly_txData.msgCount = 0;
+    }
+    setDebugVal(0x78);
+}
+
+void WIFLY_TX_Initialize ( void )
+{
+    /* Place the App state machine in its initial state. */
+    wifly_txData.initQ = xQueueCreate(1, 8);
+    wifly_txData.txMessageQ = xQueueCreate(WIFLY_TX_Q_SIZE, sizeof(InternalMessage));
+    wifly_txData.txInterruptQ = xQueueCreate(TX_BUF_SIZE, 8);
+    setDebugVal(WIFLY_RX_INIT);
+    /* TODO: Initialize your application's state machine and other
+     * parameters.
+     */
+}
 
 /******************************************************************************
   Function:
-    void UART_TX_APP_Tasks ( void )
+    void WIFLY_TX_Tasks ( void )
 
   Remarks:
-    See prototype in uart_tx_app.h.
+    See prototype in wifly_tx.h.
  */
 
-void UART_TX_APP_Tasks ( void )
-{    
-#ifdef DEBUG_ON
-    setDebugVal(TASK_UART_TX_APP);
-#endif
+void WIFLY_TX_Tasks ( void )
+{
+    //sendDebugToggle();
+    //sendObstacleData();
     char start;
-    while(!xQueueReceive(uart_tx_appData.initQ, &start, portMAX_DELAY));
-    setDebugVal(0x55);
-    InternalMessage msg;
-    // declare role
-    msg.type = CLIENT_ROLE;
-    msg.msg[0] = MY_ROLE;
-    msg.msg[1] = '\0';
-    packAndSend(msg);
+    while(!xQueueReceive(wifly_txData.initQ, &start, portMAX_DELAY));
+//    setDebugBool(pdTRUE);
+//    setDebugVal(0x55);
+//    setDebugBool(pdFALSE);
+    packAndSend(makeMessageChar(CLIENT_ROLE, MY_ROLE));
+//    setDebugBool(pdTRUE);
+//    setDebugVal(0x56);
+//    setDebugBool(pdFALSE);
     // process other messages
     while(1) {
-#ifdef DEBUG_ON
-        setDebugVal(TASK_UART_TX_APP);
-#endif
-        if (xQueueReceive(uart_tx_appData.txMessageQ, &msg, portMAX_DELAY)) {
-            packAndSend(msg);
-        }
+        setDebugVal(0x79);
+        while(!xQueueReceive(wifly_txData.txMessageQ, &wifly_txData.msg, portMAX_DELAY));
+        packAndSend(wifly_txData.msg);
     }
 }
- 
 
 /*******************************************************************************
  End of File
