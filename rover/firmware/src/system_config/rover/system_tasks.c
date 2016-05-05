@@ -54,10 +54,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
-#include "motorapp.h"
+#include "nfc_app.h"
 #include "uart_tx_app.h"
 #include "uart_rx_app.h"
-#include "nfc_app.h"
+#include "motorapp.h"
 
 
 // *****************************************************************************
@@ -67,10 +67,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
  
 static void _SYS_Tasks ( void );
-static void _MOTORAPP_Tasks(void);
+static void _NFC_APP_Tasks(void);
 static void _UART_TX_APP_Tasks(void);
 static void _UART_RX_APP_Tasks(void);
-static void _NFC_APP_Tasks(void);
+static void _MOTORAPP_Tasks(void);
 
 
 // *****************************************************************************
@@ -94,25 +94,25 @@ void SYS_Tasks ( void )
                 "Sys Tasks",
                 1024, NULL, 0, NULL);
 
-    /* Create OS Thread for MOTORAPP Tasks. */
-    xTaskCreate((TaskFunction_t) _MOTORAPP_Tasks,
-                "MOTORAPP Tasks",
-                4096, NULL, 4, NULL);
+    /* Create OS Thread for NFC_APP Tasks. */
+    xTaskCreate((TaskFunction_t) _NFC_APP_Tasks,
+                "NFC_APP Tasks",
+                4096, NULL, 1, NULL);
 
     /* Create OS Thread for UART_TX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_TX_APP_Tasks,
                 "UART_TX_APP Tasks",
-                4096, NULL, 2, NULL);
+                4096, NULL, 1, NULL);
 
     /* Create OS Thread for UART_RX_APP Tasks. */
     xTaskCreate((TaskFunction_t) _UART_RX_APP_Tasks,
                 "UART_RX_APP Tasks",
-                4096, NULL, 2, NULL);
+                2048, NULL, 3, NULL);
 
-    /* Create OS Thread for NFC_APP Tasks. */
-    xTaskCreate((TaskFunction_t) _NFC_APP_Tasks,
-                "NFC_APP Tasks",
-                4096, NULL, 5, NULL);
+    /* Create OS Thread for MOTORAPP Tasks. */
+    xTaskCreate((TaskFunction_t) _MOTORAPP_Tasks,
+                "MOTORAPP Tasks",
+                4096, NULL, 4, NULL);
 
     /**************
      * Start RTOS * 
@@ -147,17 +147,17 @@ static void _SYS_Tasks ( void )
 
 /*******************************************************************************
   Function:
-    void _MOTORAPP_Tasks ( void )
+    void _NFC_APP_Tasks ( void )
 
   Summary:
-    Maintains state machine of MOTORAPP.
+    Maintains state machine of NFC_APP.
 */
 
-static void _MOTORAPP_Tasks(void)
+static void _NFC_APP_Tasks(void)
 {
     while(1)
     {
-        MOTORAPP_Tasks();
+        NFC_APP_Tasks();
     }
 }
 
@@ -198,17 +198,17 @@ static void _UART_RX_APP_Tasks(void)
 
 /*******************************************************************************
   Function:
-    void _NFC_APP_Tasks ( void )
+    void _MOTORAPP_Tasks ( void )
 
   Summary:
-    Maintains state machine of NFC_APP.
+    Maintains state machine of MOTORAPP.
 */
 
-static void _NFC_APP_Tasks(void)
+static void _MOTORAPP_Tasks(void)
 {
     while(1)
     {
-        NFC_APP_Tasks();
+        MOTORAPP_Tasks();
     }
 }
 

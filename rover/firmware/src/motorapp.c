@@ -97,7 +97,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-MOTORAPP_DATA motorData;
+static MOTORAPP_DATA motorData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -149,28 +149,24 @@ void motorStop() {
 void motorMove(char direction, char distance) {
     switch(direction) {
                 case(ROVER_FORWARD):
-                    setDebugVal(41);
                     setLeftForward(pdTRUE);
                     setRightForward(pdTRUE);
                     motorData.moveStop = distance * INCH_TO_EN;
                     motorStartMax();
                     break;
                 case(ROVER_BACKWARD):
-                    setDebugVal(42);
                     setLeftForward(pdFALSE);
                     setRightForward(pdFALSE);
                     motorData.moveStop = distance * INCH_TO_EN;
                     motorStartMax();
                     break;
                 case(ROVER_LEFT):
-                    setDebugVal(43);
                     setLeftForward(pdFALSE);
                     setRightForward(pdTRUE);
                     motorData.moveStop = (distance / 5) * DEG_TO_EN;
                     motorStartHalf();
                     break;
                 case(ROVER_RIGHT):
-                    setDebugVal(44);
                     setLeftForward(pdTRUE);
                     setRightForward(pdFALSE);
                     motorData.moveStop = (distance / 5) * DEG_TO_EN;
@@ -178,10 +174,8 @@ void motorMove(char direction, char distance) {
                     break;
                 case(ROVER_STOP):
                 default:
-                    setDebugVal(45);
                     motorData.moveStop = 0;
                     motorStop();
-                    addToUartTXQ(roverStopped());
                     break;
             }
     PLIB_OC_PulseWidth16BitSet(OC_LEFT, motorData.leftMotor->pwm);
@@ -197,24 +191,19 @@ void incRightEn() {
 }
 
 void incMoveCount() {
-    setDebugBool(pdTRUE);
     if (motorData.moveStop == 0) {
-        setDebugVal(56);
+        return;
     }
     else if (motorData.moveCounter == motorData.moveStop) {
-        setDebugVal(57);
         if (xQueueSendFromISR(motorData.stopQ, &motorData.moveStop, 0)) {
-            setDebugVal(58);
             motorData.moveCounter = 0;
-            motorData.moveStop == 0;
+            motorData.moveStop = 0;
             addToUartTXQFromISR(roverStopped());
         }
     }
     else {
-        setDebugVal(59);
         motorData.moveCounter++;
     }
-    setDebugBool(pdFALSE);
 }
 
 void pi(Motor* motor, int16_t errorC, int16_t errorCI) {
@@ -274,7 +263,9 @@ void initMotor(Motor* motor, int16_t pwm, int16_t targetPWM, int16_t targetEncod
 void MOTORAPP_Initialize ( void )
 {
     motorData.stopQ = xQueueCreate(1, sizeof(int16_t)); 
-    motorData.motorQ = xQueueCreate(20, 8);
+    vQueueAddToRegistry(motorData.stopQ, motor_stop_q);
+    motorData.motorQ = xQueueCreate(20, sizeof(char));
+    vQueueAddToRegistry(motorData.motorQ, motor_q);
     initMotor(&motorData.leftMotorFull, PWM_START_MAX, PWM_START_MAX, TARGET_MOVE_LEFT, PWM_START_MAX / LEFT_ERROR_INT);
     initMotor(&motorData.rightMotorFull, PWM_START_MAX, PWM_START_MAX, TARGET_MOVE_RIGHT, PWM_START_MAX / RIGHT_ERROR_INT);
     initMotor(&motorData.leftMotorHalf, PWM_START_HALF, PWM_START_HALF, TARGET_TURN_LEFT, PWM_START_HALF / LEFT_ERROR_INT);
@@ -314,13 +305,10 @@ void MOTORAPP_Tasks ( void )
     int16_t go;
     while(1) {
         if(xQueueReceive(motorData.motorQ, &msg, portMAX_DELAY)) {
-            setDebugVal(100);
             motorMove(msg.msg[0], msg.msg[1]);
             // wait until done with move to get next.
             if ( msg.msg[1] > 0) {
-                setDebugVal(102);
                 while (!xQueueReceive(motorData.stopQ, &go, portMAX_DELAY));
-                setDebugVal(103);
                 motorStop();
                 PLIB_OC_PulseWidth16BitSet(OC_LEFT, motorData.leftMotor->pwm);
                 PLIB_OC_PulseWidth16BitSet(OC_RIGHT, motorData.rightMotor->pwm);

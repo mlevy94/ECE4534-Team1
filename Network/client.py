@@ -19,7 +19,7 @@ class ClientWorker:
     self.queue = queue
     self.thread = None
     self.address = address
-    self.rcvmsgcount = 0
+    self.recvmsgcount = 0
     self.sentmsgcount = 0
     self.clientConnected = False
     self.lock = threading.Lock()
@@ -27,7 +27,7 @@ class ClientWorker:
   def start(self):
     self.writefunc(bytes([0x50 for _ in range(30)]))
     self.clientConnected = True
-    self.send(InternalMessage(ROUTER, INITIALIZE, b'1', self))
+    self.send(InternalMessage(ROUTER, INITIALIZE, b'111111111111', self))
     self.thread = threading.Thread(target=self._clientRecv, daemon=True)
     self.thread.start()
 
@@ -39,15 +39,17 @@ class ClientWorker:
         serialstream += self.readfunc(4096)
         while len(serialstream) > HEADER_SIZE:
           startbyte = serialstream.find(STARTBYTE)
-          if startbyte < 0 or len(serialstream) < HEADER_SIZE:
+          if startbyte < 0 or len(serialstream[startbyte:]) < HEADER_SIZE:
             # keep looking for start byte or wait for more data
             break
           else:
             # trim extra bytes in beginning
             serialstream = serialstream[startbyte:]
           # get header values
-          (startbyte, source, count, msgtype, msgsize), serialstream = (serialstream[:HEADER_SIZE], serialstream[HEADER_SIZE:])
+          ((startbyte, source, count, msgtype, msgsize), serialstream) = (serialstream[:HEADER_SIZE], serialstream[HEADER_SIZE:])
           # get message
+          while len(serialstream) < msgsize + 1:
+            serialstream += self.readfunc(4096)
           msg, serialstream = serialstream[:msgsize], serialstream[msgsize:]
           netmsg = NetMessage(
             source= source,
@@ -56,7 +58,11 @@ class ClientWorker:
             msgsize = msgsize,
             msg=msg,
           )
-          endbyte, serialstream = serialstream[0], serialstream[1:]
+          if len(serialstream) > 1:
+            endbyte, serialstream = serialstream[0], serialstream[1:]
+          else:
+            endbyte = serialstream[0]
+            serialstream = b''
           if endbyte != ENDBYTE[0]:
             print("Bad End Byte: {}".format(self.address))
             continue
@@ -64,10 +70,14 @@ class ClientWorker:
           msg = netmsg.getMessage()
           if netmsg.msgtype == CLIENT_ROLE:
             msg.target = self
-          #print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
+          if DEBUG_ON:
+            print("Received Message {}: {} - {}".format(self.address, VAL_TO_MSG[msg.msgtype], msg.msg))
           self._put(msg)
-          self.rcvmsgcount += 1
-    except ConnectionResetError:
+          if self.recvmsgcount < MAX_MSG_COUNT:
+            self.recvmsgcount += 1
+          else:
+            self.recvmsgcount = 0
+    except (ConnectionError, TimeoutError):
       pass
 
   def _put(self, msg):
@@ -81,9 +91,13 @@ class ClientWorker:
         self.sentmsgcount += 1
       else:
         self.sentmsgcount = 0
+      if intmsg.count is not None:
+        msgcount = intmsg.count
+      else:
+        msgcount = self.sentmsgcount
       netmsg = NetMessage(
         source= intmsg.client,
-        count= self.sentmsgcount,
+        count= msgcount,
         msgtype= intmsg.msgtype,
         msgsize= len(intmsg.msg),
         msg= intmsg.msg,

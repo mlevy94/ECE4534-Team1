@@ -2,6 +2,7 @@
 from socket import gethostbyname, gethostname
 from collections import OrderedDict
 
+DEBUG_ON = False
 
 def getIPAddr():
   return gethostbyname(gethostname())
@@ -23,11 +24,12 @@ SENSOR         = 0x08
 COORDINATOR    = 0x10
 MONITOR        = 0x11
 ROUTER         = 0x12
+GUI            = 0x14
 
 # value to role conversion
 VAL_TO_ROLE = OrderedDict((
   (CLIENT, "CLIENT"),
-  (LEAD_ROVER, "LEAD_ROVER"),
+  (LEAD_ROVER, "LEAD ROVER"),
   (FOLLOWER, "FOLLOWER"),
   (SENSOR, "SENSOR"),
   (COORDINATOR, "COORDINATOR"),
@@ -38,7 +40,7 @@ VAL_TO_ROLE = OrderedDict((
 # role to value conversion
 ROLE_TO_VAL = OrderedDict((
   ("CLIENT", CLIENT),
-  ("LEAD_ROVER", LEAD_ROVER),
+  ("LEAD ROVER", LEAD_ROVER),
   ("FOLLOWER", FOLLOWER),
   ("SENSOR", SENSOR),
   ("COORDINATOR", COORDINATOR),
@@ -50,47 +52,43 @@ ROLE_TO_VAL = OrderedDict((
 
 # type values
 DEBUG_MSG            = 0x01
-NET_STAT             = 0x02
 CLIENT_ROLE          = 0x04
-FOLLOWER_FWD         = 0x05 # Tells Follower to move forward
-FOLLOWER_BKW         = 0x06 # Tells Follower to move backward
-FOLLOWER_LFT         = 0x07 # Tells Follower to move left
 INITIALIZE           = 0x08
-FOLLOWER_RHT         = 0x09 # Tells Follower to move right
-READY_TO_START       = 0x10
 ROVER_MOVE           = 0x11
-FOLLOWER_TFD         = 0x13 # Follower reports found token
 OBJECT_POS           = 0x14
-SCAN_SERVO           = 0x15 # Scanning Follower Servo
-SCAN_LEAD_FND        = 0x16 # Scan returned Lead Found
-SCAN_OBJ_FND         = 0x17 # Scan returned Object Found
 TOKEN_FOUND          = 0x18
-MOTOR_MOVE           = 0x20
-BLANK                = 0x21
-TOKEN                = 0x22
-LEAD_ROVER_POS       = 0x23
-FOLLOWER_ROVER_POS   = 0x24
-OBSTACLE             = 0x25
-ALG_TIME             = 0x26
+
+SENSOR_MODE          = 0x61
+CALIBRATE_ROVER      = 0x62
+## RESERVED 0x19-0x22
+PONG                 = 0x69
+PING                 = 0x70
+END_GAME             = 0x71
+START_GAME           = 0x72
+## RESERVED 0x73-0x79
 
 # value to message conversion
 VAL_TO_MSG = OrderedDict((
   (DEBUG_MSG, "Debug Message"),
-  (NET_STAT, "Network Statistic"),
   (CLIENT_ROLE, "Client Role"),
-  (FOLLOWER_FWD, "Follower Forward"),
-  (FOLLOWER_BKW, "Follower Backward"),
-  (FOLLOWER_LFT, "Follower Left"),
   (INITIALIZE, "Initialize"),
-  (FOLLOWER_RHT, "Follower Right"),
-  (READY_TO_START, "Ready to Start"),
   (ROVER_MOVE, "Rover Move"),
-  (FOLLOWER_TFD, "Follower Token Found"),
   (OBJECT_POS, "Object Position"),
-  (SCAN_SERVO, "Scanning Follower Servo"),
-  (SCAN_LEAD_FND, "Scan Lead Found"),
-  (SCAN_OBJ_FND, "Scan Object Found"),
   (TOKEN_FOUND, "Token Found"),
+  (START_GAME, "Start Game"),
+  (END_GAME, "End Game"),
+  (SENSOR_MODE, "Sensor Mode"),
+  (CALIBRATE_ROVER, "Calibrate Rover"),
+  (PING, "Ping"),
+  (PONG, "Pong"),
+))
+
+ROLE_MSG_RECV = OrderedDict((
+  (LEAD_ROVER, [ROVER_MOVE, PING, ]),
+  (FOLLOWER, []),
+  (SENSOR, [PING, SENSOR_MODE, ]),
+  (COORDINATOR, [ROVER_MOVE, OBJECT_POS, PING, START_GAME, END_GAME, TOKEN_FOUND, CALIBRATE_ROVER, ]),
+  (MONITOR, [DEBUG_MSG, OBJECT_POS, ROVER_MOVE, TOKEN_FOUND, PONG, START_GAME, END_GAME, ]),
 ))
 
 ########## ROVER MOVE DEFINES #############
@@ -120,14 +118,25 @@ NET_MSG_SIZE = HEADER_SIZE + TAIL_SIZE + INTERNAL_MSG_SIZE
 ########## MESSAGE STRUCTURES #############
 class InternalMessage:
 
-  def __init__(self, client, msgtype, msg, target=[]):
+  def __init__(self, client, msgtype, msg, target=None, count=None):
+    if target is None:
+      target = []
     self.client = bytetoval(client)
     self.msgtype = bytetoval(msgtype)
     self.msg = msg
+    self.count = count
     if not isinstance(target, (list, tuple)):
       self.target = [target]
     else:
       self.target = target
+
+  def __repr__(self):
+    if self.msgtype == ROVER_MOVE:
+      return "<{}, {}: {}, {}>".format(VAL_TO_MSG[self.msgtype], VAL_TO_ROLE[self.client], VAL_TO_ROV[self.msg[0]], self.msg[1])
+    elif self.msgtype == OBJECT_POS:
+      return "<{}, {} - Object: {} xPos: {}, yPos: {}, angle: {}, length: {}, width: {}>".format(VAL_TO_MSG[self.msgtype], VAL_TO_ROLE[self.client], *decipherMessage(self.msg))
+    else:
+      return "<{}, {}: {}>".format(VAL_TO_MSG[self.msgtype], VAL_TO_ROLE[self.client], self.msg)
 
 
 class NetMessage:
@@ -141,7 +150,7 @@ class NetMessage:
     self.msg = msg
 
   def getMessage(self):
-    return InternalMessage(self.source, self.msgtype, self.msg)
+    return InternalMessage(self.source, self.msgtype, self.msg, count=self.count)
 
   def serialize(self):
     # convert back to bytes
@@ -168,5 +177,34 @@ def makeObjPosMsg(objectType, x, y, orientation):
   str += bytes([orientation])
   return InternalMessage(CLIENT, OBJECT_POS, str)
 
-def roverMove(direction, distance):
-  return InternalMessage(CLIENT, ROVER_MOVE, bytes([direction, distance]))
+def roverMove(direction, distance, client=CLIENT):
+  return InternalMessage(client, ROVER_MOVE, bytes([direction, distance]))
+
+def decipherMessage(message):
+  objectType = message[0]
+  xPosition = ((message[1] << 8) | message[2]) / 10.0
+  yPosition = ((message[3] << 8) | message[4]) / 10.0
+  angle = (message[5] << 8) | message[6]
+  length = ((message[7] << 8) | message[8]) / 10.0
+  width = ((message[9] << 8) | message[10]) / 10.0
+
+  return objectType, xPosition, yPosition, angle, length, width
+
+class peekIter:
+
+  def __init__(self, oglist):
+    self.oglist = oglist
+    self.idx = 0
+
+  def generate(self):
+    self.idx = 0
+    for ele in self.oglist:
+      self.idx += 1
+      yield ele
+    raise StopIteration
+
+  def peek(self):
+    try:
+      return self.oglist[self.idx]
+    except IndexError:
+      return None
