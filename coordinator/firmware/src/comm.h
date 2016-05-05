@@ -84,6 +84,7 @@ typedef struct {
 #define OBJECT_POS          0x14
 #define TOKEN_FOUND         0x18
 #define TASK_COMPLETED      0x20
+#define ALGORITHM_TIME      0x21
 
 //////////////////////////////////////////////////////////////////////////////
 // OBJECT_STRUCTURE defines
@@ -107,10 +108,14 @@ typedef struct {
 ///////////////////////////////////////////////////////////////////////////////
 // Direction defines
 ///////////////////////////////////////////////////////////////////////////////
-#define UP      0x01
-#define DOWN    0x02
-#define LEFT    0x03
-#define RIGHT   0x04
+#define MOVE_UP      0x01
+#define MOVE_DOWN    0x02
+#define MOVE_LEFT    0x03
+#define MOVE_RIGHT   0x04
+#define FACE_UP      0x05
+#define FACE_DOWN    0x06
+#define FACE_LEFT    0x07
+#define FACE_RIGHT   0x08
 
 ///////////////////////////////////////////////////////////////////////////////
 // Internal message structure for passing between threads

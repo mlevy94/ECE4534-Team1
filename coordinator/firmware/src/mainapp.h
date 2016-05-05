@@ -126,9 +126,11 @@ typedef enum
     movingDown = 2,
     movingLeft = 3,
     movingRight = 4,
-    turningLeft = 5,
-    turningRight = 6,
-    noMotion = 7
+    turningUp = 5,
+    turningDown = 6,
+    turningRight = 7,
+    turningLeft = 8,
+    noMotion = 9
 } CORRECTIONS;
 
 // *****************************************************************************
@@ -211,6 +213,12 @@ typedef struct
     
     /* Boolean for traversal for when an obstacle is blocking a y axis side and this is used to prevent skipping one vertical line */
     BaseType_t dontSkip;
+    
+    // Boolean for correction for when the rover is turning
+    BaseType_t turning;
+    
+    // Boolean for correction for when the rover is moving
+    BaseType_t moving;
 } MAINAPP_DATA;
 
 

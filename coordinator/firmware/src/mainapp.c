@@ -137,9 +137,9 @@ void convertMessage(InternalMessage message, OBJECT_STRUCTURE* obj)
     OBJECT_STRUCTURE ret;
     int i = 0;
     setDebugBool(pdTRUE);
-    for (;i < 11; i++) {
+    /*for (;i < 11; i++) {
         setDebugVal(message.msg[i]);
-    }
+    }*/
     obj->type = message.msg[0];
     obj->xPos = (message.msg[1] << 8) | message.msg[2];
     obj->yPos = (message.msg[3] << 8) | message.msg[4];
@@ -166,7 +166,7 @@ void topToBottomEmptyCorners(uint16_t* y, uint16_t* angle)
     // Taken from topToBottomEmpty()
     InternalMessage roverCommand;
     // The rover is not facing downwards
-    setDebugVal(*angle);
+    //setDebugVal(*angle);
     if(*angle != 180) {
         // Easier to turn left
         if(*angle <= 359 && *angle > 180) {
@@ -180,7 +180,7 @@ void topToBottomEmptyCorners(uint16_t* y, uint16_t* angle)
             *angle = *angle + angleLeftover;
             roverCommand = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
         }
-        setDebugVal(*angle);
+        //setDebugVal(*angle);
         addToCommandMsgQ(roverCommand);
     }
     // The rover is facing downwards
@@ -800,6 +800,7 @@ void turnRight(uint16_t* x, uint16_t* y, uint16_t* angle)
     InternalMessage roverCommand;
     // The rover is not facing right
     if(*angle != 90) {
+        mainappData.turning = pdTRUE;
         // Easier to turn right
         if(*angle < 90 && *angle >= 0) {
             uint16_t angleLeftover = 90 - *angle;
@@ -809,7 +810,7 @@ void turnRight(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle + angleLeftover;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_RIGHT;
             mainappData.targetTotal++;
             *angle = *angle + angleLeftover;
         }
@@ -823,7 +824,7 @@ void turnRight(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = (*angle + angleLeftover) % 360;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_RIGHT;
             mainappData.targetTotal++;
             *angle = (*angle + angleLeftover) % 360;
         }
@@ -839,7 +840,7 @@ void turnRight(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle - angleLeftover;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_RIGHT;
             mainappData.targetTotal++;
             *angle = *angle - angleLeftover;
         }
@@ -851,7 +852,7 @@ void turnRight(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle - angleLeftover;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_RIGHT;
             mainappData.targetTotal++;
             *angle = *angle - angleLeftover;
         }
@@ -864,6 +865,7 @@ void turnLeft(uint16_t* x, uint16_t* y, uint16_t* angle)
     InternalMessage roverCommand;
     // The rover is not facing left
     if(*angle != 270) {
+        mainappData.turning = pdTRUE;
         // Easier to turn right
         if(*angle < 270 && *angle >= 90) {
             uint16_t angleLeftover = 270 - *angle;
@@ -873,7 +875,7 @@ void turnLeft(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle + angleLeftover;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_LEFT;
             mainappData.targetTotal++;
             *angle = *angle + angleLeftover;
         }
@@ -887,7 +889,7 @@ void turnLeft(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle - angleLeftover;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_LEFT;
             mainappData.targetTotal++;
             *angle = *angle - angleLeftover;
         }
@@ -900,7 +902,7 @@ void turnLeft(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = angleLeftover + 180 - *angle;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_LEFT;
             mainappData.targetTotal++;
             *angle = angleLeftover + 180 - *angle;
         }
@@ -913,6 +915,7 @@ void turnUp(uint16_t* x, uint16_t* y, uint16_t* angle)
     InternalMessage roverCommand;
     // The rover is not facing upwards
     if(*angle != 0) {
+        mainappData.turning = pdTRUE;
         // Easier to turn right
         if(*angle <= 359 && *angle > 180) {
             uint16_t angleLeftover = 360 - *angle;
@@ -922,7 +925,7 @@ void turnUp(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = (*angle + angleLeftover) % 360;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_UP;
             mainappData.targetTotal++;
             *angle = (*angle + angleLeftover) % 360;
         }
@@ -936,7 +939,7 @@ void turnUp(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle - *angle;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_UP;
             mainappData.targetTotal++;
             *angle = (*angle - *angle);
         }
@@ -949,6 +952,7 @@ void turnDown(uint16_t* x, uint16_t* y, uint16_t* angle)
     InternalMessage roverCommand;
     // The rover is not facing downwards
     if(*angle != 180) {
+        mainappData.turning = pdTRUE;
         // Easier to turn left
         if(*angle <= 359 && *angle > 180) {
             uint16_t angleLeftover = *angle - 180;
@@ -958,7 +962,7 @@ void turnDown(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle - angleLeftover;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_LEFT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_DOWN;
             mainappData.targetTotal++;
             *angle = *angle - angleLeftover;
         }
@@ -971,7 +975,7 @@ void turnDown(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle + angleLeftover;
-            mainappData.targetCommand[mainappData.targetTotal] = ROVER_RIGHT;
+            mainappData.targetCommand[mainappData.targetTotal] = FACE_DOWN;
             mainappData.targetTotal++;
             *angle = *angle + angleLeftover;
         }
@@ -1009,6 +1013,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 turnDown(x, y, angle);
                 // Not centered
                 if(((*y + 3) % 6) > 0) {
+                    mainappData.moving = pdTRUE;
                     correction = 6 - (testingEndPoint % 6);
                     
                     // For the message command queue
@@ -1019,12 +1024,13 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     mainappData.targetX[mainappData.targetTotal] = *x;
                     mainappData.targetY[mainappData.targetTotal] = *y + correction;
                     mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                    mainappData.targetCommand[mainappData.targetTotal] = DOWN;
+                    mainappData.targetCommand[mainappData.targetTotal] = MOVE_DOWN;
                     mainappData.targetTotal++;
                     
                     *y += correction;
                 }
                 else if((*y + 6) <= 33) {
+                    mainappData.moving = pdTRUE;
                     correction = 6;
                     
                     // For the message command queue
@@ -1035,7 +1041,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     mainappData.targetX[mainappData.targetTotal] = *x;
                     mainappData.targetY[mainappData.targetTotal] = *y + correction;
                     mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                    mainappData.targetCommand[mainappData.targetTotal] = DOWN;
+                    mainappData.targetCommand[mainappData.targetTotal] = MOVE_DOWN;
                     mainappData.targetTotal++;
                     
                     *y += correction;
@@ -1043,6 +1049,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 // Then go right
                 turnRight(x, y, angle);
                 if((testingEndPoint % 6) < 6) {
+                    mainappData.moving = pdTRUE;
                     correction = 6 - (testingEndPoint % 6);
                     
                     // For the message command queue
@@ -1053,12 +1060,13 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     mainappData.targetX[mainappData.targetTotal] = *x + correction;
                     mainappData.targetY[mainappData.targetTotal] = *y;
                     mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                    mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
-                    mainappData.targetIndex++;
+                    mainappData.targetCommand[mainappData.targetTotal] = MOVE_RIGHT;
+                    mainappData.targetTotal++;
                     
                     *x += correction;
                 }
                 else if((testingEndPoint + 6) <= 36) {
+                    mainappData.moving = pdTRUE;
                     correction = 6;
                     
                     // For the message command queue
@@ -1069,7 +1077,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     mainappData.targetX[mainappData.targetTotal] = *x + correction;
                     mainappData.targetY[mainappData.targetTotal] = *y;
                     mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                    mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
+                    mainappData.targetCommand[mainappData.targetTotal] = MOVE_RIGHT;
                     mainappData.targetTotal++;
                     
                     *x += correction;
@@ -1079,6 +1087,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 // First go upward
                 turnUp(x, y, angle);
                 if(((*y - 3) % 6) < 6) {
+                    mainappData.moving = pdTRUE;
                     correction = 6 - (testingEndPoint % 6);
                     
                     // For the message command queue
@@ -1089,12 +1098,13 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     mainappData.targetX[mainappData.targetTotal] = *x;
                     mainappData.targetY[mainappData.targetTotal] = *y - correction;
                     mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                    mainappData.targetCommand[mainappData.targetTotal] = UP;
+                    mainappData.targetCommand[mainappData.targetTotal] = MOVE_UP;
                     mainappData.targetTotal++;
                     
                     *y -= correction;
                 }
                 else if((*y - 6) >= 3) {
+                    mainappData.moving = pdTRUE;
                     correction = 6;
                     
                     // For the message command queue
@@ -1105,7 +1115,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     mainappData.targetX[mainappData.targetTotal] = *x;
                     mainappData.targetY[mainappData.targetTotal] = *y - correction;
                     mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                    mainappData.targetCommand[mainappData.targetTotal] = UP;
+                    mainappData.targetCommand[mainappData.targetTotal] = MOVE_UP;
                     mainappData.targetTotal++;
                     
                     *y -= correction;
@@ -1113,6 +1123,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 // Then go right
                 turnRight(x, y, angle);
                 if((testingEndPoint % 6) < 6) {
+                    mainappData.moving = pdTRUE;
                     correction = 6 - (testingEndPoint % 6);
                     
                     // For the message command queue
@@ -1123,12 +1134,13 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     mainappData.targetX[mainappData.targetTotal] = *x + correction;
                     mainappData.targetY[mainappData.targetTotal] = *y;
                     mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                    mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
+                    mainappData.targetCommand[mainappData.targetTotal] = MOVE_RIGHT;
                     mainappData.targetTotal++;
                     
                     *x += correction;
                 }
                 else if((testingEndPoint + 6) <= 36) {
+                    mainappData.moving = pdTRUE;
                     correction = 6;
                     
                     // For the message command queue
@@ -1139,7 +1151,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                     mainappData.targetX[mainappData.targetTotal] = *x + correction;
                     mainappData.targetY[mainappData.targetTotal] = *y;
                     mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                    mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
+                    mainappData.targetCommand[mainappData.targetTotal] = MOVE_RIGHT;
                     mainappData.targetTotal++;
                     
                     *x += correction;
@@ -1149,6 +1161,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
         // Simply go right
         else {
             if((testingEndPoint % 6) > 0) {
+                mainappData.moving = pdTRUE;
                 correction = 6 - (testingEndPoint % 6);
                 
                 // For the message command queue
@@ -1159,12 +1172,13 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 mainappData.targetX[mainappData.targetTotal] = *x + correction;
                 mainappData.targetY[mainappData.targetTotal] = *y;
                 mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
+                mainappData.targetCommand[mainappData.targetTotal] = MOVE_RIGHT;
                 mainappData.targetTotal++;
                 
                 *x += correction;
             }
             else if((testingEndPoint + 6) <= 36) {
+                mainappData.moving = pdTRUE;
                 correction = 6;
                 
                 // For the message queue
@@ -1175,7 +1189,7 @@ void moveHorizontalRightOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
                 mainappData.targetX[mainappData.targetTotal] = *x + correction;
                 mainappData.targetY[mainappData.targetTotal] = *y;
                 mainappData.targetAngle[mainappData.targetTotal] = *angle;
-                mainappData.targetCommand[mainappData.targetTotal] = RIGHT;
+                mainappData.targetCommand[mainappData.targetTotal] = MOVE_RIGHT;
                 mainappData.targetTotal++;
                 
                 *x += correction;
@@ -1195,6 +1209,7 @@ void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
     if(testingEndPoint != 0) {
         // Correction factor in case the center of the rover is not at the center of a grid cell
         if((testingEndPoint % 6) != 0) {
+            mainappData.moving = pdTRUE;
             correction = testingEndPoint % 6;
             
             // For the message command queue
@@ -1205,12 +1220,13 @@ void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x - correction;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle;
-            mainappData.targetCommand[mainappData.targetTotal] = LEFT;
+            mainappData.targetCommand[mainappData.targetTotal] = MOVE_LEFT;
             mainappData.targetTotal++;
             
             *x -= correction;
         }
         else if((testingEndPoint - 6) >= 0) {
+            mainappData.moving = pdTRUE;
             correction = 6;
             
             // For the message command queue
@@ -1221,7 +1237,7 @@ void moveHorizontalLeftOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x - correction;
             mainappData.targetY[mainappData.targetTotal] = *y;
             mainappData.targetAngle[mainappData.targetTotal] = *angle;
-            mainappData.targetCommand[mainappData.targetTotal] = LEFT;
+            mainappData.targetCommand[mainappData.targetTotal] = MOVE_LEFT;
             mainappData.targetTotal++;
             
             *x -= correction;
@@ -1239,6 +1255,7 @@ void moveVerticalUpOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
     if(testingEndPoint != 0) {
         // Correction factor in case the center of the rover is not at the center of a grid cell
         if((testingEndPoint % 6) > 0) {
+            mainappData.moving = pdTRUE;
             correction = 6 - (testingEndPoint % 6);
             
             // For the message command queue
@@ -1249,12 +1266,13 @@ void moveVerticalUpOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y - correction;
             mainappData.targetAngle[mainappData.targetTotal] = *angle;
-            mainappData.targetCommand[mainappData.targetTotal] = UP;
+            mainappData.targetCommand[mainappData.targetTotal] = MOVE_UP;
             mainappData.targetTotal++;
             
             *y -= correction;
         }
         else if((testingEndPoint - 6) >= 0) {
+            mainappData.moving = pdTRUE;
             correction = 6;
             
             // For the message command queue
@@ -1265,7 +1283,7 @@ void moveVerticalUpOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y - correction;
             mainappData.targetAngle[mainappData.targetTotal] = *angle;
-            mainappData.targetCommand[mainappData.targetTotal] = UP;
+            mainappData.targetCommand[mainappData.targetTotal] = MOVE_UP;
             mainappData.targetTotal++;
             
             *y -= correction;
@@ -1285,6 +1303,7 @@ void moveVerticalDownOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
     if(testingEndPoint != 36) {
         // Correction factor in case the center of the rover is not at the center of a grid cell
         if((testingEndPoint % 6) > 0) {
+            mainappData.moving = pdTRUE;
             correction = 6 - (testingEndPoint % 6);
             
             // For the message command queue
@@ -1295,12 +1314,13 @@ void moveVerticalDownOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y + correction;
             mainappData.targetAngle[mainappData.targetTotal] = *angle;
-            mainappData.targetCommand[mainappData.targetTotal] = DOWN;
+            mainappData.targetCommand[mainappData.targetTotal] = MOVE_DOWN;
             mainappData.targetTotal++;
             
             *y += correction;
         }
         else if((testingEndPoint + 6) <= 36) {
+            mainappData.moving = pdTRUE;
             correction = 6;
             
             // For the message command queue
@@ -1311,7 +1331,7 @@ void moveVerticalDownOnceCorner(uint16_t* x, uint16_t* y, uint16_t* angle)
             mainappData.targetX[mainappData.targetTotal] = *x;
             mainappData.targetY[mainappData.targetTotal] = *y + correction;
             mainappData.targetAngle[mainappData.targetTotal] = *angle;
-            mainappData.targetCommand[mainappData.targetTotal] = DOWN;
+            mainappData.targetCommand[mainappData.targetTotal] = MOVE_DOWN;
             mainappData.targetTotal++;
             
             *y += correction;
@@ -1417,7 +1437,8 @@ void moveLeftUpAroundObstacle(uint16_t* x, uint16_t* y, uint16_t* angle)
         // Searching for the obstacle blocking the rover
         for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
             // Finding the obstacle
-            if(((*x - 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
+            if(((*x - 6) < (mainappData.obstacle[objIterator].xPos + 3)) && ((*x - 6 > (mainappData.obstacle[objIterator].xPos - 3)))
+                && (*y < (mainappData.obstacle[objIterator].yPos + 3)) && (*y > (mainappData.obstacle[objIterator].yPos - 3))) {
                 objInd = objIterator;
                 blocked = pdTRUE;
             }
@@ -1686,7 +1707,8 @@ void moveToRightEdge(uint16_t* x, uint16_t* y, uint16_t* angle)
         // Searching for the obstacle blocking the rover
         for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
             // Finding the obstacle
-            if(((*x + 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
+            if(((*x + 6) < (mainappData.obstacle[objIterator].xPos + 3)) && ((*x + 6) > (mainappData.obstacle[objIterator].xPos - 3))
+                && (*y < (mainappData.obstacle[objIterator].yPos + 3)) && (*y > (mainappData.obstacle[objIterator].yPos - 3))) {
                 objInd = objIterator;
                 blocked = pdTRUE;
                 setDebugBool(blocked);
@@ -1706,11 +1728,12 @@ void moveToLeftEdge(uint16_t* x, uint16_t* y, uint16_t* angle)
     int objInd;
     BaseType_t blocked = pdFALSE;
     
-    while(*x != 3 && blocked == pdFALSE) {
+    while(*x > 3 && blocked == pdFALSE) {
         // Searching for the obstacle blocking the rover
         for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
             // Finding the obstacle
-            if(((*x - 6) == mainappData.obstacle[objIterator].xPos) && (*y == mainappData.obstacle[objIterator].yPos)) {
+            if(((*x - 6) < (mainappData.obstacle[objIterator].xPos + 3)) && ((*x - 6) > (mainappData.obstacle[objIterator].xPos - 3))
+                && (*y < mainappData.obstacle[objIterator].yPos + 3) && (*y > mainappData.obstacle[objIterator].yPos - 3)) {
                 objInd = objIterator;
                 blocked = pdTRUE;
             }
@@ -1733,7 +1756,8 @@ void moveToTopEdge(uint16_t* x, uint16_t* y, uint16_t* angle)
         // Searching for the obstacle blocking the rover
         for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
             // Finding the obstacle
-            if(((*y - 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+            if(((*y - 6) < (mainappData.obstacle[objIterator].yPos + 3)) && ((*y - 6) > mainappData.obstacle[objIterator].yPos - 3)
+                && (*x < (mainappData.obstacle[objIterator].xPos + 3)) && (*x > (mainappData.obstacle[objIterator].xPos - 3))) {
                 objInd = objIterator;
                 blocked = pdTRUE;
             }
@@ -1756,7 +1780,8 @@ void moveToBottomEdge(uint16_t* x, uint16_t* y, uint16_t* angle)
         // Searching for the obstacle blocking the rover
         for(objIterator = 0; objIterator < mainappData.obstacleCount; objIterator++) {
             // Finding the obstacle
-            if(((*y + 6) == mainappData.obstacle[objIterator].yPos) && (*x == mainappData.obstacle[objIterator].xPos)) {
+            if(((*y + 6) < (mainappData.obstacle[objIterator].yPos + 3)) && ((*y + 6) > (mainappData.obstacle[objIterator].yPos - 3))
+                && (*x < (mainappData.obstacle[objIterator].xPos + 3)) && (*x > (mainappData.obstacle[objIterator].xPos - 3))) {
                 objInd = objIterator;
                 blocked = pdTRUE;
             }
@@ -2195,6 +2220,12 @@ void MAINAPP_Initialize ( void )
     
     // No obstacle is currently at the end of a y-axis side
     mainappData.dontSkip = pdFALSE;
+    
+    // The rover is not initially turning
+    mainappData.turning = pdFALSE;
+    
+    // The rover is not initially moving
+    mainappData.moving = pdFALSE;
 }
 
 
@@ -2289,119 +2320,86 @@ void MAINAPP_Tasks ( void )
                     // Update the current location of the rover
                     else {
                         mainappData.rover = mainappData.object;
-                        // Checking if the rover has reached it's next ideal location
-                        if((mainappData.rover.xPos == mainappData.targetX[mainappData.targetIndex]) &&
-                           (mainappData.rover.yPos == mainappData.targetY[mainappData.targetIndex]) &&
-                           (mainappData.rover.angle == mainappData.targetAngle[mainappData.targetIndex])) {
-                            // Increment for the next command target location
-                            mainappData.targetIndex++;
-                        }
                         // Dealing with corrections to get to the next location
                         /* Need to immediately add to the queue rather than at the next location */
-                        else {
-                            // Figuring out where the rover is intending to go in order to do corrections
-                            // Turning left
-                            if(mainappData.targetCommand[mainappData.targetIndex] == ROVER_LEFT) {
-                                mainappData.roverMotion = turningLeft;
-                            }
-                            // Turn right
-                            else if(mainappData.targetCommand[mainappData.targetIndex] == ROVER_RIGHT) {
-                                mainappData.roverMotion = turningRight;
-                            }
-                            // Moving up
-                            else if(mainappData.targetCommand[mainappData.targetIndex] == UP) {
-                                mainappData.roverMotion = movingUp;
-                            }
-                            // Moving down
-                            else if(mainappData.targetCommand[mainappData.targetIndex] == DOWN) {
-                                mainappData.roverMotion = movingDown;
-                            }
-                            // Moving right
-                            else if(mainappData.targetCommand[mainappData.targetIndex] == RIGHT) {
-                                mainappData.roverMotion = movingRight;
-                            }
-                            // Moving left
-                            else if(mainappData.targetCommand[mainappData.targetIndex] == LEFT) {
-                                mainappData.roverMotion = movingLeft;
-                            }
-                            else {
-                                mainappData.roverMotion = noMotion;
-                            }
-                            
-                            // See where the rover is moving and if it is going the right way
-                            if(mainappData.roverMotion == movingUp) {
-                                // Checking if it is facing in an angle that is not within margin of error
-                                // Rover is in the wrong place
-                                if(mainappData.rover.angle == 0) {
-                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
-                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
-                                }
-                                // Rover is not turning right
-                                else {
-                                    uint16_t testAngle;
-                                }
-                            }
-                            else if(mainappData.roverMotion == movingDown) {
-                                // Checking if it is facing an angle that is not within margin of error
-                                if(mainappData.rover.angle == 180) {
-                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
-                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
-                                }
-                                else {
-                                    uint16_t testAngle;
-                                }
-                            }
-                            else if(mainappData.roverMotion == movingLeft) {
-                                // Checking if it is facing an angle that is not within margin of error
-                                if(mainappData.rover.angle == 270) {
-                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
-                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
-                                }
-                                else {
-                                    uint16_t testAngle;
-                                }
-                            }
-                            else if(mainappData.roverMotion == movingRight) {
-                                // Checking if it is facing an angle that is not within margin of error
-                                if(mainappData.rover.angle == 90) {
-                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
-                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
-                                }
-                                else {
-                                    uint16_t testAngle;
-                                }
-                            }
-                            // Checking if it is turning to an angle within margin of error
-                            else if(mainappData.roverMotion == turningLeft) {
-                                // The rover did not go far enough
-                                if(mainappData.rover.angle > mainappData.targetAngle[mainappData.targetIndex]) {
-                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
-                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetX[mainappData.targetIndex];
-                                }
-                                // The rover went too far left
-                                else if(mainappData.rover.angle < mainappData.targetAngle[mainappData.targetIndex]) {
-                                    uint16_t testAngle;
-                                }
-                            }
-                            else if(mainappData.roverMotion == turningRight) {
-                                // The rover went too far right
-                                if(mainappData.rover.angle > mainappData.targetAngle[mainappData.targetIndex]) {
-                                    uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
-                                    uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
-                                }
-                                // The rover did not go far enough
-                                else if(mainappData.rover.angle < mainappData.targetAngle[mainappData.targetIndex]) {
-                                    uint16_t testAngle;
-                                }
-                            }
+                        /*if(mainappData.targetCommand[mainappData.targetIndex] == MOVE_UP && !(mainappData.rover.angle < 6
+                           || mainappData.rover.angle > 354) && !mainappData.turning) {
+                            InternalMessage roverStop;
+                            roverStop.type = ROVER_MOVE;
+                            roverStop.size = 2;
+                            roverStop.msg[0] = ROVER_STOP;
+                            roverStop.msg[1] = 0;
+                            addToUartTXQ(roverStop);
                         }
-                        setDebugVal(0x75);
+                        else if (mainappData.targetCommand[mainappData.targetIndex] == MOVE_DOWN && !(mainappData.rover.angle < 186
+                                 && mainappData.rover.angle > 174) && !mainappData.turning) {
+                            InternalMessage roverStop;
+                            roverStop.type = ROVER_MOVE;
+                            roverStop.size = 2;
+                            roverStop.msg[0] = ROVER_STOP;
+                            roverStop.msg[1] = 0;
+                            addToUartTXQ(roverStop);
+                        }
+                        else if (mainappData.targetCommand[mainappData.targetIndex] == MOVE_RIGHT && !(mainappData.rover.angle < 96
+                                 && mainappData.rover.angle > 84) && !mainappData.turning) {
+                            InternalMessage roverStop;
+                            roverStop.type = ROVER_MOVE;
+                            roverStop.size = 2;
+                            roverStop.msg[0] = ROVER_STOP;
+                            roverStop.msg[1] = 0;
+                            addToUartTXQ(roverStop);
+                        }
+                        else if (mainappData.targetCommand[mainappData.targetIndex] == MOVE_LEFT && !(mainappData.rover.angle < 276
+                                 && mainappData.rover.angle > 264) && !mainappData.turning) {
+                            InternalMessage roverStop;
+                            roverStop.type = ROVER_MOVE;
+                            roverStop.size = 2;
+                            roverStop.msg[0] = ROVER_STOP;
+                            roverStop.msg[1] = 0;
+                            addToUartTXQ(roverStop);
+                        }
+                        else if (mainappData.targetCommand[mainappData.targetIndex] == FACE_UP && !(mainappData.rover.angle < 6
+                           || mainappData.rover.angle > 354) && !mainappData.turning) {
+                            InternalMessage roverStop;
+                            roverStop.type = ROVER_MOVE;
+                            roverStop.size = 2;
+                            roverStop.msg[0] = ROVER_STOP;
+                            roverStop.msg[1] = 0;
+                            addToUartTXQ(roverStop);
+                        }
+                        else if (mainappData.targetCommand[mainappData.targetIndex] == FACE_DOWN && !(mainappData.rover.angle < 186
+                                 && mainappData.rover.angle > 174) && !mainappData.turning) {
+                            InternalMessage roverStop;
+                            roverStop.type = ROVER_MOVE;
+                            roverStop.size = 2;
+                            roverStop.msg[0] = ROVER_STOP;
+                            roverStop.msg[1] = 0;
+                            addToUartTXQ(roverStop);
+                        }
+                        else if (mainappData.targetCommand[mainappData.targetIndex] == FACE_RIGHT && !(mainappData.rover.angle < 96
+                                 && mainappData.rover.angle > 84) && !mainappData.turning) {
+                            InternalMessage roverStop;
+                            roverStop.type = ROVER_MOVE;
+                            roverStop.size = 2;
+                            roverStop.msg[0] = ROVER_STOP;
+                            roverStop.msg[1] = 0;
+                            addToUartTXQ(roverStop);
+                        }
+                        else if (mainappData.targetCommand[mainappData.targetIndex] == FACE_LEFT && !(mainappData.rover.angle < 276
+                                 && mainappData.rover.angle > 264) && !mainappData.turning) {
+                            InternalMessage roverStop;
+                            roverStop.type = ROVER_MOVE;
+                            roverStop.size = 2;
+                            roverStop.msg[0] = ROVER_STOP;
+                            roverStop.msg[1] = 0;
+                            addToUartTXQ(roverStop);
+                        }*/
                     }
                     
                     /* Adding a previous rover location to the macro/micro grid */
-                    int16_t xGrid = mainappData.rover.xPos / 6;
+                    /*int16_t xGrid = mainappData.rover.xPos / 6;
                     int16_t yGrid = mainappData.rover.yPos / 6;
-                    mainappData.macroGrid[xGrid][yGrid] = lead_rover;
+                    mainappData.macroGrid[xGrid][yGrid] = lead_rover;*/
                     
                     /* Debugging for sending back the rover location */
                     //sendRoverLocation();
@@ -2426,20 +2424,780 @@ void MAINAPP_Tasks ( void )
                 }
                 // Lead rover finished moving so I can now send the next command
                 else if((mainappData.object.type & 0xff) == LEAD_ROVER_UPDATE) {
-                    // To check that no more traveling must be done
+                    InternalMessage roverCorrectionMessage;
+                    mainappData.turning = pdFALSE;
+                    mainappData.moving = pdFALSE;
                     if(mainappData.object.xPos == 0 && mainappData.object.yPos == 0 && mainappData.object.angle == 0) {
-                        InternalMessage command;
-                        if(xQueueReceive(mainappData.mainAppCommandMsgQ, &command, portMAX_DELAY)) {
-                            addToUartTXQ(command);
+                    if((mainappData.rover.xPos < mainappData.targetX[mainappData.targetIndex] + 3) &&
+                       (mainappData.rover.xPos > mainappData.targetX[mainappData.targetIndex] - 3) &&
+                       (mainappData.rover.yPos < mainappData.targetY[mainappData.targetIndex] + 3) &&
+                       (mainappData.rover.yPos > mainappData.targetY[mainappData.targetIndex] - 3)) {
+                        mainappData.targetIndex++;
+                        InternalMessage failure;
+                        failure.type = OBJECT_POS;
+                        failure.size = 11;
+                        failure.msg[0] = ROVER;
+                        failure.msg[1] = (mainappData.targetX[mainappData.targetIndex] & 0xFF00) >> 8;
+                        failure.msg[2] = mainappData.targetX[mainappData.targetIndex] & 0x00FF;
+                        failure.msg[3] = (mainappData.targetY[mainappData.targetIndex] & 0xFF00) >> 8;
+                        failure.msg[4] = mainappData.targetY[mainappData.targetIndex] & 0x00FF;
+                        failure.msg[5] = (mainappData.targetAngle[mainappData.targetIndex] & 0xFF00) >> 8;
+                        failure.msg[6] = mainappData.targetAngle[mainappData.targetIndex] & 0x00FF;
+                        failure.msg[7] = 0x00;
+                        failure.msg[8] = 0x06;
+                        failure.msg[9] = 0x00;
+                        failure.msg[10] = 0x06;
+                        addToUartTXQ(failure);
+                    }
+                    else {
+                        if(((mainappData.rover.xPos & 0x00FF) / 6) == ((mainappData.targetX[mainappData.targetIndex] & 0x00FF) / 6) &&
+                            ((mainappData.rover.yPos & 0x00FF) / 6) > ((mainappData.targetY[mainappData.targetIndex] & 0x00FF) / 6)) {
+                            if(!((mainappData.rover.angle & 0x00FF) < 6)) { // || (mainappData.rover.angle & 0x0FFF) > 354
+                                mainappData.turning = pdTRUE;
+                                // Easier to turn right
+                                if((mainappData.rover.angle & 0x0FFF) <= 359 && (mainappData.rover.angle & 0x0FFF) > 180) {
+                                    uint16_t angleLeftover = 360 - mainappData.rover.angle;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                }
+                                // Easier to turn left
+                                else {
+                                    uint16_t angleLeftover = mainappData.rover.angle;
+                                    // Need to move left the amount of angle that it is facing
+                                    roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                }
+                                addToUartTXQ(roverCorrectionMessage);
+                            }
+                            else {
+                                mainappData.moving = pdTRUE;
+                                uint16_t distanceLeftover = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                addToUartTXQ(roverCorrectionMessage);
+                            }
+                        }
+                        else if (((mainappData.rover.xPos & 0x00FF) / 6) == ((mainappData.targetX[mainappData.targetIndex] & 0x00FF) / 6) &&
+                            ((mainappData.rover.yPos & 0x00FF) / 6) < ((mainappData.targetY[mainappData.targetIndex] & 0x00FF) / 6)) {
+                            if(!((mainappData.rover.angle & 0x00FF) < 186 && (mainappData.rover.angle & 0x00FF) > 174)) { // The condition that fails is mainappData.rover.angle < 186
+                                mainappData.turning = pdTRUE;
+                                // Easier to turn right
+                                if((mainappData.rover.angle & 0x0FFF) <= 359 && (mainappData.rover.angle & 0x0FFF) > 180) {
+                                    uint16_t angleLeftover = mainappData.rover.angle - 180;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                }
+                                // Easier to turn left
+                                else {
+                                    // Need to move left the amount of angle that it is facing
+                                    uint16_t angleLeftover = 180 - mainappData.rover.angle;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                }
+                                addToUartTXQ(roverCorrectionMessage);
+                            }
+                            else {
+                                mainappData.moving = pdTRUE;
+                                uint16_t distanceLeftover = mainappData.targetY[mainappData.targetIndex] - mainappData.rover.yPos;
+                                roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                addToUartTXQ(roverCorrectionMessage);
+                            }
+                        }
+                        else if(((mainappData.rover.yPos & 0x00FF) / 6) == ((mainappData.targetY[mainappData.targetIndex] & 0x00FF) / 6) &&
+                            ((mainappData.rover.xPos & 0x00FF) / 6) > ((mainappData.targetX[mainappData.targetIndex] & 0x00FF) / 6)) {
+                            // Checking if it is facing an angle that is not within margin of error
+                            if(!((mainappData.rover.angle & 0x0FFF) < 276 && (mainappData.rover.angle & 0x0FFF) > 264)) {
+                                mainappData.turning = pdTRUE;
+                                // Easier to turn right
+                                if((mainappData.rover.angle & 0x0FFF) < 270 || (mainappData.rover.angle & 0x0FFF) > 180) {
+                                    uint16_t angleLeftover = 270 - mainappData.rover.angle;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                }
+                                else if((mainappData.rover.angle & 0x00FF) <= 180 && (mainappData.rover.angle & 0x00FF) >= 90) {
+                                    uint16_t angleLeftover = 270 - mainappData.rover.angle;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                }
+                                // Easier to turn left
+                                else if((mainappData.rover.angle & 0x0FFF) <= 359 && (mainappData.rover.angle & 0x0FFF) > 270) {
+                                    uint16_t angleLeftover = mainappData.rover.angle - 270;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                }
+                                else if((mainappData.rover.angle & 0x00FF) >= 0 && (mainappData.rover.angle & 0x00FF) < 90) {
+                                    // The 90 degrees is to get to the right quadrant
+                                    uint16_t angleLeftover = mainappData.rover.angle + 90;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                }
+                            addToUartTXQ(roverCorrectionMessage);
+                            }
+                            else {
+                                mainappData.moving = pdTRUE;
+                                uint16_t distanceLeftover = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                addToUartTXQ(roverCorrectionMessage);
+                            }
+                        }
+                        else if(((mainappData.rover.yPos & 0x00FF) / 6) == ((mainappData.targetY[mainappData.targetIndex] & 0x00FF) / 6) &&
+                            ((mainappData.rover.xPos & 0x00FF) / 6) < ((mainappData.targetX[mainappData.targetIndex] & 0x00FF) / 6)) {
+                            setDebugVal(0x72);
+                            setDebugVal(mainappData.rover.angle);
+                            setDebugVal(0x73);
+                            // Checking if it is facing an angle that is not within margin of error
+                            // The rover is not facing right
+                            if(!((mainappData.rover.angle & 0x00FF) < 96 && (mainappData.rover.angle & 0x00FF) > 84)) {
+                                setDebugVal(0x74);
+                                setDebugVal(mainappData.rover.angle & 0x00FF);
+                                mainappData.turning = pdTRUE;
+                                // Easier to turn right
+                                if((mainappData.rover.angle & 0x00FF) < 90 && (mainappData.rover.angle & 0x00FF) >= 0) {
+                                    setDebugVal(0x75);
+                                    uint16_t angleLeftover = 90 - mainappData.rover.angle;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                }
+                                else if((mainappData.rover.angle & 0x0FFF) <= 359 && (mainappData.rover.angle & 0x0FFF) >= 270) {
+                                    setDebugVal(0x76);
+                                    // The 90 degrees is to get to the right quadrant
+                                    // The subtraction from 360 degrees is to get the actual leftover angle
+                                    uint16_t angleLeftover = 90 + (360 - mainappData.rover.angle);
+                                    roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                }
+                                // Easier to turn left
+                                else if((mainappData.rover.angle & 0x0FFF) < 270 || (mainappData.rover.angle & 0x0FFF) >= 180) {
+                                    setDebugVal(0x77);
+                                    // The 90 degrees is to get to the right quadrant
+                                    // The subtraction with 180 degrees is to get the actual leftover angles
+                                    uint16_t angleLeftover = 90 + (mainappData.rover.angle - 180);
+                                    roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                }
+                                else if((mainappData.rover.angle & 0x00FF) < 180 && (mainappData.rover.angle & 0x00FF) > 90) {
+                                    setDebugVal(0x78);
+                                    uint16_t angleLeftover = mainappData.rover.angle - 90;
+                                    roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                }
+                                setDebugVal(0x79);
+                                addToUartTXQ(roverCorrectionMessage);
+                            }
+                            else {
+                                mainappData.moving = pdTRUE;
+                                uint16_t distanceLeftover = mainappData.targetX[mainappData.targetIndex] - mainappData.rover.xPos;
+                                roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                addToUartTXQ(roverCorrectionMessage);
+                            }
+                        }
+                            /*InternalMessage roverCorrectionMessage;
+                            ///////////////////////////////////////////////////
+                            //
+                            //  Determining the correction to do
+                            //
+                            ///////////////////////////////////////////////////
+                            // Figuring out where the rover is intending to go in order to do corrections
+                            // Turning up
+                            if(mainappData.targetCommand[mainappData.targetIndex] == FACE_UP) {
+                                mainappData.roverMotion = turningUp;
+                            }
+                            // Turning down
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == FACE_DOWN) {
+                                mainappData.roverMotion = turningDown;
+                            }
+                            // Turning right
+                            else if (mainappData.targetCommand[mainappData.targetIndex] == FACE_RIGHT) {
+                                mainappData.roverMotion = turningRight;
+                            }
+                            // Turning left
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == FACE_LEFT) {
+                                mainappData.roverMotion = turningLeft;
+                            }
+                            // Moving up
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == MOVE_UP) {
+                                mainappData.roverMotion = movingUp;
+                            }
+                            // Moving down
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == MOVE_DOWN) {
+                                mainappData.roverMotion = movingDown;
+                            }
+                            // Moving right
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == MOVE_RIGHT) {
+                                mainappData.roverMotion = movingRight;
+                            }
+                            // Moving left
+                            else if(mainappData.targetCommand[mainappData.targetIndex] == MOVE_LEFT) {
+                                mainappData.roverMotion = movingLeft;
+                            }
+                            else {
+                                mainappData.roverMotion = noMotion;
+                            }
+                            
+                            ///////////////////////////////////////////////////
+                            //
+                            //  Doing the corrections
+                            //
+                            ///////////////////////////////////////////////////
+                            // See where the rover is moving and if it is going the right way
+                            if(mainappData.roverMotion == movingUp) {
+                                uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                if(testX != 0) {
+                                    // Checking if it is facing an angle that is not within margin of error
+                                    if(mainappData.rover.xPos > mainappData.targetX[mainappData.targetIndex]) {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        if(mainappData.rover.angle < 276 && mainappData.rover.angle > 264) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 90) {
+                                                uint16_t angleLeftover = 270 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 270) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 270;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle >= 0 && mainappData.rover.angle < 90) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                uint16_t angleLeftover = mainappData.rover.angle + 90;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                        addToCommandMsgQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                    else {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        // The rover is not facing right
+                                        if(mainappData.rover.angle < 96 && mainappData.rover.angle > 84) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.targetX[mainappData.targetIndex] - mainappData.rover.xPos;
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle < 90 && mainappData.rover.angle >= 0) {
+                                                uint16_t angleLeftover = 90 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle <= 359 && mainappData.rover.angle >= 270) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                // The subtraction from 360 degrees is to get the actual leftover angle
+                                                uint16_t angleLeftover = 90 + (360 - mainappData.rover.angle);
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 180) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                // The subtraction with 180 degrees is to get the actual leftover angles
+                                                uint16_t angleLeftover = 90 + (mainappData.rover.angle - 180);
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle < 180 && mainappData.rover.angle > 90) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 90;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            addToCommandMsgQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                }
+                                else if(testY != 0) {
+                                    if(mainappData.rover.yPos > mainappData.targetY[mainappData.targetIndex]) {
+                                        // Checking if it is facing in an angle that is not within margin of error
+                                        // Rover is in the wrong place
+                                        if(mainappData.rover.angle < 6 || mainappData.rover.angle > 354) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                                uint16_t angleLeftover = 360 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else {
+                                                // Need to move left the amount of angle that it is facing
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, mainappData.rover.angle & 0x00FF);
+                                            }
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                    else {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        if(mainappData.rover.angle < 186 && mainappData.rover.angle > 174) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.targetY[mainappData.targetIndex] - mainappData.rover.yPos;
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn left
+                                            if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 180;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn right
+                                            else {
+                                                uint16_t angleLeftover = 180 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                }
+                            }
+                            else if(mainappData.roverMotion == movingDown) {
+                                uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                if(testX != 0) {
+                                    // Checking if it is facing an angle that is not within margin of error
+                                    if(mainappData.rover.xPos > mainappData.targetX[mainappData.targetIndex]) {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        if(mainappData.rover.angle < 276 && mainappData.rover.angle > 264) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 90) {
+                                                uint16_t angleLeftover = 270 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 270) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 270;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle >= 0 && mainappData.rover.angle < 90) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                uint16_t angleLeftover = mainappData.rover.angle + 90;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            addToCommandMsgQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                    else {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        // The rover is not facing right
+                                        if(mainappData.rover.angle < 96 && mainappData.rover.angle > 84) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.targetX[mainappData.targetIndex] - mainappData.rover.xPos;
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle < 90 && mainappData.rover.angle >= 0) {
+                                                uint16_t angleLeftover = 90 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle <= 359 && mainappData.rover.angle >= 270) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                // The subtraction from 360 degrees is to get the actual leftover angle
+                                                uint16_t angleLeftover = 90 + (360 - mainappData.rover.angle);
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 180) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                // The subtraction with 180 degrees is to get the actual leftover angles
+                                                uint16_t angleLeftover = 90 + (mainappData.rover.angle - 180);
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle < 180 && mainappData.rover.angle > 90) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 90;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            addToCommandMsgQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                }
+                                else if(testY != 0) {
+                                    if(mainappData.rover.yPos > mainappData.targetY[mainappData.targetIndex]) {
+                                        // Checking if it is facing in an angle that is not within margin of error
+                                        // Rover is in the wrong place
+                                        if(mainappData.rover.angle < 6 || mainappData.rover.angle > 354) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                                uint16_t angleLeftover = 360 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else {
+                                                // Need to move left the amount of angle that it is facing
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, mainappData.rover.angle & 0x00FF);
+                                            }
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                    else {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        if(mainappData.rover.angle < 186 && mainappData.rover.angle > 174) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.targetY[mainappData.targetIndex] - mainappData.rover.yPos;
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn left
+                                            if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 180;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn right
+                                            else {
+                                                uint16_t angleLeftover = 180 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                }
+                            }
+                            else if(mainappData.roverMotion == movingLeft) {
+                                uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                if(testX != 0) {
+                                    // Checking if it is facing an angle that is not within margin of error
+                                    if(mainappData.rover.xPos > mainappData.targetX[mainappData.targetIndex]) {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        if(mainappData.rover.angle < 276 && mainappData.rover.angle > 264) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 90) {
+                                                uint16_t angleLeftover = 270 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 270) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 270;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle >= 0 && mainappData.rover.angle < 90) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                uint16_t angleLeftover = mainappData.rover.angle + 90;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            addToCommandMsgQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                    else {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        // The rover is not facing right
+                                        if(mainappData.rover.angle < 96 && mainappData.rover.angle > 84) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.targetX[mainappData.targetIndex] - mainappData.rover.xPos;
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle < 90 && mainappData.rover.angle >= 0) {
+                                                uint16_t angleLeftover = 90 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle <= 359 && mainappData.rover.angle >= 270) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                // The subtraction from 360 degrees is to get the actual leftover angle
+                                                uint16_t angleLeftover = 90 + (360 - mainappData.rover.angle);
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 180) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                // The subtraction with 180 degrees is to get the actual leftover angles
+                                                uint16_t angleLeftover = 90 + (mainappData.rover.angle - 180);
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle < 180 && mainappData.rover.angle > 90) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 90;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            addToCommandMsgQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                }
+                                else if(testY != 0) {
+                                    if(mainappData.rover.yPos > mainappData.targetY[mainappData.targetIndex]) {
+                                        // Checking if it is facing in an angle that is not within margin of error
+                                        // Rover is in the wrong place
+                                        if(mainappData.rover.angle < 6 || mainappData.rover.angle > 354) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                                uint16_t angleLeftover = 360 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else {
+                                                // Need to move left the amount of angle that it is facing
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, mainappData.rover.angle & 0x00FF);
+                                            }
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                    else {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        if(mainappData.rover.angle < 186 && mainappData.rover.angle > 174) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.targetY[mainappData.targetIndex] - mainappData.rover.yPos;
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn left
+                                            if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 180;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn right
+                                            else {
+                                                uint16_t angleLeftover = 180 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                }
+                            }
+                            else if(mainappData.roverMotion == movingRight) {
+                                uint16_t testX = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                uint16_t testY = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                if(testX != 0) {
+                                    // Checking if it is facing an angle that is not within margin of error
+                                    if(mainappData.rover.xPos > mainappData.targetX[mainappData.targetIndex]) {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        if(mainappData.rover.angle < 276 && mainappData.rover.angle > 264) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.rover.xPos - mainappData.targetX[mainappData.targetIndex];
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 90) {
+                                                uint16_t angleLeftover = 270 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 270) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 270;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle >= 0 && mainappData.rover.angle < 90) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                uint16_t angleLeftover = mainappData.rover.angle + 90;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                        addToCommandMsgQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                    else {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        // The rover is not facing right
+                                        if(mainappData.rover.angle < 96 && mainappData.rover.angle > 84) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.targetX[mainappData.targetIndex] - mainappData.rover.xPos;
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle < 90 && mainappData.rover.angle >= 0) {
+                                                uint16_t angleLeftover = 90 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle <= 359 && mainappData.rover.angle >= 270) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                // The subtraction from 360 degrees is to get the actual leftover angle
+                                                uint16_t angleLeftover = 90 + (360 - mainappData.rover.angle);
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 180) {
+                                                // The 90 degrees is to get to the right quadrant
+                                                // The subtraction with 180 degrees is to get the actual leftover angles
+                                                uint16_t angleLeftover = 90 + (mainappData.rover.angle - 180);
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            else if(mainappData.rover.angle < 180 && mainappData.rover.angle > 90) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 90;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            addToCommandMsgQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                }
+                                else if(testY != 0) {
+                                    if(mainappData.rover.yPos > mainappData.targetY[mainappData.targetIndex]) {
+                                        // Checking if it is facing in an angle that is not within margin of error
+                                        // Rover is in the wrong place
+                                        if(mainappData.rover.angle < 6 || mainappData.rover.angle > 354) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.rover.yPos - mainappData.targetY[mainappData.targetIndex];
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn right
+                                            if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                                uint16_t angleLeftover = 360 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn left
+                                            else {
+                                                // Need to move left the amount of angle that it is facing
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, mainappData.rover.angle & 0x00FF);
+                                            }
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                    else {
+                                        // Checking if it is facing an angle that is not within margin of error
+                                        if(mainappData.rover.angle < 186 && mainappData.rover.angle > 174) {
+                                            mainappData.moving = pdTRUE;
+                                            uint16_t distanceLeftover = mainappData.targetY[mainappData.targetIndex] - mainappData.rover.yPos;
+                                            roverCorrectionMessage = makeRoverMove(ROVER_FORWARD, distanceLeftover & 0x00FF);
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                        else {
+                                            mainappData.turning = pdTRUE;
+                                            // Easier to turn left
+                                            if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                                uint16_t angleLeftover = mainappData.rover.angle - 180;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                            }
+                                            // Easier to turn right
+                                            else {
+                                                uint16_t angleLeftover = 180 - mainappData.rover.angle;
+                                                roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                            }
+                                            addToUartTXQ(roverCorrectionMessage);
+                                        }
+                                    }
+                                }
+                            }
+                            // Checking if it is turning to an angle within margin of error
+                            else if(mainappData.roverMotion == turningUp) {
+                                mainappData.turning = pdTRUE;
+                                // Checking if it is facing in an angle that is not within margin of error
+                                // Rover is in the wrong place
+                                if(!(mainappData.rover.angle < 6 || mainappData.rover.angle > 354)) {
+                                    // Easier to turn right
+                                    if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                        uint16_t angleLeftover = 360 - mainappData.rover.angle;
+                                        roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                    }
+                                    // Easier to turn left
+                                    else {
+                                        // Need to move left the amount of angle that it is facing
+                                        roverCorrectionMessage = makeRoverMove(ROVER_LEFT, mainappData.rover.angle & 0x00FF);
+                                    }
+                                    addToUartTXQ(roverCorrectionMessage);
+                                }
+                            }
+                            else if(mainappData.roverMotion == turningDown) {
+                                mainappData.turning = pdTRUE;
+                                // Checking if it is facing an angle that is not within margin of error
+                                if(mainappData.rover.angle != 180) {//!(mainappData.rover.angle < 185 && mainappData.rover.angle > 175)) {
+                                    // Easier to turn left
+                                    if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 180) {
+                                        uint16_t angleLeftover = mainappData.rover.angle - 180;
+                                        roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                    }
+                                    // Easier to turn right
+                                    else {
+                                        uint16_t angleLeftover = 180 - mainappData.rover.angle;
+                                        roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                    }
+                                    addToUartTXQ(roverCorrectionMessage);
+                                }
+                            }
+                            else if(mainappData.roverMotion == turningRight) {
+                                mainappData.turning = pdTRUE;
+                                // Checking if it is facing an angle that is not within margin of error
+                                // The rover is not facing right
+                                if(mainappData.rover.angle != 90) {//!(mainappData.rover.angle < 96 && mainappData.rover.angle > 84)) {
+                                    // Easier to turn right
+                                    if(mainappData.rover.angle < 90 && mainappData.rover.angle >= 0) {
+                                        uint16_t angleLeftover = 90 - mainappData.rover.angle;
+                                        roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                    }
+                                    else if(mainappData.rover.angle <= 359 && mainappData.rover.angle >= 270) {
+                                        // The 90 degrees is to get to the right quadrant
+                                        // The subtraction from 360 degrees is to get the actual leftover angle
+                                        uint16_t angleLeftover = 90 + (360 - mainappData.rover.angle);
+                                        roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                    }
+                                    // Easier to turn left
+                                    else if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 180) {
+                                        // The 90 degrees is to get to the right quadrant
+                                        // The subtraction with 180 degrees is to get the actual leftover angles
+                                        uint16_t angleLeftover = 90 + (mainappData.rover.angle - 180);
+                                        roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                    }
+                                    else if(mainappData.rover.angle < 180 && mainappData.rover.angle > 90) {
+                                        uint16_t angleLeftover = mainappData.rover.angle - 90;
+                                        roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                    }
+                                    addToCommandMsgQ(roverCorrectionMessage);
+                                }
+                            }
+                            else if(mainappData.roverMotion == turningLeft) {
+                                mainappData.turning = pdTRUE;
+                                // Checking if it is facing an angle that is not within margin of error
+                                if(mainappData.rover.angle != 270) {//!(mainappData.rover.angle < 276 && mainappData.rover.angle > 264)) {
+                                    // Easier to turn right
+                                    if(mainappData.rover.angle < 270 && mainappData.rover.angle >= 90) {
+                                        uint16_t angleLeftover = 270 - mainappData.rover.angle;
+                                        roverCorrectionMessage = makeRoverMove(ROVER_RIGHT, angleLeftover & 0x00FF);
+                                    }
+                                    // Easier to turn left
+                                    else if(mainappData.rover.angle <= 359 && mainappData.rover.angle > 270) {
+                                        uint16_t angleLeftover = mainappData.rover.angle - 270;
+                                        roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                    }
+                                    else if(mainappData.rover.angle >= 0 && mainappData.rover.angle < 90) {
+                                        // The 90 degrees is to get to the right quadrant
+                                        uint16_t angleLeftover = mainappData.rover.angle + 90;
+                                        roverCorrectionMessage = makeRoverMove(ROVER_LEFT, angleLeftover & 0x00FF);
+                                    }
+                                addToCommandMsgQ(roverCorrectionMessage);
+                                }
+                            }*/
                         }
                     }
                 }
-                // Token positions as obtained by the sensor so I can get a count of the number of tokens
-                /*else if((mainappData.object.type & 0xff) == TOKEN) {
-                    // Simply extracting the number of tokens (not the actual locations)
-                    mainappData.tokenCount = mainappData.object.angle;
-                    sendTokenUpdate();
-                }*/
             }
             // Message for a token being found by the rover
             else if(inMessage.type == TOKEN_FOUND) {
@@ -2465,15 +3223,12 @@ void MAINAPP_Tasks ( void )
                     // Adding the new token location to the array
                     mainappData.token[mainappData.tokenCur].xPos = mainappData.rover.xPos;
                     mainappData.token[mainappData.tokenCur].yPos = mainappData.rover.yPos;
-
-                    //sendTokenUpdate(mainappData.token[mainappData.tokenCur].xPos, mainappData.token[mainappData.tokenCur].yPos, 0x06, 0x06);
                     
                     // Increment the counter
                     mainappData.tokenCur++;
                     if(mainappData.tokenCur == mainappData.tokenCount) {
                         sendTokenUpdate(mainappData.token[3].xPos, mainappData.token[3].yPos, 0x06, 0x06);
                     }
-                    //sendTokenUpdate();
                 }
             }
         }
