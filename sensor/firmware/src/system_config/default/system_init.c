@@ -49,8 +49,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
-#include "txbuffer_public.h"
-#include "debug.h"
 
 
 // ****************************************************************************
@@ -62,8 +60,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 /*** DEVCFG0 ***/
 
-#pragma config DEBUG =      OFF
-#pragma config ICESEL =     ICS_PGx1
+#pragma config DEBUG =      ON
+#pragma config ICESEL =     ICS_PGx2
 #pragma config PWP =        OFF
 #pragma config BWP =        OFF
 #pragma config CP =         OFF
@@ -72,19 +70,19 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #pragma config FNOSC =      FRCPLL
 #pragma config FSOSCEN =    OFF
-#pragma config IESO =       OFF
+#pragma config IESO =       ON
 #pragma config POSCMOD =    OFF
 #pragma config OSCIOFNC =   OFF
 #pragma config FPBDIV =     DIV_1
-#pragma config FCKSM =      CSDCMD
+#pragma config FCKSM =      CSECMD
 #pragma config WDTPS =      PS1048576
 #pragma config FWDTEN =     OFF
 
 /*** DEVCFG2 ***/
 
 #pragma config FPLLIDIV =   DIV_2
-#pragma config FPLLMUL =    MUL_20
-#pragma config FPLLODIV =   DIV_1
+#pragma config FPLLMUL =    MUL_24
+#pragma config FPLLODIV =   DIV_2
 #pragma config UPLLIDIV =   DIV_2
 #pragma config UPLLEN =     OFF
 
@@ -149,6 +147,17 @@ const SYS_DEVCON_INIT sysDevconInit =
 // </editor-fold>
 
 
+//<editor-fold defaultstate="collapsed" desc="SYS_DEBUG Initialization Data">
+/*** System Debug Initialization Data ***/
+
+SYS_DEBUG_INIT debugInit =
+{
+    .moduleInit = {0},
+    .errorLevel = SYS_ERROR_ERROR
+};
+// </editor-fold>
+//<editor-fold defaultstate="collapsed" desc="SYS_CONSOLE Initialization Data">
+// </editor-fold>
 // *****************************************************************************
 // *****************************************************************************
 // Section: Static Initialization Functions
@@ -181,40 +190,30 @@ void SYS_Initialize ( void* data )
     SYS_DEVCON_PerformanceConfig(SYS_CLK_SystemFrequencyGet());
     SYS_DEVCON_JTAGDisable();
     SYS_PORTS_Initialize();
-    
-#ifdef DEBUG_ON
-    setDebugVal(SYS_INIT_START); // has to be after ports init
-#endif
-
+    setDebugVal(POST_PORTS_INIT);
     /* Initialize Drivers */
     DRV_USART0_Initialize();
-
-    /* Initialize System Services */
-    SYS_INT_Initialize();
-#ifdef DEBUG_ON
-    setDebugVal(SYS_INIT_UART);
-#endif
-
-    /* Initialize Middleware */
-    initializeTXBufferQ();
+    DRV_USART1_Initialize();
     
-#ifdef DEBUG_ON
-    setDebugVal(SYS_INIT_TX_BUF);
-#endif
+    setDebugVal(POST_UART_INIT);
+    /* Initialize System Services */
+    SYS_INT_Initialize();  
+    sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, NULL);
+
+    sysObj.sysDebug = SYS_DEBUG_Initialize(SYS_DEBUG_INDEX_0, (SYS_MODULE_INIT*)&debugInit);
+
+    setDebugVal(POST_SYS_INT_INIT);
+    /* Initialize Middleware */
     
     /* Initialize the Application */
-    MAINAPP_Initialize();
-#ifdef DEBUG_ON
-    setDebugVal(SYS_INIT_APP);
-#endif
-    UART_TX_APP_Initialize();
-#ifdef DEBUG_ON
-    setDebugVal(SYS_INIT_UART_TX_APP);
-#endif
-    UART_RX_APP_Initialize();
-#ifdef DEBUG_ON
-    setDebugVal(SYS_INIT_UART_RX_APP);
-#endif
+    WIFLY_RX_Initialize();    
+    setDebugVal(POST_TX_Q_INIT);
+    WIFLY_TX_Initialize();
+    setDebugVal(POST_WIFLY_APP_INIT);
+    PIXY_RX_Initialize();
+    setDebugVal(POST_PIXY_APP_INIT);
+    
+    
 }
 
 

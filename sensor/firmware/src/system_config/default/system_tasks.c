@@ -54,9 +54,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
-#include "mainapp.h"
-#include "uart_tx_app.h"
-#include "uart_rx_app.h"
+#include "wifly_rx.h"
+#include "wifly_tx.h"
+#include "pixy_rx.h"
 
 
 // *****************************************************************************
@@ -66,9 +66,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
  
 static void _SYS_Tasks ( void );
-static void _MAINAPP_Tasks(void);
-static void _UART_TX_APP_Tasks(void);
-static void _UART_RX_APP_Tasks(void);
+static void _WIFLY_RX_Tasks(void);
+static void _WIFLY_TX_Tasks(void);
+static void _PIXY_RX_Tasks(void);
 
 
 // *****************************************************************************
@@ -90,22 +90,22 @@ void SYS_Tasks ( void )
     /* Create OS Thread for Sys Tasks. */
     xTaskCreate((TaskFunction_t) _SYS_Tasks,
                 "Sys Tasks",
-                1024, NULL, 1, NULL);
+                1024, NULL, 0, NULL);
 
-    /* Create OS Thread for MAINAPP Tasks. */
-    xTaskCreate((TaskFunction_t) _MAINAPP_Tasks,
-                "MAINAPP Tasks",
-                4096, NULL, 1, NULL);
+    /* Create OS Thread for WIFLY_RX Tasks. */
+    xTaskCreate((TaskFunction_t) _WIFLY_RX_Tasks,
+                "WIFLY_RX Tasks",
+                1024, NULL, 2, NULL);
 
-    /* Create OS Thread for UART_TX_APP Tasks. */
-    xTaskCreate((TaskFunction_t) _UART_TX_APP_Tasks,
-                "UART_TX_APP Tasks",
+    /* Create OS Thread for WIFLY_TX Tasks. */
+    xTaskCreate((TaskFunction_t) _WIFLY_TX_Tasks,
+                "WIFLY_TX Tasks",
                 4096, NULL, 2, NULL);
 
-    /* Create OS Thread for UART_RX_APP Tasks. */
-    xTaskCreate((TaskFunction_t) _UART_RX_APP_Tasks,
-                "UART_RX_APP Tasks",
-                4096, NULL, 2, NULL);
+    /* Create OS Thread for PIXY_RX Tasks. */
+    xTaskCreate((TaskFunction_t) _PIXY_RX_Tasks,
+                "PIXY_RX Tasks",
+                8192, NULL, 1, NULL);
 
     /**************
      * Start RTOS * 
@@ -128,64 +128,64 @@ static void _SYS_Tasks ( void )
     {
         /* Maintain system services */
         SYS_DEVCON_Tasks(sysObj.sysDevcon);
+    SYS_CONSOLE_Tasks(sysObj.sysConsole0);
 
         /* Maintain Device Drivers */
 
         /* Maintain Middleware */
 
         /* Task Delay */
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 
 
 /*******************************************************************************
   Function:
-    void _MAINAPP_Tasks ( void )
+    void _WIFLY_RX_Tasks ( void )
 
   Summary:
-    Maintains state machine of MAINAPP.
+    Maintains state machine of WIFLY_RX.
 */
 
-static void _MAINAPP_Tasks(void)
+static void _WIFLY_RX_Tasks(void)
 {
     while(1)
     {
-        MAINAPP_Tasks();
+        WIFLY_RX_Tasks();
     }
 }
 
 
 /*******************************************************************************
   Function:
-    void _UART_TX_APP_Tasks ( void )
+    void _WIFLY_TX_Tasks ( void )
 
   Summary:
-    Maintains state machine of UART_TX_APP.
+    Maintains state machine of WIFLY_TX.
 */
 
-static void _UART_TX_APP_Tasks(void)
+static void _WIFLY_TX_Tasks(void)
 {
     while(1)
     {
-        UART_TX_APP_Tasks();
+        WIFLY_TX_Tasks();
     }
 }
 
 
 /*******************************************************************************
   Function:
-    void _UART_RX_APP_Tasks ( void )
+    void _PIXY_RX_Tasks ( void )
 
   Summary:
-    Maintains state machine of UART_RX_APP.
+    Maintains state machine of PIXY_RX.
 */
 
-static void _UART_RX_APP_Tasks(void)
+static void _PIXY_RX_Tasks(void)
 {
     while(1)
     {
-        UART_RX_APP_Tasks();
+        PIXY_RX_Tasks();
     }
 }
 

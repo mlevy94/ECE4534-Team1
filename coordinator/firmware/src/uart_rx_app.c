@@ -126,8 +126,8 @@ void sortMessage(InternalMessage msg) {
     // add message types here. the case should place the messages in Q's for
     // the correct thread to act upon. DEBUG_MSG are just printed to the debug
     // line one byte at a time.
-    setDebugVal(0xff);
-    setDebugVal(msg.type);
+    /*setDebugVal(0xff);
+    setDebugVal(msg.type);*/
     switch(msg.type) {
         case INITIALIZE:
             /*
@@ -135,8 +135,8 @@ void sortMessage(InternalMessage msg) {
             returnMessage.msg[0] = 0x02;
             addToInitTXQ(msg.msg[0]);
             addToUartTXQ(returnMessage);
-            */
             addToInitTXQ(msg.msg[0]);
+            */
             break;
         case DEBUG_MSG:
             for (i = 0; msg.msg[i] != '\0'; i++) {
@@ -144,6 +144,9 @@ void sortMessage(InternalMessage msg) {
             }
             break;
         case OBJECT_POS:
+            addToMainAppQ(msg);
+            break;
+        case TOKEN_FOUND:
             addToMainAppQ(msg);
             break;
         default:
@@ -187,7 +190,7 @@ void UART_RX_APP_Tasks ( void )
 {
     char inChar;
     int i = 0;
-    while(i < 20) {
+    /*while(i < 20) {
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
             if (inChar == 0x50) {
                 i++;
@@ -196,13 +199,13 @@ void UART_RX_APP_Tasks ( void )
                 i = 0;
             }
         }
-    }
+    }*/
     InternalMessage processedMsg;
     while(1) {
-#ifdef DEBUG_ON
+/*#ifdef DEBUG_ON
         setDebugVal(TASK_UART_RX_APP);
 #endif
-        setDebugVal(0x20);
+        setDebugVal(0x20);*/
         if (xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY)) {
             // get start byte
             if ((inChar & 0xff) == START_BYTE) {
@@ -223,16 +226,16 @@ void UART_RX_APP_Tasks ( void )
                 for (i = 0; i < inmsg.msgsize; i++ ) {
                     while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
                     inmsg.msg[i] = inChar;
-                    setDebugVal(inmsg.msg[i]);
+                    //setDebugVal(inmsg.msg[i]);
                 }
                 // get end byte
                 while (!xQueueReceive(uart_rx_appData.rxMessageQ, &inChar, portMAX_DELAY));
-                setDebugVal(0x35);
+                //setDebugVal(0x35);
                 if ((inChar & 0xff) == END_BYTE) {
                     // place in correct Q based on message type
                     processedMsg = processMessage(inmsg);
                     sortMessage(processedMsg);
-                    setDebugVal(0x37);
+                    //setDebugVal(0x37);
                 }
             }
         }

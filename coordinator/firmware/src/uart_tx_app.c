@@ -171,8 +171,8 @@ void UART_TX_APP_Tasks ( void )
 #ifdef DEBUG_ON
     setDebugVal(TASK_UART_TX_APP);
 #endif
-    char start;
-    while(!xQueueReceive(uart_tx_appData.initQ, &start, portMAX_DELAY));
+    /*char start;
+    while(!xQueueReceive(uart_tx_appData.initQ, &start, portMAX_DELAY));*/
     InternalMessage msg = makeMessageChar(CLIENT_ROLE, MY_ROLE);
     packAndSend(msg);
     // process other messages

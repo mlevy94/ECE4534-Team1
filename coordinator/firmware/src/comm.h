@@ -83,12 +83,16 @@ typedef struct {
 #define ROVER_MOVE          0x11
 #define OBJECT_POS          0x14
 #define TOKEN_FOUND         0x18
+#define TASK_COMPLETED      0x20
+#define ALGORITHM_TIME      0x21
 
 //////////////////////////////////////////////////////////////////////////////
 // OBJECT_STRUCTURE defines
 //////////////////////////////////////////////////////////////////////////////
-#define ROVER       0xA0
-#define OBSTACLE    0xA1
+#define ROVER               0xA0
+#define OBSTACLE            0xA1
+#define LEAD_ROVER_UPDATE   0xA2
+#define TOKEN               0xA3
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,6 +104,18 @@ typedef struct {
 #define ROVER_LEFT         0x04
 #define ROVER_RIGHT        0x08
 #define ROVER_STOP         0x10
+
+///////////////////////////////////////////////////////////////////////////////
+// Direction defines
+///////////////////////////////////////////////////////////////////////////////
+#define MOVE_UP      0x01
+#define MOVE_DOWN    0x02
+#define MOVE_LEFT    0x03
+#define MOVE_RIGHT   0x04
+#define FACE_UP      0x05
+#define FACE_DOWN    0x06
+#define FACE_LEFT    0x07
+#define FACE_RIGHT   0x08
 
 ///////////////////////////////////////////////////////////////////////////////
 // Internal message structure for passing between threads

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration version="1.0.7.9">
   <General>
-    <HarmonyPath path="../../../../../../../microchip/harmony/v1_06_02"/>
-    <ForceOptimization flag="true"/>
+    <HarmonyPath path="../.."/>
+    <ForceOptimization flag="false"/>
   </General>
   <Manifest>
     <Files>
@@ -107,6 +107,18 @@
         <Path>Header Files/framework/system</Path>
       </File>
       <File>
+        <Name>sys_debug.c</Name>
+        <Path>Source Files/framework/system/debug/src</Path>
+      </File>
+      <File>
+        <Name>sys_console.h</Name>
+        <Path>Header Files/framework/system/console</Path>
+      </File>
+      <File>
+        <Name>sys_debug.h</Name>
+        <Path>Header Files/framework/system/debug</Path>
+      </File>
+      <File>
         <Name>sys_module.h</Name>
         <Path>Header Files/framework/system/common</Path>
       </File>
@@ -135,6 +147,10 @@
         <Path>Header Files/FreeRTOS</Path>
       </File>
       <File>
+        <Name>sys_console_local.h</Name>
+        <Path>Header Files/framework/system/console/src</Path>
+      </File>
+      <File>
         <Name>queue.c</Name>
         <Path>Source Files/FreeRTOS</Path>
       </File>
@@ -145,22 +161,18 @@
     </Files>
     <Templates>
       <Template>
-        <Name>uart_tx_app.h</Name>
-        <Path>Header Files/app</Path>
-      </Template>
-      <Template>
-        <Name>uart_tx_app.c</Name>
+        <Name>pixy_rx.c</Name>
         <Path>Source Files/app</Path>
       </Template>
       <Template>
         <Name>sys_ports_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/system/ports/src</Path>
-        <Checksum>93766964B34AEDCBDDA9AF45E91B5D1A</Checksum>
+        <Checksum>1D50F916CC2F5E53A9EF31DC6EFE1135</Checksum>
       </Template>
       <Template>
         <Name>system_init.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>2E2AC889BD401BB0AF24AB0D8B16161B</Checksum>
+        <Checksum>81C5E8960890D4ECF0ADFA7FDD597BDA</Checksum>
       </Template>
       <Template>
         <Name>main.c</Name>
@@ -169,16 +181,24 @@
       <Template>
         <Name>system_interrupt_a.S</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>5C0D911C19B5E425D7F0FB89E579F457</Checksum>
+        <Checksum>39778D0E2EA4049E918F08F615B71FD5</Checksum>
       </Template>
       <Template>
-        <Name>mainapp.c</Name>
+        <Name>wifly_tx.c</Name>
         <Path>Source Files/app</Path>
+      </Template>
+      <Template>
+        <Name>wifly_rx.c</Name>
+        <Path>Source Files/app</Path>
+      </Template>
+      <Template>
+        <Name>wifly_tx.h</Name>
+        <Path>Header Files/app</Path>
       </Template>
       <Template>
         <Name>system_definitions.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>F4A8CDC94C9274C0DB2364E849BFC444</Checksum>
+        <Checksum>F9495943A5C1450612B360919AAA18B4</Checksum>
       </Template>
       <Template>
         <Name>system_exceptions.c</Name>
@@ -186,33 +206,42 @@
         <Checksum>C111969CA43D6CEA1E9E33A6164E7AE0</Checksum>
       </Template>
       <Template>
-        <Name>uart_rx_app.h</Name>
+        <Name>wifly_rx.h</Name>
         <Path>Header Files/app</Path>
       </Template>
       <Template>
         <Name>drv_usart_static.c</Name>
         <Path>Source Files/app/system_config/default/framework/driver/usart</Path>
-        <Checksum>EABF0C55835D1911E2FF5A9CF07E2301</Checksum>
+        <Checksum>77FF388572F500747AF72DA8D0D613C9</Checksum>
+      </Template>
+      <Template>
+        <Name>sys_console_static.c</Name>
+        <Path>Source Files/app/system_config/default/framework/system/console/src</Path>
+        <Checksum>190C0247ECA1F7BCFADAF80040423F65</Checksum>
       </Template>
       <Template>
         <Name>drv_usart_static.h</Name>
         <Path>Header Files/app/system_config/default/framework/driver/usart</Path>
-        <Checksum>66C127084540B78CD4F78E2FBCC6D29F</Checksum>
+        <Checksum>F9922B53DE280DA8D1F7F708458F84E9</Checksum>
       </Template>
       <Template>
         <Name>FreeRTOSConfig.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>9EA9B8C362E3C6A3359D44ED1EF839ED</Checksum>
+        <Checksum>8C1ED15CE931EEF807E5CCDD2D948D7A</Checksum>
       </Template>
       <Template>
         <Name>system_tasks.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>2C1F4414F167A7AB10F3B4ACF228BA5B</Checksum>
+        <Checksum>23EE6FB7AED5FAE401AB31E72403875E</Checksum>
       </Template>
       <Template>
         <Name>system_config.h</Name>
         <Path>Header Files/app/system_config/default</Path>
-        <Checksum>073CBB1C1BF93D061F0C079A46ED895B</Checksum>
+        <Checksum>7A23ECDD2BF5A34823210515E808B555</Checksum>
+      </Template>
+      <Template>
+        <Name>pixy_rx.h</Name>
+        <Path>Header Files/app</Path>
       </Template>
       <Template>
         <Name>sys_clk_static.h</Name>
@@ -222,7 +251,7 @@
       <Template>
         <Name>system_interrupt.c</Name>
         <Path>Source Files/app/system_config/default</Path>
-        <Checksum>5570B208A2FCDE653B2F8F53A6F9F061</Checksum>
+        <Checksum>68119021CE506B4998C698A1C462F52F</Checksum>
       </Template>
       <Template>
         <Name>rtos_hooks.c</Name>
@@ -234,30 +263,22 @@
         <Path>Source Files/app/system_config/default/framework/system/clk/src</Path>
         <Checksum>1B968DA82B5DD869A6119C3B7628D753</Checksum>
       </Template>
-      <Template>
-        <Name>uart_rx_app.c</Name>
-        <Path>Source Files/app</Path>
-      </Template>
-      <Template>
-        <Name>mainapp.h</Name>
-        <Path>Header Files/app</Path>
-      </Template>
     </Templates>
     <CompilerItems>
       <C32-AS>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
       </C32-AS>
       <C32>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
-        <Include value="../../../../../../../../../microchip/harmony/v1_06_02/third_party/rtos/FreeRTOS/Source/include"/>
+        <Include value="../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX"/>
+        <Include value="../../../../third_party/rtos/FreeRTOS/Source/include"/>
         <Include value="../src/system_config/default"/>
         <Define value="__XC"/>
       </C32>
     </CompilerItems>
     <Libraries>
-      <Library value="../../../../../../../../../microchip/harmony/v1_06_02/bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
+      <Library value="../../../../bin/framework/peripheral/PIC32MX795F512L_peripherals.a"/>
     </Libraries>
   </Manifest>
 </configuration>
